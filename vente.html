@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offre spéciale – ClarityDash Pro</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    .vsl-frame {
+      background: var(--dark);
+      aspect-ratio: 16/9;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid rgba(108,99,255,0.3);
+      max-width: 780px;
+      margin: 0 auto;
+      cursor: pointer;
+    }
+    .vsl-frame::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(139,131,255,0.1));
+    }
+    .play-button {
+      width: 90px; height: 90px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 1;
+      box-shadow: 0 0 0 16px rgba(108,99,255,0.2), 0 0 0 32px rgba(108,99,255,0.08);
+      transition: transform 0.2s;
+    }
+    .play-button:hover { transform: scale(1.08); }
+    .play-button svg { width: 32px; height: 32px; fill: white; margin-left: 4px; }
+    .vsl-label { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 50px; font-size: 0.85rem; font-weight: 600; white-space: nowrap; z-index: 1; }
+    .sticky-cta { position: fixed; bottom: 0; left: 0; right: 0; background: var(--dark); padding: 16px 24px; z-index: 200; border-top: 2px solid var(--primary); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; transform: translateY(100%); transition: transform 0.4s; }
+    .sticky-cta.visible { transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div class="funnel-progress">
+  <div class="progress-steps">
+    <div class="progress-step done">
+      <div class="step-num">✓</div>
+      <span>Accès gratuit</span>
+    </div>
+    <div class="step-sep done"></div>
+    <div class="progress-step active">
+      <div class="step-num">2</div>
+      <span>Offre spéciale</span>
+    </div>
+    <div class="step-sep"></div>
+    <div class="progress-step">
+      <div class="step-num">3</div>
+      <span>Accès immédiat</span>
+    </div>
+  </div>
+</div>
+
+<!-- Topbar -->
+<div class="topbar">
+  ⚡ Cette offre exclusive expire dans <span id="topbar-timer">01:59:59</span> — Ne fermez pas cette page
+</div>
+
+<!-- Header -->
+<section style="background: linear-gradient(135deg, var(--dark), #1a1050); padding: 56px 0 40px; text-align: center;">
+  <div class="container-sm">
+    <div class="hero-badge" style="margin-bottom: 20px;">🎉 Félicitations ! Votre guide est en route</div>
+    <h1 style="color: white; margin-bottom: 16px;">
+      Attendez ! Une offre <span class="highlight">unique et limitée</span><br/>vous attend ci-dessous
+    </h1>
+    <p style="color: rgba(255,255,255,0.7); font-size: 1.1rem;">Regardez cette courte vidéo (9 minutes) avant de continuer</p>
+  </div>
+</section>
+
+<!-- VSL Video -->
+<section style="background: var(--dark-2); padding: 48px 0;">
+  <div class="container">
+    <div class="vsl-frame">
+      <div class="play-button">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+      <div class="vsl-label">▶ Regarder la vidéo de présentation (9 min)</div>
+    </div>
+    <p style="text-align:center; color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 16px;">
+      ⚠️ Cette vidéo contient une offre qui n'est disponible que sur cette page
+    </p>
+  </div>
+</section>
+
+<!-- VSL Description -->
+<section class="section bg-light">
+  <div class="container-sm">
+    <div class="reveal" style="text-align: center; margin-bottom: 48px;">
+      <span class="section-label">Ce que j'ai à vous dire</span>
+      <h2 style="color:var(--dark);">Vous avez déjà le <span class="highlight">guide gratuit</span>.<br/>Maintenant, voici comment aller 10x plus vite.</h2>
+      <div class="divider"></div>
+    </div>
+
+    <div style="background: white; border-radius: var(--radius); padding: 40px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);" class="reveal">
+      <p style="color: var(--text); font-size: 1.1rem; line-height: 1.8; margin-bottom: 20px;">Le guide que vous venez de recevoir vous donne les grandes étapes. Mais voici ce que la plupart des gens ne comprennent pas :</p>
+      <p style="color: var(--text); font-size: 1.1rem; line-height: 1.8; margin-bottom: 20px;"><strong>Connaître les étapes ne suffit pas.</strong> Vous avez besoin du système complet — les vidéos détaillées, les templates prêts à l'emploi, la communauté qui vous soutient, et le coaching pour corriger vos erreurs avant qu'elles ne vous coûtent du temps et de l'argent.</p>
+      <p style="color: var(--text); font-size: 1.1rem; line-height: 1.8;">C'est exactement ce que ClarityDash Pro vous offre. Et aujourd'hui, parce que vous êtes sur cette page, vous pouvez y accéder à un tarif que vous ne retrouverez nulle part ailleurs.</p>
+    </div>
+  </div>
+</section>
+
+<!-- What You Get -->
+<section class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-label">Inclus dans ClarityDash Pro</span>
+      <h2>Tout ce que vous recevez<br/>avec votre accès aujourd'hui</h2>
+      <div class="divider"></div>
+    </div>
+
+    <div style="display: grid; gap: 20px; max-width: 760px; margin: 0 auto;" class="reveal">
+      <div style="display: flex; align-items: center; gap: 20px; background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm);">
+        <div class="card-icon" style="margin: 0; flex-shrink: 0;">🎓</div>
+        <div>
+          <strong style="display:block; color:var(--dark); font-size:1.05rem; margin-bottom: 4px;">5 modules de formation complets (40+ vidéos)</strong>
+          <span style="color:var(--text-muted);">De la niche à l'automatisation — tout le parcours en détail</span>
+        </div>
+        <div style="color:var(--text-muted); font-size:0.9rem; text-align:right; flex-shrink:0; margin-left:auto;"><span style="text-decoration:line-through;">294€</span></div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 20px; background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm);">
+        <div class="card-icon" style="margin: 0; flex-shrink: 0;">👥</div>
+        <div>
+          <strong style="display:block; color:var(--dark); font-size:1.05rem; margin-bottom: 4px;">Accès à la communauté privée (2 400+ membres)</strong>
+          <span style="color:var(--text-muted);">Support, entraide, accountability — vous n'êtes plus seul</span>
+        </div>
+        <div style="color:var(--text-muted); font-size:0.9rem; text-align:right; flex-shrink:0; margin-left:auto;"><span style="text-decoration:line-through;">97€</span></div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 20px; background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm);">
+        <div class="card-icon" style="margin: 0; flex-shrink: 0;">📋</div>
+        <div>
+          <strong style="display:block; color:var(--dark); font-size:1.05rem; margin-bottom: 4px;">Pack 50 templates Canva Pro + 30 emails de vente</strong>
+          <span style="color:var(--text-muted);">Tout prêt à personnaliser, zéro création de zéro</span>
+        </div>
+        <div style="color:var(--text-muted); font-size:0.9rem; text-align:right; flex-shrink:0; margin-left:auto;"><span style="text-decoration:line-through;">491€</span></div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 20px; background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm);">
+        <div class="card-icon" style="margin: 0; flex-shrink: 0;">🎙️</div>
+        <div>
+          <strong style="display:block; color:var(--dark); font-size:1.05rem; margin-bottom: 4px;">Script VSL + coaching mensuel en groupe</strong>
+          <span style="color:var(--text-muted);">Posez vos questions en live tous les mois</span>
+        </div>
+        <div style="color:var(--text-muted); font-size:0.9rem; text-align:right; flex-shrink:0; margin-left:auto;"><span style="text-decoration:line-through;">200€</span></div>
+      </div>
+
+      <div style="background: linear-gradient(135deg, rgba(108,99,255,0.08), rgba(108,99,255,0.03)); border: 2px solid var(--primary); border-radius: var(--radius); padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+        <div>
+          <div style="color:var(--text-muted); font-size:0.9rem; margin-bottom: 4px;">Valeur totale</div>
+          <div style="font-size:1.5rem; font-weight:900; text-decoration:line-through; color:var(--text-muted);">1 082€</div>
+        </div>
+        <div>
+          <div style="color:var(--success); font-size:0.9rem; font-weight:700; margin-bottom: 4px;">VOTRE PRIX AUJOURD'HUI</div>
+          <div style="font-size:2.5rem; font-weight:900; color:var(--primary);">197€</div>
+        </div>
+        <a href="commande.html?plan=pro" class="btn btn-cta">Je prends ClarityDash Pro →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Urgency + Countdown -->
+<section style="background: var(--dark-2); padding: 40px 0;">
+  <div class="container-sm">
+    <div class="countdown-wrapper" id="countdown-main">
+      <div class="countdown-text">⏰ Cette offre exclusive expire dans :</div>
+      <div class="countdown-timer">
+        <div class="countdown-unit">
+          <span class="countdown-number" data-h>01</span>
+          <span class="countdown-label">Heures</span>
+        </div>
+        <div class="countdown-unit">
+          <span class="countdown-number" data-m>59</span>
+          <span class="countdown-label">Minutes</span>
+        </div>
+        <div class="countdown-unit">
+          <span class="countdown-number" data-s>59</span>
+          <span class="countdown-label">Secondes</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Guarantee -->
+<section class="section-sm bg-light">
+  <div class="container-sm">
+    <div class="guarantee-box reveal">
+      <div class="guarantee-icon">🛡️</div>
+      <div>
+        <h3>Garantie satisfait ou remboursé — 30 jours</h3>
+        <p>Testez ClarityDash Pro pendant 30 jours. Si vous n'êtes pas 100% satisfait pour quelque raison que ce soit, nous vous remboursons immédiatement et intégralement. Aucune question posée.</p>
+      </div>
+    </div>
+    <div style="text-align: center; margin-top: 32px;">
+      <a href="commande.html?plan=pro" class="btn btn-primary btn-xl btn-pulse reveal">
+        ✦ Oui, je veux accéder à ClarityDash Pro maintenant
+      </a>
+      <p style="margin-top: 12px; font-size: 0.85rem; color: var(--text-muted);">Paiement sécurisé · Accès immédiat · Garantie 30 jours</p>
+    </div>
+  </div>
+</section>
+
+<!-- Sticky CTA -->
+<div class="sticky-cta" id="sticky-cta">
+  <div>
+    <div style="color:white; font-weight:700; font-size:1rem;">ClarityDash Pro — Offre limitée</div>
+    <div style="color:rgba(255,255,255,0.6); font-size:0.85rem;">197€ au lieu de 1 082€ · Accès immédiat</div>
+  </div>
+  <a href="commande.html?plan=pro" class="btn btn-cta">Je prends ClarityDash Pro →</a>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <p>© 2026 ClarityDash Pro – Tous droits réservés</p>
+    <div class="footer-links">
+      <a href="#">Mentions légales</a>
+      <a href="#">Politique de confidentialité</a>
+      <a href="#">CGV</a>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  // Sticky CTA on scroll
+  const sticky = document.getElementById('sticky-cta');
+  window.addEventListener('scroll', () => {
+    sticky.classList.toggle('visible', window.scrollY > 600);
+  }, { passive: true });
+
+  // Topbar countdown
+  function updateTopbar() {
+    const key = 'cd_end_countdown-main';
+    let end = localStorage.getItem(key);
+    if (!end) return;
+    end = parseInt(end);
+    const diff = end - Date.now();
+    if (diff <= 0) return;
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    const tb = document.getElementById('topbar-timer');
+    if (tb) tb.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    requestAnimationFrame(updateTopbar);
+  }
+  setTimeout(updateTopbar, 100);
+</script>
+</body>
+</html>

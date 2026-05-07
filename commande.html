@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Votre commande – ClarityDash Pro</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    .order-page { background: var(--light); min-height: 100vh; padding: 0 0 80px; }
+    .order-header { background: var(--dark); color: white; text-align: center; padding: 28px 24px; }
+    .order-header .logo { display: inline-flex; align-items: center; gap: 8px; color: white; font-size: 1.4rem; font-weight: 900; }
+    .order-header .logo span { color: var(--primary); }
+    .order-grid { display: grid; grid-template-columns: 1fr 400px; gap: 32px; align-items: start; margin-top: 40px; }
+    .order-form-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--border); overflow: hidden; }
+    .order-form-header { background: linear-gradient(135deg, var(--primary), #8b83ff); padding: 24px 32px; color: white; }
+    .order-form-header h2 { font-size: 1.4rem; margin-bottom: 4px; }
+    .order-form-header p { color: rgba(255,255,255,0.8); font-size: 0.9rem; }
+    .order-form-body { padding: 32px; }
+    .payment-methods { display: flex; gap: 12px; margin-bottom: 24px; }
+    .payment-tab { flex: 1; padding: 12px; border: 2px solid #e2e8f0; border-radius: var(--radius-sm); text-align: center; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); transition: all 0.2s; }
+    .payment-tab.active { border-color: var(--primary); color: var(--primary); background: rgba(108,99,255,0.05); }
+    .card-icons { display: flex; gap: 8px; margin-bottom: 20px; }
+    .card-icon-img { background: #f8f9ff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 4px 10px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
+    .summary-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--border); overflow: hidden; position: sticky; top: 80px; }
+    .summary-header { background: var(--dark-2); padding: 20px 24px; }
+    .summary-header h3 { color: white; font-size: 1.1rem; }
+    .summary-body { padding: 24px; }
+    .summary-product { display: flex; align-items: center; gap: 12px; padding-bottom: 20px; border-bottom: 1px solid #eee; margin-bottom: 20px; }
+    .product-thumb { width: 64px; height: 64px; background: linear-gradient(135deg, var(--primary), #8b83ff); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+    .summary-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.95rem; }
+    .summary-line.total { font-size: 1.2rem; font-weight: 800; color: var(--dark); border-top: 2px solid var(--border); padding-top: 16px; margin-top: 4px; }
+    .summary-line.savings { color: var(--success); font-weight: 700; }
+    .plan-selector { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+    .plan-option { display: flex; align-items: center; gap: 12px; padding: 16px; border: 2px solid #e2e8f0; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; }
+    .plan-option.selected { border-color: var(--primary); background: rgba(108,99,255,0.04); }
+    .plan-option input[type="radio"] { accent-color: var(--primary); width: 18px; height: 18px; }
+    .plan-option-info { flex: 1; }
+    .plan-option-name { font-weight: 700; color: var(--dark); font-size: 0.95rem; }
+    .plan-option-sub { font-size: 0.8rem; color: var(--text-muted); }
+    .plan-option-price { font-weight: 800; color: var(--primary); font-size: 1.05rem; }
+    @media (max-width: 900px) {
+      .order-grid { grid-template-columns: 1fr; }
+      .summary-card { position: static; }
+    }
+  </style>
+</head>
+<body class="order-page">
+
+<!-- Order Header -->
+<div class="order-header">
+  <div class="container" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+    <div class="logo">Clarity<span>Dash</span> Pro</div>
+    <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+      <span style="color:rgba(255,255,255,0.6); font-size: 0.85rem;">🔒 Paiement 256-bit SSL sécurisé</span>
+      <span style="color:rgba(255,255,255,0.6); font-size: 0.85rem;">🛡️ Garantie 30 jours</span>
+      <span style="color:rgba(255,255,255,0.6); font-size: 0.85rem;">⚡ Accès immédiat</span>
+    </div>
+  </div>
+</div>
+
+<!-- Progress Bar -->
+<div class="funnel-progress" style="background: var(--dark-2);">
+  <div class="progress-steps">
+    <div class="progress-step done">
+      <div class="step-num">✓</div>
+      <span>Accès gratuit</span>
+    </div>
+    <div class="step-sep done"></div>
+    <div class="progress-step done">
+      <div class="step-num">✓</div>
+      <span>Offre spéciale</span>
+    </div>
+    <div class="step-sep done"></div>
+    <div class="progress-step active">
+      <div class="step-num">3</div>
+      <span>Votre commande</span>
+    </div>
+    <div class="step-sep"></div>
+    <div class="progress-step">
+      <div class="step-num">4</div>
+      <span>Accès immédiat</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="order-grid">
+
+    <!-- Form -->
+    <div>
+      <div class="order-form-card">
+        <div class="order-form-header">
+          <h2>🔐 Finalisez votre commande</h2>
+          <p>Plus que quelques secondes avant d'accéder à ClarityDash Pro</p>
+        </div>
+        <div class="order-form-body">
+
+          <!-- Plan Selector -->
+          <div style="margin-bottom: 28px;">
+            <div class="form-label" style="margin-bottom: 12px; font-size: 1rem;">Choisissez votre formule :</div>
+            <div class="plan-selector" id="plan-selector">
+              <label class="plan-option" onclick="selectPlan(this, '97')">
+                <input type="radio" name="plan" value="starter">
+                <div class="plan-option-info">
+                  <div class="plan-option-name">Starter</div>
+                  <div class="plan-option-sub">5 modules + templates + accès à vie</div>
+                </div>
+                <div class="plan-option-price">97€</div>
+              </label>
+              <label class="plan-option selected" onclick="selectPlan(this, '197')">
+                <input type="radio" name="plan" value="pro" checked>
+                <div class="plan-option-info">
+                  <div class="plan-option-name">Pro ⭐ Le plus populaire</div>
+                  <div class="plan-option-sub">Tout Starter + communauté + coaching mensuel</div>
+                </div>
+                <div class="plan-option-price">197€</div>
+              </label>
+              <label class="plan-option" onclick="selectPlan(this, '397')">
+                <input type="radio" name="plan" value="elite">
+                <div class="plan-option-info">
+                  <div class="plan-option-name">Elite</div>
+                  <div class="plan-option-sub">Tout Pro + 3 sessions 1-1 + audit business</div>
+                </div>
+                <div class="plan-option-price">397€</div>
+              </label>
+            </div>
+          </div>
+
+          <form data-funnel="order" data-next="upsell.html">
+            <!-- Infos personnelles -->
+            <h3 style="color:var(--dark); font-size: 1rem; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #eee;">1. Vos informations</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Prénom</label>
+                <input type="text" class="form-input" placeholder="Sophie" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Nom</label>
+                <input type="text" class="form-input" placeholder="Dupont" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-input" placeholder="votre@email.com" required />
+              <div class="form-hint">Votre accès sera envoyé à cette adresse email.</div>
+            </div>
+
+            <!-- Paiement -->
+            <h3 style="color:var(--dark); font-size: 1rem; margin-top: 28px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #eee;">2. Informations de paiement</h3>
+
+            <div class="payment-methods">
+              <div class="payment-tab active" onclick="setPayment(this, 'card')">💳 Carte bancaire</div>
+              <div class="payment-tab" onclick="setPayment(this, 'paypal')">🅿️ PayPal</div>
+              <div class="payment-tab" onclick="setPayment(this, '3x')">📅 3x sans frais</div>
+            </div>
+
+            <div class="card-icons">
+              <div class="card-icon-img">VISA</div>
+              <div class="card-icon-img">MC</div>
+              <div class="card-icon-img">AMEX</div>
+            </div>
+
+            <div id="card-fields">
+              <div class="form-group">
+                <label class="form-label">Numéro de carte</label>
+                <input type="text" class="form-input" placeholder="1234 5678 9012 3456" maxlength="19" id="card-number" />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Date d'expiration</label>
+                  <input type="text" class="form-input" placeholder="MM/AA" maxlength="5" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">CVV</label>
+                  <input type="text" class="form-input" placeholder="123" maxlength="4" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Nom sur la carte</label>
+                <input type="text" class="form-input" placeholder="SOPHIE DUPONT" />
+              </div>
+            </div>
+
+            <div id="paypal-fields" style="display:none; text-align:center; padding: 24px; background: var(--light); border-radius: var(--radius-sm); border: 1px dashed #ccc;">
+              <p style="color: var(--text-muted);">Vous serez redirigé vers PayPal pour finaliser votre paiement sécurisé.</p>
+            </div>
+
+            <div id="3x-fields" style="display:none; text-align:center; padding: 24px; background: #f0fff4; border-radius: var(--radius-sm); border: 1px solid var(--success);">
+              <p style="color: var(--text); font-weight: 600;">✅ Paiement en 3 fois sans frais</p>
+              <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 6px;">Ex. : Plan Pro → 3 x 65,67€ · Prélèvements automatiques · Sans intérêts</p>
+            </div>
+
+            <!-- Submit -->
+            <div style="margin-top: 28px;">
+              <button type="submit" class="btn btn-cta btn-full" id="submit-btn">
+                🔒 Valider ma commande — Accès immédiat
+              </button>
+              <div class="security-badges" style="margin-top: 16px;">
+                <div class="security-badge"><span class="icon">🔒</span> SSL 256 bits</div>
+                <div class="security-badge"><span class="icon">✅</span> Paiement sécurisé</div>
+                <div class="security-badge"><span class="icon">🛡️</span> Garantie 30j</div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Trust -->
+      <div style="text-align:center; margin-top: 20px; color: var(--text-muted); font-size:0.85rem;">
+        En finalisant votre commande, vous acceptez nos <a href="#" style="color:var(--primary);">CGV</a> et notre <a href="#" style="color:var(--primary);">politique de confidentialité</a>.
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-card">
+      <div class="summary-header">
+        <h3>Résumé de votre commande</h3>
+      </div>
+      <div class="summary-body">
+        <div class="summary-product">
+          <div class="product-thumb">📘</div>
+          <div>
+            <strong style="color:var(--dark); display:block;">ClarityDash Pro</strong>
+            <span id="summary-plan-name" style="color:var(--text-muted); font-size:0.85rem;">Formule Pro</span>
+          </div>
+        </div>
+
+        <div class="summary-line">
+          <span>Prix initial</span>
+          <span style="text-decoration:line-through; color:var(--text-muted);" id="summary-old-price">594€</span>
+        </div>
+        <div class="summary-line savings">
+          <span>Réduction exclusive</span>
+          <span id="summary-discount">-397€</span>
+        </div>
+        <div class="summary-line">
+          <span>Bonus inclus</span>
+          <span style="color:var(--success);">591€ OFFERTS</span>
+        </div>
+        <div class="summary-line total">
+          <span>Total aujourd'hui</span>
+          <span id="summary-total">197€</span>
+        </div>
+
+        <div style="background: var(--light); border-radius: var(--radius-sm); padding: 16px; margin-top: 20px;">
+          <div style="font-weight: 700; color: var(--dark); margin-bottom: 10px; font-size: 0.9rem;">✅ Inclus dans votre commande :</div>
+          <ul class="checklist" style="gap: 10px;">
+            <li style="font-size:0.85rem;"><span class="check-icon" style="width:18px;height:18px;font-size:0.6rem;">✓</span>5 modules complets (40+ vidéos)</li>
+            <li style="font-size:0.85rem;"><span class="check-icon" style="width:18px;height:18px;font-size:0.6rem;">✓</span>50 templates Canva Pro</li>
+            <li style="font-size:0.85rem;"><span class="check-icon" style="width:18px;height:18px;font-size:0.6rem;">✓</span>30 emails de vente rédigés</li>
+            <li style="font-size:0.85rem;"><span class="check-icon" style="width:18px;height:18px;font-size:0.6rem;">✓</span>Accès à la communauté privée</li>
+            <li style="font-size:0.85rem;"><span class="check-icon" style="width:18px;height:18px;font-size:0.6rem;">✓</span>Coaching mensuel en groupe</li>
+            <li style="font-size:0.85rem;"><span class="check-icon" style="width:18px;height:18px;font-size:0.6rem;">✓</span>Accès à vie + mises à jour</li>
+          </ul>
+        </div>
+
+        <div class="guarantee-box" style="margin-top: 20px; padding: 20px; gap: 12px;">
+          <div style="font-size: 2rem;">🛡️</div>
+          <div>
+            <strong style="color:var(--dark); display:block; margin-bottom: 4px;">Garantie 30 jours</strong>
+            <span style="font-size: 0.82rem; color: var(--text);">Remboursement intégral si vous n'êtes pas satisfait.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer" style="margin-top: 60px;">
+  <div class="container">
+    <p>© 2026 ClarityDash Pro – Tous droits réservés</p>
+    <div class="footer-links">
+      <a href="#">Mentions légales</a>
+      <a href="#">Politique de confidentialité</a>
+      <a href="#">CGV</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  // Plan selection
+  const plans = {
+    starter: { name: 'Formule Starter', price: 97, old: 394, discount: 297 },
+    pro:     { name: 'Formule Pro',     price: 197, old: 594, discount: 397 },
+    elite:   { name: 'Formule Elite',   price: 397, old: 994, discount: 597 },
+  };
+
+  function selectPlan(el, price) {
+    document.querySelectorAll('.plan-option').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    const val = el.querySelector('input').value;
+    const p = plans[val];
+    document.getElementById('summary-plan-name').textContent = p.name;
+    document.getElementById('summary-old-price').textContent = p.old + '€';
+    document.getElementById('summary-discount').textContent = '-' + p.discount + '€';
+    document.getElementById('summary-total').textContent = p.price + '€';
+  }
+
+  // Read URL param
+  const params = new URLSearchParams(location.search);
+  const plan = params.get('plan');
+  if (plan && plans[plan]) {
+    document.querySelectorAll('.plan-option').forEach(el => {
+      const v = el.querySelector('input').value;
+      el.classList.toggle('selected', v === plan);
+      if (v === plan) el.querySelector('input').checked = true;
+    });
+    const p = plans[plan];
+    document.getElementById('summary-plan-name').textContent = p.name;
+    document.getElementById('summary-old-price').textContent = p.old + '€';
+    document.getElementById('summary-discount').textContent = '-' + p.discount + '€';
+    document.getElementById('summary-total').textContent = p.price + '€';
+  }
+
+  // Payment tabs
+  function setPayment(el, type) {
+    document.querySelectorAll('.payment-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('card-fields').style.display = type === 'card' ? 'block' : 'none';
+    document.getElementById('paypal-fields').style.display = type === 'paypal' ? 'block' : 'none';
+    document.getElementById('3x-fields').style.display = type === '3x' ? 'block' : 'none';
+  }
+
+  // Card number formatting
+  document.getElementById('card-number')?.addEventListener('input', (e) => {
+    let v = e.target.value.replace(/\D/g, '').slice(0, 16);
+    e.target.value = v.replace(/(.{4})/g, '$1 ').trim();
+  });
+</script>
+</body>
+</html>

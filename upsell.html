@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offre unique — ClarityDash Pro Mastermind</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    body { background: linear-gradient(135deg, #0f0e17, #1a1050); min-height: 100vh; }
+    .oto-badge {
+      display: inline-block;
+      background: var(--secondary);
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 8px 24px;
+      border-radius: 50px;
+      margin-bottom: 20px;
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.7} }
+    .benefit-row { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .benefit-row:last-child { border-bottom: none; }
+    .benefit-icon { width: 48px; height: 48px; background: rgba(108,99,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+    .compare-table { width: 100%; border-collapse: collapse; }
+    .compare-table th { background: rgba(108,99,255,0.15); padding: 16px; text-align: center; font-size: 0.9rem; font-weight: 700; color: white; border-bottom: 2px solid rgba(108,99,255,0.3); }
+    .compare-table th:first-child { text-align: left; }
+    .compare-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.9rem; color: rgba(255,255,255,0.8); }
+    .compare-table td:first-child { font-weight: 600; color: white; }
+    .compare-table td:nth-child(2), .compare-table td:nth-child(3) { text-align: center; }
+    .tick { color: var(--success); font-size: 1.1rem; }
+    .cross { color: rgba(255,255,255,0.25); }
+    .compare-table tr:hover td { background: rgba(255,255,255,0.03); }
+    .oto-price-box { background: rgba(108,99,255,0.12); border: 2px solid rgba(108,99,255,0.4); border-radius: var(--radius); padding: 32px; text-align: center; }
+  </style>
+</head>
+<body>
+
+<!-- Progress -->
+<div class="funnel-progress">
+  <div class="progress-steps">
+    <div class="progress-step done"><div class="step-num">✓</div><span>Accès gratuit</span></div>
+    <div class="step-sep done"></div>
+    <div class="progress-step done"><div class="step-num">✓</div><span>Commande</span></div>
+    <div class="step-sep done"></div>
+    <div class="progress-step active"><div class="step-num">4</div><span>Offre unique</span></div>
+    <div class="step-sep"></div>
+    <div class="progress-step"><div class="step-num">5</div><span>Accès immédiat</span></div>
+  </div>
+</div>
+
+<!-- Header -->
+<section class="upsell-hero">
+  <div class="container-sm">
+    <div class="oto-badge">⚡ Offre unique — Disponible sur cette page seulement</div>
+    <h1 style="color: white; margin-bottom: 16px;">
+      Attendez ! Avant d'accéder à votre programme…<br/>
+      <span class="highlight">Multipliez vos résultats par 3</span><br/>avec le Mastermind Élite
+    </h1>
+    <p style="color: rgba(255,255,255,0.7); font-size: 1.1rem; max-width: 560px; margin: 0 auto;">
+      Cette offre n'est disponible qu'une seule fois et uniquement sur cette page. Une fois que vous la quittez, elle disparaît définitivement.
+    </p>
+
+    <!-- Countdown -->
+    <div style="display: inline-flex; align-items: center; gap: 16px; background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.4); border-radius: var(--radius); padding: 16px 28px; margin-top: 28px; flex-wrap: wrap; justify-content: center;">
+      <span style="color: var(--secondary); font-weight: 700;">⏰ Cette offre expire dans :</span>
+      <div class="countdown-timer" id="countdown-upsell">
+        <div class="countdown-unit">
+          <span class="countdown-number" data-h style="background: var(--secondary);">00</span>
+          <span class="countdown-label">Heures</span>
+        </div>
+        <div class="countdown-unit">
+          <span class="countdown-number" data-m style="background: var(--secondary);">14</span>
+          <span class="countdown-label">Min</span>
+        </div>
+        <div class="countdown-unit">
+          <span class="countdown-number" data-s style="background: var(--secondary);">59</span>
+          <span class="countdown-label">Sec</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main Content -->
+<section class="section-sm">
+  <div class="container-sm">
+    <div class="upsell-card">
+
+      <div class="upsell-header">
+        <h2 style="font-size: 1.5rem; margin-bottom: 8px;">🚀 ClarityDash Mastermind Élite</h2>
+        <p style="color: rgba(255,255,255,0.85);">L'accompagnement premium pour ceux qui veulent aller vite et loin</p>
+      </div>
+
+      <div class="upsell-body">
+
+        <!-- What is it -->
+        <div style="text-align: center; margin-bottom: 32px;">
+          <p style="color: var(--text); font-size: 1.05rem; line-height: 1.8; max-width: 580px; margin: 0 auto;">
+            Le Mastermind Élite est un groupe privé de <strong>20 entrepreneurs maximum</strong> qui bénéficient d'un accès direct à notre équipe de coaches, d'un suivi personnalisé mensuel et d'une révision complète de leur business digital.
+          </p>
+        </div>
+
+        <!-- Benefits -->
+        <div style="margin-bottom: 36px;">
+          <h3 style="color: var(--dark); margin-bottom: 20px;">Ce que vous obtenez en plus :</h3>
+          <div class="benefit-row">
+            <div class="benefit-icon">🎯</div>
+            <div>
+              <strong style="display:block; color:var(--dark); margin-bottom:4px;">3 sessions de coaching 1-1 (90 min chacune)</strong>
+              <span style="color:var(--text-muted); font-size:0.9rem;">Un coach expert analyse votre business et vous donne un plan d'action sur mesure — valeur 750€</span>
+            </div>
+          </div>
+          <div class="benefit-row">
+            <div class="benefit-icon">📊</div>
+            <div>
+              <strong style="display:block; color:var(--dark); margin-bottom:4px;">Audit complet de votre tunnel de vente</strong>
+              <span style="color:var(--text-muted); font-size:0.9rem;">Nous analysons chaque étape et identifions les points de friction qui vous coûtent des ventes — valeur 500€</span>
+            </div>
+          </div>
+          <div class="benefit-row">
+            <div class="benefit-icon">✍️</div>
+            <div>
+              <strong style="display:block; color:var(--dark); margin-bottom:4px;">Révision de votre copywriting</strong>
+              <span style="color:var(--text-muted); font-size:0.9rem;">Notre rédacteur expert retravaille votre page de vente, vos emails et vos publicités pour maximiser les conversions — valeur 300€</span>
+            </div>
+          </div>
+          <div class="benefit-row">
+            <div class="benefit-icon">🔴</div>
+            <div>
+              <strong style="display:block; color:var(--dark); margin-bottom:4px;">Accès aux sessions live hebdomadaires (12 mois)</strong>
+              <span style="color:var(--text-muted); font-size:0.9rem;">Chaque semaine, rejoignez une session stratégique en direct avec Q&A — posez toutes vos questions — valeur 1 200€</span>
+            </div>
+          </div>
+          <div class="benefit-row">
+            <div class="benefit-icon">🏆</div>
+            <div>
+              <strong style="display:block; color:var(--dark); margin-bottom:4px;">Accès à toutes les futures formations (valeur illimitée)</strong>
+              <span style="color:var(--text-muted); font-size:0.9rem;">Chaque nouveau module, chaque nouvelle ressource que nous créons — à vie, inclus dans votre Mastermind</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compare Table -->
+        <div style="margin-bottom: 36px; overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <table class="compare-table" style="background: #f8f9ff;">
+            <thead>
+              <tr>
+                <th>Ce que vous obtenez</th>
+                <th style="color:var(--primary);">Pro seul</th>
+                <th style="color:white; background: var(--primary);">Pro + Mastermind</th>
+              </tr>
+            </thead>
+            <tbody style="background:white;">
+              <tr><td>5 modules de formation</td><td class="tick">✅</td><td class="tick" style="background:rgba(108,99,255,0.04);">✅</td></tr>
+              <tr><td>Communauté privée</td><td class="tick">✅</td><td class="tick" style="background:rgba(108,99,255,0.04);">✅</td></tr>
+              <tr><td>Coaching mensuel en groupe</td><td class="tick">✅</td><td class="tick" style="background:rgba(108,99,255,0.04);">✅</td></tr>
+              <tr><td>3 sessions de coaching 1-1</td><td class="cross">—</td><td class="tick" style="background:rgba(108,99,255,0.04);">✅</td></tr>
+              <tr><td>Audit complet de votre funnel</td><td class="cross">—</td><td class="tick" style="background:rgba(108,99,255,0.04);">✅</td></tr>
+              <tr><td>Révision de votre copywriting</td><td class="cross">—</td><td class="tick" style="background:rgba(108,99,255,0.04);">✅</td></tr>
+              <tr><td>Sessions live hebdomadaires</td><td class="cross">—</td><td class="tick" style="background:rgba(108,99,255,0.04);">✅</td></tr>
+              <tr><td>Accès aux futures formations</td><td class="cross">—</td><td class="tick" style="background:rgba(108,99,255,0.04);">✅</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Price -->
+        <div class="oto-price-box" style="margin-bottom: 28px;">
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px;">Valeur réelle du Mastermind Élite</p>
+          <div style="font-size: 2rem; font-weight: 900; text-decoration: line-through; color: var(--text-muted); margin-bottom: 4px;">2 750€</div>
+          <p style="color: var(--text-muted); margin-bottom: 16px; font-size: 0.9rem;">Votre prix aujourd'hui — offre unique</p>
+          <div style="font-size: 3rem; font-weight: 900; color: var(--primary); line-height: 1; margin-bottom: 4px;"><sup style="font-size: 1.4rem;">€</sup>297</div>
+          <p style="color: var(--success); font-weight: 700; font-size: 0.9rem; margin-bottom: 20px;">Ajouté à votre commande — Accès immédiat</p>
+          <p style="color: var(--text-muted); font-size: 0.8rem;">ou 3 x 99€ sans frais</p>
+        </div>
+
+        <!-- CTA -->
+        <div style="text-align: center;">
+          <a href="merci.html?upsell=yes" class="btn btn-cta btn-full btn-pulse" style="font-size: 1.1rem; padding: 20px;">
+            ✦ Oui ! J'ajoute le Mastermind Élite pour 297€ →
+          </a>
+          <p style="margin-top: 12px; color: var(--text-muted); font-size: 0.8rem;">✅ Garantie 30 jours · Accès immédiat · Paiement sécurisé</p>
+
+          <button class="no-thanks" onclick="window.location.href='merci.html'">
+            Non merci, je me contente du plan Pro standard et je renonce à l'accompagnement personnalisé
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Testimonial -->
+    <div class="testimonial-card" style="margin-top: 32px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);">
+      <div class="stars">★★★★★</div>
+      <p class="testimonial-text" style="color: rgba(255,255,255,0.8);">"Le Mastermind a été un game-changer absolu. En 3 mois avec le coaching 1-1, j'ai généré 11 000€ et mis en place un système qui tourne tout seul. Aucun regret d'avoir investi dans cette option."</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">JL</div>
+        <div class="author-info">
+          <strong style="color:white;">Julien L.</strong>
+          <span style="color:rgba(255,255,255,0.5);">Ex-salarié reconverti — 11k€/mois</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <p>© 2026 ClarityDash Pro – Tous droits réservés</p>
+    <div class="footer-links">
+      <a href="#">Mentions légales</a>
+      <a href="#">CGV</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
