@@ -4,6 +4,7 @@ import { DEFAULT_PARAMETERS } from "@/types/parameters";
 import type { LSFProject } from "@/types/project";
 import type { PlanFile } from "@/types/project";
 import type { PlanAnalysisResult } from "@/types/analysis";
+import type { AIProvider } from "@/lib/ai/types";
 import { calculateProject } from "@/lib/calculations";
 
 interface ProjectStore {
@@ -22,6 +23,11 @@ interface ProjectStore {
   generateProject: () => void;
   clearProject: () => void;
   isGenerating: boolean;
+
+  selectedProvider: AIProvider;
+  availableProviders: AIProvider[];
+  setProvider: (provider: AIProvider) => void;
+  fetchProviders: () => Promise<void>;
 
   analysisResult: PlanAnalysisResult | null;
   isAnalyzing: boolean;
@@ -79,13 +85,30 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
 
   clearProject: () => set({ project: null }),
 
+  selectedProvider: "anthropic",
+  availableProviders: [],
+  setProvider: (provider) => set({ selectedProvider: provider }),
+  fetchProviders: async () => {
+    try {
+      const res = await fetch("/api/analyze-plan");
+      const data = await res.json();
+      const providers: AIProvider[] = data.providers ?? [];
+      set({
+        availableProviders: providers,
+        selectedProvider: providers[0] ?? "anthropic",
+      });
+    } catch {
+      set({ availableProviders: [] });
+    }
+  },
+
   analysisResult: null,
   isAnalyzing: false,
   analysisError: null,
   detectedFields: new Set(),
 
   analyzePlan: async () => {
-    const { planFile } = get();
+    const { planFile, selectedProvider } = get();
     if (!planFile) return;
 
     set({ isAnalyzing: true, analysisError: null });
@@ -97,6 +120,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
         body: JSON.stringify({
           dataUrl: planFile.dataUrl,
           fileType: planFile.type,
+          provider: selectedProvider,
         }),
       });
 

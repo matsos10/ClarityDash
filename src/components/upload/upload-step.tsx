@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useProjectStore } from "@/lib/store/project-store";
+import { AI_PROVIDERS } from "@/lib/ai/types";
 import {
   Upload,
   FileImage,
@@ -15,6 +16,7 @@ import {
   DoorOpen,
   SquareIcon,
   Ruler,
+  Bot,
 } from "lucide-react";
 
 export function UploadStep() {
@@ -28,8 +30,16 @@ export function UploadStep() {
     analysisResult,
     isAnalyzing,
     analysisError,
+    selectedProvider,
+    availableProviders,
+    setProvider,
+    fetchProviders,
   } = useProjectStore();
   const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    fetchProviders();
+  }, [fetchProviders]);
 
   const handleFile = useCallback(
     (file: File) => {
@@ -155,28 +165,94 @@ export function UploadStep() {
           {/* Analysis section */}
           {!analysisResult && !isAnalyzing && (
             <div className="border border-primary/30 rounded-xl p-6 bg-primary/5">
-              <div className="flex flex-col sm:flex-row items-center gap-4">
-                <div className="flex-shrink-0 p-3 rounded-full bg-primary/10">
-                  <ScanSearch className="h-8 w-8 text-primary" />
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <div className="flex-shrink-0 p-3 rounded-full bg-primary/10">
+                    <ScanSearch className="h-8 w-8 text-primary" />
+                  </div>
+                  <div className="flex-1 text-center sm:text-left">
+                    <h3 className="font-semibold text-foreground">
+                      Analyser le plan avec l&apos;IA
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      L&apos;IA va scanner votre plan pour détecter les pièces,
+                      fenêtres, portes, dimensions et pré-remplir les paramètres
+                      automatiquement.
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 text-center sm:text-left">
-                  <h3 className="font-semibold text-foreground">
-                    Analyser le plan avec l&apos;IA
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    L&apos;IA va scanner votre plan pour détecter les pièces,
-                    fenêtres, portes, dimensions et pré-remplir les paramètres
-                    automatiquement.
-                  </p>
+
+                {/* Provider selector */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium text-foreground mb-1.5 flex items-center gap-1">
+                      <Bot className="h-3.5 w-3.5" />
+                      Modèle d&apos;IA
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {AI_PROVIDERS.map((p) => {
+                        const isAvailable = availableProviders.includes(p.id);
+                        const isSelected = selectedProvider === p.id;
+                        return (
+                          <button
+                            key={p.id}
+                            onClick={() => isAvailable && setProvider(p.id)}
+                            disabled={!isAvailable}
+                            className={`relative text-left px-3 py-2.5 rounded-lg border text-sm transition-all ${
+                              isSelected
+                                ? "border-primary bg-white ring-2 ring-primary/20"
+                                : isAvailable
+                                  ? "border-border bg-white hover:border-primary/50 cursor-pointer"
+                                  : "border-border/50 bg-muted/30 opacity-50 cursor-not-allowed"
+                            }`}
+                          >
+                            <div className="font-medium text-foreground">
+                              {p.name}
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-0.5">
+                              {isAvailable ? p.description : "Clé API non configurée"}
+                            </div>
+                            {isSelected && isAvailable && (
+                              <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
+
                 <button
                   onClick={analyzePlan}
-                  className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-sm whitespace-nowrap"
+                  disabled={availableProviders.length === 0}
+                  className="w-full sm:w-auto self-end flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ScanSearch className="h-4 w-4" />
                   Analyser le plan
                 </button>
               </div>
+
+              {availableProviders.length === 0 && (
+                <div className="mt-4 flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-amber-800">
+                      Aucune clé API configurée
+                    </p>
+                    <p className="text-xs text-amber-700 mt-1">
+                      Ajoutez au moins une clé dans votre fichier{" "}
+                      <code className="bg-amber-100 px-1 rounded">.env.local</code> :
+                      <br />
+                      <code className="text-[11px]">ANTHROPIC_API_KEY=sk-ant-...</code>{" "}
+                      ou{" "}
+                      <code className="text-[11px]">OPENAI_API_KEY=sk-...</code>{" "}
+                      ou{" "}
+                      <code className="text-[11px]">DEEPSEEK_API_KEY=sk-...</code>
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {analysisError && (
                 <div className="mt-4 flex items-start gap-2 p-3 bg-destructive/10 rounded-lg">
                   <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
