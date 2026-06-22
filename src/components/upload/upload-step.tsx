@@ -2,10 +2,33 @@
 
 import { useCallback, useState } from "react";
 import { useProjectStore } from "@/lib/store/project-store";
-import { Upload, FileImage, X, ArrowRight } from "lucide-react";
+import {
+  Upload,
+  FileImage,
+  X,
+  ArrowRight,
+  ScanSearch,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  Home,
+  DoorOpen,
+  SquareIcon,
+  Ruler,
+} from "lucide-react";
 
 export function UploadStep() {
-  const { planFile, setPlanFile, clearPlanFile, setStep } = useProjectStore();
+  const {
+    planFile,
+    setPlanFile,
+    clearPlanFile,
+    setStep,
+    analyzePlan,
+    applyAnalysis,
+    analysisResult,
+    isAnalyzing,
+    analysisError,
+  } = useProjectStore();
   const [isDragging, setIsDragging] = useState(false);
 
   const handleFile = useCallback(
@@ -36,16 +59,25 @@ export function UploadStep() {
     [handleFile],
   );
 
+  const totalWindows =
+    analysisResult?.windows?.reduce((s, w) => s + w.quantity, 0) ?? 0;
+  const totalDoors =
+    analysisResult?.doors?.reduce((s, d) => s + d.quantity, 0) ?? 0;
+  const extDoors =
+    analysisResult?.doors
+      ?.filter((d) => d.isExterior)
+      .reduce((s, d) => s + d.quantity, 0) ?? 0;
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground">
           Charger le plan d&apos;architecture
         </h2>
         <p className="text-muted-foreground mt-2">
-          Chargez votre plan en PDF ou image pour référence visuelle.
-          Cette étape est optionnelle — vous pouvez passer directement aux
-          paramètres.
+          Chargez votre plan en PDF ou image. L&apos;IA analysera
+          automatiquement le plan pour extraire les dimensions, pièces, fenêtres
+          et portes.
         </p>
       </div>
 
@@ -83,37 +115,198 @@ export function UploadStep() {
           />
         </div>
       ) : (
-        <div className="border border-border rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <FileImage className="h-8 w-8 text-primary" />
-              <div>
-                <p className="font-medium text-foreground">{planFile.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {planFile.type}
-                </p>
+        <div className="space-y-4">
+          {/* Plan preview */}
+          <div className="border border-border rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <FileImage className="h-8 w-8 text-primary" />
+                <div>
+                  <p className="font-medium text-foreground">{planFile.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {planFile.type}
+                  </p>
+                </div>
               </div>
+              <button
+                onClick={clearPlanFile}
+                className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
-            <button
-              onClick={clearPlanFile}
-              className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            {planFile.type.startsWith("image/") && (
+              <div className="rounded-lg overflow-hidden border border-border bg-muted/30">
+                <img
+                  src={planFile.dataUrl}
+                  alt="Plan d'architecture"
+                  className="w-full h-auto max-h-80 object-contain"
+                />
+              </div>
+            )}
+            {planFile.type === "application/pdf" && (
+              <div className="rounded-lg border border-border bg-muted/30 p-8 text-center">
+                <FileImage className="mx-auto h-16 w-16 text-muted-foreground mb-2" />
+                <p className="text-muted-foreground">Aperçu PDF chargé</p>
+              </div>
+            )}
           </div>
-          {planFile.type.startsWith("image/") && (
-            <div className="rounded-lg overflow-hidden border border-border bg-muted/30">
-              <img
-                src={planFile.dataUrl}
-                alt="Plan d'architecture"
-                className="w-full h-auto max-h-96 object-contain"
-              />
+
+          {/* Analysis section */}
+          {!analysisResult && !isAnalyzing && (
+            <div className="border border-primary/30 rounded-xl p-6 bg-primary/5">
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <div className="flex-shrink-0 p-3 rounded-full bg-primary/10">
+                  <ScanSearch className="h-8 w-8 text-primary" />
+                </div>
+                <div className="flex-1 text-center sm:text-left">
+                  <h3 className="font-semibold text-foreground">
+                    Analyser le plan avec l&apos;IA
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    L&apos;IA va scanner votre plan pour détecter les pièces,
+                    fenêtres, portes, dimensions et pré-remplir les paramètres
+                    automatiquement.
+                  </p>
+                </div>
+                <button
+                  onClick={analyzePlan}
+                  className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-sm whitespace-nowrap"
+                >
+                  <ScanSearch className="h-4 w-4" />
+                  Analyser le plan
+                </button>
+              </div>
+              {analysisError && (
+                <div className="mt-4 flex items-start gap-2 p-3 bg-destructive/10 rounded-lg">
+                  <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-destructive">
+                      Erreur d&apos;analyse
+                    </p>
+                    <p className="text-sm text-destructive/80">
+                      {analysisError}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
-          {planFile.type === "application/pdf" && (
-            <div className="rounded-lg border border-border bg-muted/30 p-8 text-center">
-              <FileImage className="mx-auto h-16 w-16 text-muted-foreground mb-2" />
-              <p className="text-muted-foreground">Aperçu PDF chargé</p>
+
+          {/* Loading state */}
+          {isAnalyzing && (
+            <div className="border border-primary/30 rounded-xl p-8 bg-primary/5 text-center">
+              <Loader2 className="mx-auto h-10 w-10 text-primary animate-spin mb-4" />
+              <h3 className="font-semibold text-foreground">
+                Analyse en cours...
+              </h3>
+              <p className="text-sm text-muted-foreground mt-2">
+                L&apos;IA examine votre plan d&apos;architecture pour détecter
+                les éléments constructifs. Cela peut prendre quelques secondes.
+              </p>
+            </div>
+          )}
+
+          {/* Analysis results */}
+          {analysisResult && (
+            <div className="border border-green-300 rounded-xl p-6 bg-green-50">
+              <div className="flex items-center gap-2 mb-4">
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <h3 className="font-semibold text-green-900">
+                  Analyse terminée
+                </h3>
+              </div>
+
+              {/* Detected rooms */}
+              {analysisResult.detectedRooms.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-green-800 mb-2 flex items-center gap-1.5">
+                    <Home className="h-4 w-4" />
+                    Pièces détectées ({analysisResult.detectedRooms.length})
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {analysisResult.detectedRooms.map((room, i) => (
+                      <span
+                        key={i}
+                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white text-sm text-green-800 border border-green-200"
+                      >
+                        {room.name}
+                        {room.estimatedArea && (
+                          <span className="text-green-600">
+                            ~{room.estimatedArea}m²
+                          </span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Key metrics */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                {analysisResult.totalFloorArea && (
+                  <div className="bg-white rounded-lg p-3 border border-green-200">
+                    <div className="flex items-center gap-1 text-xs text-green-700 mb-1">
+                      <SquareIcon className="h-3 w-3" />
+                      Surface
+                    </div>
+                    <p className="font-semibold text-green-900">
+                      {analysisResult.totalFloorArea} m²
+                    </p>
+                  </div>
+                )}
+                {analysisResult.perimeterLength && (
+                  <div className="bg-white rounded-lg p-3 border border-green-200">
+                    <div className="flex items-center gap-1 text-xs text-green-700 mb-1">
+                      <Ruler className="h-3 w-3" />
+                      Périmètre
+                    </div>
+                    <p className="font-semibold text-green-900">
+                      {analysisResult.perimeterLength} m
+                    </p>
+                  </div>
+                )}
+                {totalWindows > 0 && (
+                  <div className="bg-white rounded-lg p-3 border border-green-200">
+                    <div className="flex items-center gap-1 text-xs text-green-700 mb-1">
+                      <SquareIcon className="h-3 w-3" />
+                      Fenêtres
+                    </div>
+                    <p className="font-semibold text-green-900">
+                      {totalWindows} unité(s)
+                    </p>
+                  </div>
+                )}
+                {totalDoors > 0 && (
+                  <div className="bg-white rounded-lg p-3 border border-green-200">
+                    <div className="flex items-center gap-1 text-xs text-green-700 mb-1">
+                      <DoorOpen className="h-3 w-3" />
+                      Portes
+                    </div>
+                    <p className="font-semibold text-green-900">
+                      {totalDoors} ({extDoors} ext.)
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Notes */}
+              {analysisResult.notes && (
+                <div className="bg-white rounded-lg p-3 border border-green-200 mb-4">
+                  <p className="text-sm text-green-800">
+                    <span className="font-medium">Notes : </span>
+                    {analysisResult.notes}
+                  </p>
+                </div>
+              )}
+
+              <button
+                onClick={applyAnalysis}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors shadow-sm"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                Appliquer et continuer aux paramètres
+              </button>
             </div>
           )}
         </div>
@@ -122,9 +315,9 @@ export function UploadStep() {
       <div className="flex justify-end gap-3">
         <button
           onClick={() => setStep(1)}
-          className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-sm"
+          className="flex items-center gap-2 px-6 py-3 border border-border rounded-lg text-foreground hover:bg-muted transition-colors"
         >
-          {planFile ? "Continuer" : "Passer cette étape"}
+          {planFile ? "Passer sans analyser" : "Passer cette étape"}
           <ArrowRight className="h-4 w-4" />
         </button>
       </div>

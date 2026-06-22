@@ -11,6 +11,7 @@ import {
   Layers,
   Shield,
   Loader2,
+  ScanSearch,
 } from "lucide-react";
 import type {
   StudProfile,
@@ -47,14 +48,22 @@ function SectionCard({
 function Field({
   label,
   children,
+  detected,
 }: {
   label: string;
   children: React.ReactNode;
+  detected?: boolean;
 }) {
   return (
     <div>
       <label className="block text-sm font-medium text-foreground mb-1.5">
         {label}
+        {detected && (
+          <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700">
+            <ScanSearch className="h-3 w-3" />
+            Auto-détecté
+          </span>
+        )}
       </label>
       {children}
     </div>
@@ -66,8 +75,10 @@ const inputClass =
 const selectClass = inputClass;
 
 export function ParameterStep() {
-  const { parameters, updateParameters, setStep, generateProject, isGenerating } =
+  const { parameters, updateParameters, setStep, generateProject, isGenerating, detectedFields } =
     useProjectStore();
+
+  const isDetected = (field: string) => detectedFields.has(field);
 
   const updateWindow = (index: number, field: keyof WindowConfig, value: number) => {
     const windows = [...parameters.windows];
@@ -138,7 +149,7 @@ export function ParameterStep() {
 
         {/* Building Dimensions */}
         <SectionCard title="Dimensions du bâtiment" icon={Ruler}>
-          <Field label="Surface par étage (m²)">
+          <Field label="Surface par étage (m²)" detected={isDetected("totalFloorArea")}>
             <input
               type="number"
               className={inputClass}
@@ -150,7 +161,7 @@ export function ParameterStep() {
               max={1000}
             />
           </Field>
-          <Field label="Nombre d'étages">
+          <Field label="Nombre d'étages" detected={isDetected("numberOfFloors")}>
             <select
               className={selectClass}
               value={parameters.numberOfFloors}
@@ -163,7 +174,7 @@ export function ParameterStep() {
               <option value={3}>3 (R+2)</option>
             </select>
           </Field>
-          <Field label="Hauteur des murs (mm)">
+          <Field label="Hauteur des murs (mm)" detected={isDetected("wallHeight")}>
             <select
               className={selectClass}
               value={parameters.wallHeight}
@@ -177,7 +188,7 @@ export function ParameterStep() {
               <option value={3300}>3300 mm</option>
             </select>
           </Field>
-          <Field label="Périmètre extérieur (m)">
+          <Field label="Périmètre extérieur (m)" detected={isDetected("perimeterLength")}>
             <input
               type="number"
               className={inputClass}
@@ -189,7 +200,7 @@ export function ParameterStep() {
               max={200}
             />
           </Field>
-          <Field label="Longueur cloisons intérieures (m)">
+          <Field label="Longueur cloisons intérieures (m)" detected={isDetected("interiorWallLength")}>
             <input
               type="number"
               className={inputClass}
@@ -251,7 +262,7 @@ export function ParameterStep() {
 
         {/* Roof */}
         <SectionCard title="Toiture" icon={Home}>
-          <Field label="Type de toiture">
+          <Field label="Type de toiture" detected={isDetected("roofType")}>
             <select
               className={selectClass}
               value={parameters.roofType}
@@ -265,7 +276,7 @@ export function ParameterStep() {
               <option value="flat">Toit plat</option>
             </select>
           </Field>
-          <Field label="Pente (degrés)">
+          <Field label="Pente (degrés)" detected={isDetected("roofPitch")}>
             <input
               type="number"
               className={inputClass}
@@ -305,6 +316,12 @@ export function ParameterStep() {
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-medium text-sm text-foreground">
                   Fenêtres
+                  {isDetected("windows") && (
+                    <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700">
+                      <ScanSearch className="h-3 w-3" />
+                      Auto-détecté
+                    </span>
+                  )}
                 </h4>
                 <button
                   onClick={addWindow}
@@ -362,7 +379,15 @@ export function ParameterStep() {
 
             <div className="border-t border-border pt-4">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium text-sm text-foreground">Portes</h4>
+                <h4 className="font-medium text-sm text-foreground">
+                  Portes
+                  {isDetected("doors") && (
+                    <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700">
+                      <ScanSearch className="h-3 w-3" />
+                      Auto-détecté
+                    </span>
+                  )}
+                </h4>
                 <button
                   onClick={addDoor}
                   className="text-xs px-3 py-1 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors"
