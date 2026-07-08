@@ -60,10 +60,10 @@ export default function Home() {
       )}
 
       <footer className="mt-10 text-[11px] text-black/40 dark:text-white/40 leading-relaxed">
-        Les annonces sont récupérées en direct depuis des sites publics (Idealista). Cet outil
-        est destiné à un usage personnel de recherche ; le contenu affiché appartient à ses
-        propriétaires respectifs. La disponibilité des résultats dépend de la protection
-        anti-robot des sites sources.
+        Les annonces sont récupérées en direct depuis plusieurs sites publics (Idealista, Casa
+        Sapo, OLX, Fotocasa, pisos.com selon le pays). Cet outil est destiné à un usage personnel
+        de recherche ; le contenu affiché appartient à ses propriétaires respectifs. La
+        disponibilité des résultats dépend de la protection anti-robot des sites sources.
       </footer>
     </main>
   );
