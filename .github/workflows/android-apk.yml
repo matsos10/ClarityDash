@@ -1,0 +1,47 @@
+name: APK Android
+
+on:
+  push:
+    branches: [claude/google-drive-recipes-app-pbab6i, main]
+    paths: ["docs/**", "android/**", ".github/workflows/android-apk.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      - name: Compilar APK
+        working-directory: android
+        run: gradle assembleRelease --no-daemon
+
+      - name: Renomear
+        run: cp android/app/build/outputs/apk/release/app-release.apk Receitas.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Receitas-apk
+          path: Receitas.apk
+
+      - name: Publicar na página de Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete apk --yes --cleanup-tag || true
+          gh release create apk Receitas.apk \
+            --target "$GITHUB_SHA" \
+            --title "Receitas — APK Android" \
+            --notes "Descarregue Receitas.apk no telemóvel e abra-o para instalar (versão ${{ github.run_number }})."

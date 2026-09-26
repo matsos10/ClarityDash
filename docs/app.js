@@ -465,6 +465,7 @@
   let wakeLock = null;
   async function keepAwake(on) {
     try {
+      if (window.AndroidApp) { window.AndroidApp.keepScreenOn(!!on); return; }
       if (on && "wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen");
       else if (!on && wakeLock) { await wakeLock.release(); wakeLock = null; }
     } catch (e) { /* sem suporte */ }
@@ -648,7 +649,7 @@
   window.addEventListener("hashchange", route);
   route();
 
-  if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  if ("serviceWorker" in navigator && location.protocol !== "file:" && !window.AndroidApp) {
     window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
   }
 })();
