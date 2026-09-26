@@ -1,0 +1,442 @@
+{
+  "name": "LinkedIn Leads · 04 · Sinais mornos",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "a8e173b4-560e-4aa6-8777-3ebd5647410e",
+      "name": "Dias úteis às 9h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "40b23f6b-a142-47ea-ab00-00e0cac9f4cc",
+              "name": "unipile_base_url",
+              "value": "https://apiX.unipile.com:XXXXX/api/v1",
+              "type": "string"
+            },
+            {
+              "id": "ce089a13-c6a5-4f36-a847-27a8a495843a",
+              "name": "unipile_account_id",
+              "value": "ID_DA_CONTA_LINKEDIN_NA_UNIPILE",
+              "type": "string"
+            },
+            {
+              "id": "4c1bbd83-a139-4f57-9c84-0fef15561274",
+              "name": "sheet_id",
+              "value": "ID_DA_GOOGLE_SHEET",
+              "type": "string"
+            },
+            {
+              "id": "20bbd19f-1247-476c-9524-c53258351bf0",
+              "name": "icp",
+              "value": "Diretores financeiros de PMEs portuguesas com 20-200 funcionários, setor de serviços, que ainda fazem reporting em Excel",
+              "type": "string"
+            },
+            {
+              "id": "88ba9fa9-8c63-4bb3-96c6-7158d9a35c1a",
+              "name": "score_minimo_icp",
+              "value": "7",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ebf58254-f429-4c60-b8f5-b6f37e99fb91",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.unipile_base_url }}/users/me",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "account_id",
+              "value": "={{ $('Config').first().json.unipile_account_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fd8beaca-7c57-4da1-9437-613396210514",
+      "name": "O meu perfil",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.unipile_base_url }}/users/{{ $json.provider_id }}/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "account_id",
+              "value": "={{ $('Config').first().json.unipile_account_id }}"
+            },
+            {
+              "name": "limit",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9cc3ca30-075e-4751-96e8-dd337b240d4c",
+      "name": "As minhas publicações",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const TZ = 'Europe/Lisbon';\nconst hoje = DateTime.now().setZone(TZ).startOf('day');\nconst hojeStr = hoje.toFormat('yyyy-MM-dd');\nfunction parseData(v) {\n  if (!v) return null;\n  const s = String(v).trim();\n  let d = DateTime.fromISO(s, { zone: TZ });\n  if (!d.isValid) d = DateTime.fromFormat(s, 'dd/MM/yyyy', { zone: TZ });\n  return d.isValid ? d.startOf('day') : null;\n}\nfunction diasDesde(v) {\n  const d = parseData(v);\n  return d ? Math.floor(hoje.diff(d, 'days').days) : Infinity;\n}\n\nreturn ($input.first().json.items || [])\n  .filter(p => (p.comment_counter || 0) > 0)\n  .filter(p => diasDesde(p.parsed_datetime) <= 14)\n  .map(p => ({ json: { social_id: p.social_id, texto: String(p.text || '').slice(0, 200) } }));\n"
+      },
+      "id": "7e839b60-e0cf-41a4-9e99-a4b561404c83",
+      "name": "Publicações dos últimos 14 dias",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.unipile_base_url }}/posts/{{ encodeURIComponent($json.social_id) }}/comments",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "account_id",
+              "value": "={{ $('Config').first().json.unipile_account_id }}"
+            },
+            {
+              "name": "limit",
+              "value": "100"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "351851b8-7aac-4ff2-8617-c8b76bf346b5",
+      "name": "Comentários",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Prospects",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "cc66a608-7d72-42b9-8cee-f02bfa0be237",
+      "name": "Ler prospects",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1320,
+        300
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const eu = $('O meu perfil').first().json.provider_id;\nconst posts = $('Publicações dos últimos 14 dias').all().map(i => i.json);\nconst norm = v => String(v || '').toLowerCase().replace(/\\/+$/, '');\n\nconst existentes = new Set();\nfor (const { json: r } of $input.all()) {\n  [r.provider_id, r.public_identifier, r.linkedin_url].map(norm).filter(Boolean).forEach(v => existentes.add(v));\n}\n\nconst candidatos = new Map();\n$('Comentários').all().forEach((resp, idx) => {\n  const post = posts[idx] || {};\n  for (const c of resp.json.items || []) {\n    const a = c.author_details || {};\n    if (!a.id || a.id === eu || candidatos.has(a.id)) continue;\n    if (existentes.has(norm(a.id)) || existentes.has(norm(a.profile_url))) continue;\n    candidatos.set(a.id, {\n      id: a.id,\n      nome: typeof c.author === 'string' ? c.author : (c.author?.name || ''),\n      headline: a.headline || '',\n      linkedin_url: a.profile_url || '',\n      comentario: String(c.text || '').slice(0, 300),\n      post: post.texto || '',\n    });\n  }\n});\n\nif (!candidatos.size) return [];\nreturn [{ json: { candidatos: [...candidatos.values()] } }];\n"
+      },
+      "id": "a21fa1aa-30cd-4505-8a65-322b01e3c126",
+      "name": "Novos comentadores",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst candidatos = $input.first().json.candidatos;\nreturn [{ json: {\n  claude_request: {\n    model: 'claude-opus-5',\n    max_tokens: 16000,\n    fallbacks: 'default',\n    output_config: {\n      effort: 'low',\n      format: {\n        type: 'json_schema',\n        schema: {\n          type: 'object',\n          properties: {\n            avaliacoes: {\n              type: 'array',\n              items: {\n                type: 'object',\n                properties: {\n                  id: { type: 'string' },\n                  score: { type: 'integer' },\n                  motivo: { type: 'string' },\n                },\n                required: ['id', 'score', 'motivo'],\n                additionalProperties: false,\n              },\n            },\n          },\n          required: ['avaliacoes'],\n          additionalProperties: false,\n        },\n      },\n    },\n    system: `Avalias, de 0 a 10, quanto cada pessoa corresponde a este cliente ideal (ICP): ${cfg.icp}.\nBaseia-te só no headline (cargo/empresa). 10 = encaixe perfeito; 0 = sem relação (concorrentes, estudantes, recrutadores, vendedores de serviços semelhantes = 0-2). Motivo numa frase curta em português de Portugal. Avalia todas as pessoas.`,\n    messages: [{ role: 'user', content: JSON.stringify(candidatos.map(c => ({ id: c.id, nome: c.nome, headline: c.headline })), null, 2) }],\n  },\n} }];\n"
+      },
+      "id": "dcaebc88-eeba-4e34-98a7-8d67e84a6ef7",
+      "name": "Preparar qualificação ICP",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "anthropic-beta",
+              "value": "server-side-fallback-2026-07-01"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.claude_request) }}",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "139fa107-9237-4607-9477-45432477679c",
+      "name": "Claude · qualificar ICP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1980,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const minimo = Number($('Config').first().json.score_minimo_icp) || 7;\nconst candidatos = new Map($('Novos comentadores').first().json.candidatos.map(c => [c.id, c]));\nconst r = $input.first().json;\nlet avaliacoes = [];\ntry {\n  const bloco = (r.content || []).find(c => c.type === 'text');\n  avaliacoes = JSON.parse(bloco.text).avaliacoes || [];\n} catch (e) { return []; }\n\nreturn avaliacoes\n  .filter(a => a.score >= minimo && candidatos.has(a.id))\n  .map(a => {\n    const c = candidatos.get(a.id);\n    return { json: {\n      nome: c.nome,\n      cargo: c.headline,\n      empresa: '',\n      linkedin_url: c.linkedin_url,\n      provider_id: c.id,\n      fonte: 'comentario',\n      prioridade: 10,\n      contexto: `Comentou o teu post \"${c.post.slice(0, 80)}…\": \"${c.comentario}\"`,\n      estado: 'novo',\n      notas: `ICP ${a.score}/10 — ${a.motivo}`,\n    } };\n  });\n"
+      },
+      "id": "49e2b2b2-1dd2-48f1-8309-ca9df29a6f02",
+      "name": "Linhas a adicionar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Prospects",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW",
+          "handlingExtraData": "ignoreIt"
+        }
+      },
+      "id": "e8f4501c-1bef-47b3-8c4a-8b000d169e9b",
+      "name": "Adicionar à lista (prioridade máxima)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2420,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Dias úteis às 9h": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "O meu perfil",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "O meu perfil": {
+      "main": [
+        [
+          {
+            "node": "As minhas publicações",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "As minhas publicações": {
+      "main": [
+        [
+          {
+            "node": "Publicações dos últimos 14 dias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publicações dos últimos 14 dias": {
+      "main": [
+        [
+          {
+            "node": "Comentários",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comentários": {
+      "main": [
+        [
+          {
+            "node": "Ler prospects",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler prospects": {
+      "main": [
+        [
+          {
+            "node": "Novos comentadores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Novos comentadores": {
+      "main": [
+        [
+          {
+            "node": "Preparar qualificação ICP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar qualificação ICP": {
+      "main": [
+        [
+          {
+            "node": "Claude · qualificar ICP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude · qualificar ICP": {
+      "main": [
+        [
+          {
+            "node": "Linhas a adicionar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Linhas a adicionar": {
+      "main": [
+        [
+          {
+            "node": "Adicionar à lista (prioridade máxima)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Lisbon",
+    "saveManualExecutions": true
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

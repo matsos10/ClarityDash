@@ -1,0 +1,334 @@
+{
+  "name": "LinkedIn Leads · 07 · Relatório semanal e limpeza",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 17 * * 5"
+            }
+          ]
+        }
+      },
+      "id": "6a7f0705-1c78-4d9e-a97f-703acbafeed5",
+      "name": "Sexta às 17h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "45f9f663-29b2-4cb8-b384-5ffc4fb2067a",
+              "name": "unipile_base_url",
+              "value": "https://apiX.unipile.com:XXXXX/api/v1",
+              "type": "string"
+            },
+            {
+              "id": "d73a04cb-057b-4a8b-bcd4-d7c37a829fa2",
+              "name": "unipile_account_id",
+              "value": "ID_DA_CONTA_LINKEDIN_NA_UNIPILE",
+              "type": "string"
+            },
+            {
+              "id": "3cced040-d220-45c0-bc44-e6ceae49d029",
+              "name": "sheet_id",
+              "value": "ID_DA_GOOGLE_SHEET",
+              "type": "string"
+            },
+            {
+              "id": "3f78549b-9be0-44ce-a1af-36d21c673e9b",
+              "name": "email_alertas",
+              "value": "o-teu-email@exemplo.com",
+              "type": "string"
+            },
+            {
+              "id": "c58f29fa-243b-4d7f-a67c-171c6301b76b",
+              "name": "dias_ate_retirar_convite",
+              "value": "21",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c0c5f431-eae6-4bbd-8416-e9d104cb5024",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Prospects",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "046c85bf-ee0a-4da5-b874-8a1997bf71b1",
+      "name": "Ler prospects",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const TZ = 'Europe/Lisbon';\nconst hoje = DateTime.now().setZone(TZ).startOf('day');\nconst hojeStr = hoje.toFormat('yyyy-MM-dd');\nfunction parseData(v) {\n  if (!v) return null;\n  const s = String(v).trim();\n  let d = DateTime.fromISO(s, { zone: TZ });\n  if (!d.isValid) d = DateTime.fromFormat(s, 'dd/MM/yyyy', { zone: TZ });\n  return d.isValid ? d.startOf('day') : null;\n}\nfunction diasDesde(v) {\n  const d = parseData(v);\n  return d ? Math.floor(hoje.diff(d, 'days').days) : Infinity;\n}\n\nconst P = $input.all().map(i => i.json);\nconst semana = v => diasDesde(v) <= 6;\nconst pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);\n\nconst convites = P.filter(p => semana(p.data_convite)).length;\nconst aceites = P.filter(p => semana(p.data_ligacao)).length;\nconst respostas = P.filter(p => semana(p.data_resposta)).length;\nconst leads = P.filter(p => p.estado === 'lead' && semana(p.data_resposta));\nconst contactados = P.filter(p => (Number(p.passo) || 0) >= 1).length;\nconst responderam = P.filter(p => p.data_resposta).length;\nconst leadsTotal = P.filter(p => p.estado === 'lead').length;\n\nconst taxaAceite = pct(aceites, convites);\nconst taxaResposta = pct(responderam, contactados);\nconst taxaLead = pct(leadsTotal, responderam);\nconst novos = P.filter(p => p.estado === 'novo').length;\nconst pendentes = P.filter(p => p.estado === 'convite_enviado').length;\nconst emSequencia = P.filter(p => ['ligado', 'em_sequencia'].includes(p.estado)).length;\n\nconst diag = [];\nif (convites < 100) diag.push(`Só ${convites} convites esta semana (meta 100): verifica erros na coluna \"notas\" ou a lista de novos.`);\nif (convites >= 20 && taxaAceite < 30) diag.push('Aceitação abaixo de 30%: melhora o perfil (título/banner) ou aperta o ICP.');\nif (contactados >= 20 && taxaResposta < 25) diag.push('Resposta abaixo de 25%: personaliza mais a abertura (passo 0).');\nif (responderam >= 10 && taxaLead < 40) diag.push('Resposta→lead abaixo de 40%: qualifica melhor a dor ou testa outra oferta.');\nif (novos < 100) diag.push(`Só restam ${novos} prospects novos: adiciona mais ao Sales Navigator/Sheet (meta 400+).`);\nif (pendentes > 100) diag.push(`${pendentes} convites pendentes: acima de 100 aumenta o risco de restrição.`);\nif (!diag.length) diag.push('Tudo dentro das metas. Mantém a rotina.');\n\nconst cor = (v, meta) => `<b style=\"color:${v >= meta ? '#1a7f37' : '#cf222e'}\">${v}</b>`;\nconst html = `\n<h2>LinkedIn — semana até ${hoje.toFormat('dd/MM/yyyy')}</h2>\n<table cellpadding=\"6\" style=\"border-collapse:collapse\">\n<tr><td>Leads esta semana</td><td>${cor(leads.length, 10)} / 10</td></tr>\n<tr><td>Convites enviados</td><td>${cor(convites, 100)} / 100</td></tr>\n<tr><td>Novas ligações</td><td>${aceites}</td></tr>\n<tr><td>Taxa de aceitação</td><td>${cor(taxaAceite, 35)}% (meta &gt;35%)</td></tr>\n<tr><td>Respostas esta semana</td><td>${respostas}</td></tr>\n<tr><td>Taxa de resposta (acumulada)</td><td>${cor(taxaResposta, 25)}% (meta &gt;25%)</td></tr>\n<tr><td>Resposta → lead (acumulada)</td><td>${cor(taxaLead, 40)}% (meta &gt;40%)</td></tr>\n<tr><td>Em sequência</td><td>${emSequencia}</td></tr>\n<tr><td>Convites pendentes</td><td>${pendentes}</td></tr>\n<tr><td>Prospects novos na lista</td><td>${novos}</td></tr>\n</table>\n<h3>Diagnóstico</h3><ul>${diag.map(d => `<li>${d}</li>`).join('')}</ul>\n<h3>Leads da semana</h3><ul>${leads.map(l => `<li><a href=\"${l.linkedin_url}\">${l.nome}</a> — ${l.cargo || ''} ${l.empresa ? '@ ' + l.empresa : ''}: ${l.resumo_ia || ''}</li>`).join('') || '<li>Nenhuma</li>'}</ul>`;\n\nreturn [{ json: { assunto: `📊 LinkedIn: ${leads.length} leads esta semana`, html } }];\n"
+      },
+      "id": "647489a4-8bdf-4f28-98ce-4b0d86307e88",
+      "name": "Calcular KPIs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "={{ $('Config').first().json.email_alertas }}",
+        "subject": "={{ $json.assunto }}",
+        "emailType": "html",
+        "message": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "6619588b-5c11-4996-9dfb-edfc574fb4a8",
+      "name": "Enviar relatório",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const TZ = 'Europe/Lisbon';\nconst hoje = DateTime.now().setZone(TZ).startOf('day');\nconst hojeStr = hoje.toFormat('yyyy-MM-dd');\nfunction parseData(v) {\n  if (!v) return null;\n  const s = String(v).trim();\n  let d = DateTime.fromISO(s, { zone: TZ });\n  if (!d.isValid) d = DateTime.fromFormat(s, 'dd/MM/yyyy', { zone: TZ });\n  return d.isValid ? d.startOf('day') : null;\n}\nfunction diasDesde(v) {\n  const d = parseData(v);\n  return d ? Math.floor(hoje.diff(d, 'days').days) : Infinity;\n}\n\nconst dias = Number($('Config').first().json.dias_ate_retirar_convite) || 21;\nreturn $input.all()\n  .map(i => i.json)\n  .filter(p => p.estado === 'convite_enviado' && p.invitation_id && p.provider_id && diasDesde(p.data_convite) >= dias)\n  .map(p => ({ json: { provider_id: p.provider_id, invitation_id: p.invitation_id } }));\n"
+      },
+      "id": "05c858f6-2538-41f0-a510-dc2b4ed7b7ae",
+      "name": "Convites antigos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "={{ $('Config').first().json.unipile_base_url }}/users/invite/sent/{{ $json.invitation_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "account_id",
+              "value": "={{ $('Config').first().json.unipile_account_id }}"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 5000
+            }
+          }
+        }
+      },
+      "id": "ff26e7aa-4ce4-4815-96f1-511f1bc16042",
+      "name": "Retirar convite",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        420
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b965cfb7-f0f6-401d-8690-3ca061bffe82",
+              "name": "provider_id",
+              "value": "={{ $('Convites antigos').item.json.provider_id }}",
+              "type": "string"
+            },
+            {
+              "id": "7cfb6072-a054-4b7a-ade9-330ec11e228d",
+              "name": "estado",
+              "value": "={{ $json.error ? 'convite_enviado' : 'convite_retirado' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "27cf69f9-4595-4d61-9a28-f5dd1b31afa4",
+      "name": "Marcar retirado",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1100,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Prospects",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "provider_id"
+          ],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW",
+          "handlingExtraData": "ignoreIt"
+        }
+      },
+      "id": "774f3416-5f34-41ec-a569-c4fdff6ef742",
+      "name": "Atualizar prospect",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1320,
+        420
+      ]
+    }
+  ],
+  "connections": {
+    "Sexta às 17h": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Ler prospects",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler prospects": {
+      "main": [
+        [
+          {
+            "node": "Calcular KPIs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Convites antigos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular KPIs": {
+      "main": [
+        [
+          {
+            "node": "Enviar relatório",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convites antigos": {
+      "main": [
+        [
+          {
+            "node": "Retirar convite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retirar convite": {
+      "main": [
+        [
+          {
+            "node": "Marcar retirado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar retirado": {
+      "main": [
+        [
+          {
+            "node": "Atualizar prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Lisbon",
+    "saveManualExecutions": true
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

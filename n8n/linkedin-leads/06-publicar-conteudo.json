@@ -1,0 +1,292 @@
+{
+  "name": "LinkedIn Leads · 06 · Publicar conteúdo aprovado",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 8 * * 2-4"
+            }
+          ]
+        }
+      },
+      "id": "430e4394-62c4-4c7b-bf2a-1062a12eac09",
+      "name": "Terça a quinta às 8h30",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "63de5d24-0da5-4e43-9644-0bca639b4d63",
+              "name": "unipile_base_url",
+              "value": "https://apiX.unipile.com:XXXXX/api/v1",
+              "type": "string"
+            },
+            {
+              "id": "c4a13568-496a-4f58-a0be-78663f6c1c3b",
+              "name": "unipile_account_id",
+              "value": "ID_DA_CONTA_LINKEDIN_NA_UNIPILE",
+              "type": "string"
+            },
+            {
+              "id": "1d92dfdb-13de-4fcb-9c3b-d30ace595300",
+              "name": "sheet_id",
+              "value": "ID_DA_GOOGLE_SHEET",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "196d5b29-1b12-4e0a-b1dd-7572ba92dcda",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Conteudo",
+          "mode": "name"
+        },
+        "options": {},
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "estado",
+              "lookupValue": "aprovado"
+            }
+          ]
+        }
+      },
+      "id": "adbe9cfc-1906-4c57-ab2f-e3abfde8cdb2",
+      "name": "Publicações aprovadas",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const TZ = 'Europe/Lisbon';\nconst hoje = DateTime.now().setZone(TZ).startOf('day');\nconst hojeStr = hoje.toFormat('yyyy-MM-dd');\nfunction parseData(v) {\n  if (!v) return null;\n  const s = String(v).trim();\n  let d = DateTime.fromISO(s, { zone: TZ });\n  if (!d.isValid) d = DateTime.fromFormat(s, 'dd/MM/yyyy', { zone: TZ });\n  return d.isValid ? d.startOf('day') : null;\n}\nfunction diasDesde(v) {\n  const d = parseData(v);\n  return d ? Math.floor(hoje.diff(d, 'days').days) : Infinity;\n}\n\nconst p = $input.all().map(i => i.json).find(r => diasDesde(r.data_publicacao) === 0 && r.texto);\nreturn p ? [{ json: p }] : [];\n"
+      },
+      "id": "1d9c44b3-af76-49ce-aadb-7894c1137acb",
+      "name": "Publicação de hoje",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.unipile_base_url }}/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formData",
+              "name": "account_id",
+              "value": "={{ $('Config').first().json.unipile_account_id }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "text",
+              "value": "={{ $json.texto }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ebcbb92a-1d2b-47d8-a91b-291e83f2035e",
+      "name": "Publicar no LinkedIn",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f41b6066-8e38-4dbb-811a-7d0a96e45a40",
+              "name": "id",
+              "value": "={{ $('Publicação de hoje').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "98ef4f1b-2413-4753-85ee-d53bf2c7d6ee",
+              "name": "estado",
+              "value": "publicado",
+              "type": "string"
+            },
+            {
+              "id": "97e967e7-e45e-4bf0-91cb-6120285d53c5",
+              "name": "post_id",
+              "value": "={{ $json.post_id || $json.id || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "68036c23-42fe-4a87-8aa6-386df19e0538",
+              "name": "data_publicado",
+              "value": "={{ $now.setZone('Europe/Lisbon').toFormat('yyyy-MM-dd') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "44805cea-cfc3-452b-9dd6-48c4f2e4d28e",
+      "name": "Marcar publicado",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Conteudo",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW",
+          "handlingExtraData": "ignoreIt"
+        }
+      },
+      "id": "889f19a0-2db1-484f-8a79-fbe59023fdb6",
+      "name": "Atualizar conteúdo",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1320,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Terça a quinta às 8h30": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Publicações aprovadas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publicações aprovadas": {
+      "main": [
+        [
+          {
+            "node": "Publicação de hoje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publicação de hoje": {
+      "main": [
+        [
+          {
+            "node": "Publicar no LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publicar no LinkedIn": {
+      "main": [
+        [
+          {
+            "node": "Marcar publicado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar publicado": {
+      "main": [
+        [
+          {
+            "node": "Atualizar conteúdo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Lisbon",
+    "saveManualExecutions": true
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

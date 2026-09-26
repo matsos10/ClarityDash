@@ -1,0 +1,576 @@
+{
+  "name": "LinkedIn Leads · 01 · Convites diários",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 10 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "f1a39f85-a8f1-4b45-8e4e-b2ae84ee2494",
+      "name": "Dias úteis às 10h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfad5cad-cebe-4fa4-a284-f8fd498cef62",
+              "name": "unipile_base_url",
+              "value": "https://apiX.unipile.com:XXXXX/api/v1",
+              "type": "string"
+            },
+            {
+              "id": "1bd0221c-0089-423b-be6b-b901c2c741f6",
+              "name": "unipile_account_id",
+              "value": "ID_DA_CONTA_LINKEDIN_NA_UNIPILE",
+              "type": "string"
+            },
+            {
+              "id": "99d80633-ed0a-4707-8f8f-8b665c3cfb4d",
+              "name": "sheet_id",
+              "value": "ID_DA_GOOGLE_SHEET",
+              "type": "string"
+            },
+            {
+              "id": "69797cb0-d0c3-4d75-9ff3-1a864194e35d",
+              "name": "limite_convites_dia",
+              "value": "20",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bc47cd46-eff7-41e4-bc29-4130115b7538",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Prospects",
+          "mode": "name"
+        },
+        "options": {},
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "estado",
+              "lookupValue": "novo"
+            }
+          ]
+        }
+      },
+      "id": "f10432be-1125-4efa-bc3d-04b3394d3e20",
+      "name": "Ler prospects novos",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const TZ = 'Europe/Lisbon';\nconst hoje = DateTime.now().setZone(TZ).startOf('day');\nconst hojeStr = hoje.toFormat('yyyy-MM-dd');\nfunction parseData(v) {\n  if (!v) return null;\n  const s = String(v).trim();\n  let d = DateTime.fromISO(s, { zone: TZ });\n  if (!d.isValid) d = DateTime.fromFormat(s, 'dd/MM/yyyy', { zone: TZ });\n  return d.isValid ? d.startOf('day') : null;\n}\nfunction diasDesde(v) {\n  const d = parseData(v);\n  return d ? Math.floor(hoje.diff(d, 'days').days) : Infinity;\n}\n\nconst limite = Number($('Config').first().json.limite_convites_dia) || 20;\nconst linhas = $input.all()\n  .map(i => i.json)\n  .filter(p => p.linkedin_url || p.provider_id)\n  .sort((a, b) => (Number(b.prioridade) || 0) - (Number(a.prioridade) || 0))\n  .slice(0, limite);\n\nreturn linhas.map(p => {\n  const slug = String(p.linkedin_url || '').split('/in/')[1]?.split(/[/?#]/)[0] || '';\n  return { json: { ...p, identificador: p.provider_id || decodeURIComponent(slug) } };\n});\n"
+      },
+      "id": "ea0efd6c-ea71-4c5a-81ea-013cf1a7cf03",
+      "name": "Selecionar os do dia",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "51339ab8-4d74-43a7-ac3f-e4b1cac146d8",
+      "name": "Um de cada vez",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.unipile_base_url }}/users/{{ $json.identificador }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "account_id",
+              "value": "={{ $('Config').first().json.unipile_account_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "faacc706-ff54-452b-b967-c3da984aa6ca",
+      "name": "Visitar perfil",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        200
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a8b6cd00-8a2f-49ca-b9da-60d0dfa5dbe7",
+              "leftValue": "={{ $json.network_distance === 'FIRST_DEGREE' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "b728a261-39d8-4bb9-b22f-e28cb154e63e",
+      "name": "Já é ligação de 1.º grau?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1320,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.unipile_base_url }}/users/invite",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ provider_id: $json.provider_id, account_id: $('Config').first().json.unipile_account_id }) }}",
+        "options": {}
+      },
+      "id": "492f5540-e129-4919-83af-b4352fc018bb",
+      "name": "Enviar convite (sem nota)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1540,
+        200
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f3287153-757a-4028-b3a8-f7a75ca5b43c",
+              "name": "linkedin_url",
+              "value": "={{ $('Um de cada vez').item.json.linkedin_url }}",
+              "type": "string"
+            },
+            {
+              "id": "477c215f-2a4b-406c-90d0-9014e2a8dddf",
+              "name": "provider_id",
+              "value": "={{ $json.provider_id }}",
+              "type": "string"
+            },
+            {
+              "id": "cd0eddba-19ca-42fa-98fe-d6bf604d55d4",
+              "name": "public_identifier",
+              "value": "={{ $json.public_identifier }}",
+              "type": "string"
+            },
+            {
+              "id": "755aadf3-dd96-4473-8abd-b24dce7aaf91",
+              "name": "estado",
+              "value": "ligado",
+              "type": "string"
+            },
+            {
+              "id": "0f99d3bf-1aef-4c83-84a9-2739c64a4b63",
+              "name": "data_ligacao",
+              "value": "={{ $now.setZone('Europe/Lisbon').toFormat('yyyy-MM-dd') }}",
+              "type": "string"
+            },
+            {
+              "id": "65be1a53-d241-4edf-91cb-dd4dfee0e044",
+              "name": "passo",
+              "value": "0",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d0f2b1f8-cce7-423e-bb50-ae6f2510c62b",
+      "name": "Marcar como ligado",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1760,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "34f8b324-bd4f-4c25-8ab6-020b327e2d2e",
+              "name": "linkedin_url",
+              "value": "={{ $('Um de cada vez').item.json.linkedin_url }}",
+              "type": "string"
+            },
+            {
+              "id": "4d9fc214-56bd-44f2-ab70-fa91fbc490f0",
+              "name": "provider_id",
+              "value": "={{ $('Visitar perfil').item.json.provider_id }}",
+              "type": "string"
+            },
+            {
+              "id": "01b33b31-5622-447a-9c8c-2a5672c8872e",
+              "name": "public_identifier",
+              "value": "={{ $('Visitar perfil').item.json.public_identifier }}",
+              "type": "string"
+            },
+            {
+              "id": "e82ec975-8c26-4342-a25f-20823eb96576",
+              "name": "estado",
+              "value": "convite_enviado",
+              "type": "string"
+            },
+            {
+              "id": "a4002ec5-70f5-4889-b4e7-0b7a1840d4bd",
+              "name": "invitation_id",
+              "value": "={{ $json.invitation_id }}",
+              "type": "string"
+            },
+            {
+              "id": "c07583f4-050b-4f09-8120-aa6c18fb1dc2",
+              "name": "data_convite",
+              "value": "={{ $now.setZone('Europe/Lisbon').toFormat('yyyy-MM-dd') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "488269ca-ac02-4eaa-87ff-4c50da57d752",
+      "name": "Marcar convite enviado",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1760,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2fb8f21c-1fdb-4502-ba23-d8267282a096",
+              "name": "linkedin_url",
+              "value": "={{ $('Um de cada vez').item.json.linkedin_url }}",
+              "type": "string"
+            },
+            {
+              "id": "297bac02-fae6-44b6-ba76-a5a9f02298c3",
+              "name": "estado",
+              "value": "erro",
+              "type": "string"
+            },
+            {
+              "id": "7e42e9a6-cc6d-4d9b-83e2-bd29766dcbc1",
+              "name": "notas",
+              "value": "={{ 'Erro Unipile: ' + ($json.error?.message || JSON.stringify($json.error || $json)).slice(0, 300) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b13883bb-aa62-42e9-8cd5-499c14e8b436",
+      "name": "Marcar erro",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1760,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Prospects",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "linkedin_url"
+          ],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW",
+          "handlingExtraData": "ignoreIt"
+        }
+      },
+      "id": "c9cf488e-f62f-4d04-8632-733903aca249",
+      "name": "Atualizar prospect",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1980,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor(Math.random() * 75) + 45 }}",
+        "unit": "seconds"
+      },
+      "id": "1ac2dc63-9bb2-4262-a000-789bfee2f177",
+      "name": "Pausa humana 45–120 s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2200,
+        200
+      ],
+      "webhookId": "478f0a63-fc19-47b2-9a4e-7f02aae664c2"
+    }
+  ],
+  "connections": {
+    "Dias úteis às 10h": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Ler prospects novos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler prospects novos": {
+      "main": [
+        [
+          {
+            "node": "Selecionar os do dia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Selecionar os do dia": {
+      "main": [
+        [
+          {
+            "node": "Um de cada vez",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Um de cada vez": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Visitar perfil",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Visitar perfil": {
+      "main": [
+        [
+          {
+            "node": "Já é ligação de 1.º grau?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Já é ligação de 1.º grau?": {
+      "main": [
+        [
+          {
+            "node": "Marcar como ligado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar convite (sem nota)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar convite (sem nota)": {
+      "main": [
+        [
+          {
+            "node": "Marcar convite enviado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar como ligado": {
+      "main": [
+        [
+          {
+            "node": "Atualizar prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar convite enviado": {
+      "main": [
+        [
+          {
+            "node": "Atualizar prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar erro": {
+      "main": [
+        [
+          {
+            "node": "Atualizar prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar prospect": {
+      "main": [
+        [
+          {
+            "node": "Pausa humana 45–120 s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pausa humana 45–120 s": {
+      "main": [
+        [
+          {
+            "node": "Um de cada vez",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Lisbon",
+    "saveManualExecutions": true
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

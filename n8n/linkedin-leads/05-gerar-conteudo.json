@@ -1,0 +1,341 @@
+{
+  "name": "LinkedIn Leads · 05 · Gerar conteúdo da semana",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 18 * * 0"
+            }
+          ]
+        }
+      },
+      "id": "2f9d3332-cdcc-412e-86ae-a4a88edfc03a",
+      "name": "Domingo às 18h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "75160f6d-b3af-4d40-8085-be324f480ca0",
+              "name": "unipile_base_url",
+              "value": "https://apiX.unipile.com:XXXXX/api/v1",
+              "type": "string"
+            },
+            {
+              "id": "07411cab-31c5-43c7-92f5-15e89a248f5b",
+              "name": "unipile_account_id",
+              "value": "ID_DA_CONTA_LINKEDIN_NA_UNIPILE",
+              "type": "string"
+            },
+            {
+              "id": "81999f63-3abb-4345-b6b3-dc59bba86e7a",
+              "name": "sheet_id",
+              "value": "ID_DA_GOOGLE_SHEET",
+              "type": "string"
+            },
+            {
+              "id": "caf75f68-96e7-4546-9960-fbaadc7cbdff",
+              "name": "nome_remetente",
+              "value": "O teu primeiro nome",
+              "type": "string"
+            },
+            {
+              "id": "abb251a0-78ec-4d88-9c8d-32061fe311a4",
+              "name": "oferta",
+              "value": "O que fazes, numa frase (ex.: ajudo CFOs de PMEs a fechar o mês em 2 dias em vez de 10)",
+              "type": "string"
+            },
+            {
+              "id": "e75a4798-92cc-4a8c-93da-0ed90a028864",
+              "name": "icp",
+              "value": "Diretores financeiros de PMEs portuguesas com 20-200 funcionários, setor de serviços, que ainda fazem reporting em Excel",
+              "type": "string"
+            },
+            {
+              "id": "c411ba2d-e8ba-4825-95af-2ba4d46566ff",
+              "name": "dor",
+              "value": "fecho de mês lento e reporting manual em Excel",
+              "type": "string"
+            },
+            {
+              "id": "a50d86a7-1a0f-40ca-927f-212491bd56f1",
+              "name": "prova",
+              "value": "Caso real com números (ex.: a empresa X passou de 10 para 2 dias de fecho)",
+              "type": "string"
+            },
+            {
+              "id": "500876af-c8a9-43b8-a674-c3821182c5c4",
+              "name": "temas",
+              "value": "3-5 temas sobre os quais queres ser conhecido, separados por vírgulas",
+              "type": "string"
+            },
+            {
+              "id": "984802f5-0604-4456-b369-4ec97a951594",
+              "name": "lead_magnet",
+              "value": "Guia PDF sobre [tema] — quem comentar 'GUIA' recebe por mensagem",
+              "type": "string"
+            },
+            {
+              "id": "180348bf-aa56-4b30-bfa8-0db63d403317",
+              "name": "email_alertas",
+              "value": "o-teu-email@exemplo.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "432a0d5b-c799-4475-bbb3-a3e296a4a82b",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Conteudo",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "813cedc1-40ff-4d14-98de-5e4fa012b436",
+      "name": "Publicações anteriores",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        300
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const TZ = 'Europe/Lisbon';\nconst hoje = DateTime.now().setZone(TZ).startOf('day');\nconst hojeStr = hoje.toFormat('yyyy-MM-dd');\nfunction parseData(v) {\n  if (!v) return null;\n  const s = String(v).trim();\n  let d = DateTime.fromISO(s, { zone: TZ });\n  if (!d.isValid) d = DateTime.fromFormat(s, 'dd/MM/yyyy', { zone: TZ });\n  return d.isValid ? d.startOf('day') : null;\n}\nfunction diasDesde(v) {\n  const d = parseData(v);\n  return d ? Math.floor(hoje.diff(d, 'days').days) : Infinity;\n}\n\nconst cfg = $('Config').first().json;\nconst proximo = wd => hoje.plus({ days: ((wd - hoje.weekday + 7) % 7) || 7 });\nconst datas = { terca: proximo(2), quarta: proximo(3), quinta: proximo(4) };\nconst comLeadMagnet = datas.quinta.day <= 7; // 1.ª semana do mês\n\nconst anteriores = $input.all()\n  .map(i => i.json)\n  .filter(r => r.texto)\n  .slice(-9)\n  .map(r => String(r.texto).slice(0, 300));\n\nconst system = `És ghostwriter de LinkedIn de ${cfg.nome_remetente}, que ${cfg.oferta}.\nPúblico: ${cfg.icp}. Dor principal: ${cfg.dor}. Prova disponível: ${cfg.prova}. Temas: ${cfg.temas}.\n\nEscreve 3 publicações em português de Portugal:\n- terca (educativo): framework, passo a passo ou erro comum. Objetivo: autoridade.\n- quarta (prova): caso de cliente com números, antes e depois. Usa apenas a prova fornecida, sem inventar números.\n- quinta (opiniao): ponto de vista contrário ou história de bastidores. Objetivo: alcance e ligação.\n${comLeadMagnet ? `A de quinta termina com CTA de lead magnet: ${cfg.lead_magnet}.` : ''}\n\nFormato: gancho forte nas 2 primeiras linhas; frases curtas e espaçadas; uma ideia por publicação; 900–1500 caracteres; CTA leve no fim (pergunta); sem links; 0–3 hashtags no fim; sem emojis em excesso.\nNão repitas ideias nem ganchos das publicações anteriores.`;\n\nreturn [{ json: {\n  datas: Object.fromEntries(Object.entries(datas).map(([k, d]) => [k, d.toFormat('yyyy-MM-dd')])),\n  claude_request: {\n    model: 'claude-opus-5',\n    max_tokens: 16000,\n    fallbacks: 'default',\n    output_config: {\n      effort: 'high',\n      format: {\n        type: 'json_schema',\n        schema: {\n          type: 'object',\n          properties: {\n            posts: {\n              type: 'array',\n              items: {\n                type: 'object',\n                properties: {\n                  dia: { type: 'string', enum: ['terca', 'quarta', 'quinta'] },\n                  tipo: { type: 'string' },\n                  texto: { type: 'string' },\n                },\n                required: ['dia', 'tipo', 'texto'],\n                additionalProperties: false,\n              },\n            },\n          },\n          required: ['posts'],\n          additionalProperties: false,\n        },\n      },\n    },\n    system,\n    messages: [{ role: 'user', content: 'Publicações anteriores (não repetir):\\n' + (anteriores.join('\\n---\\n') || '(nenhuma)') }],\n  },\n} }];\n"
+      },
+      "id": "4becc032-6f55-4879-994a-345c6a44c1e1",
+      "name": "Preparar pedido de conteúdo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "anthropic-beta",
+              "value": "server-side-fallback-2026-07-01"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.claude_request) }}",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "6f9aa693-fdff-4a6a-b1f0-486e8c3b5a9e",
+      "name": "Claude · escrever publicações",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const datas = $('Preparar pedido de conteúdo').first().json.datas;\nconst r = $input.first().json;\nconst bloco = (r.content || []).find(c => c.type === 'text');\nif (!bloco) throw new Error('Claude não devolveu texto (stop_reason: ' + r.stop_reason + ')');\nreturn JSON.parse(bloco.text).posts.map(p => ({ json: {\n  id: datas[p.dia],\n  data_publicacao: datas[p.dia],\n  dia: p.dia,\n  tipo: p.tipo,\n  texto: p.texto,\n  estado: 'rascunho',\n} }));\n"
+      },
+      "id": "08a36739-20a7-412e-adee-3f1578dc2a55",
+      "name": "Linhas de conteúdo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Conteudo",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW",
+          "handlingExtraData": "ignoreIt"
+        }
+      },
+      "id": "11eeec12-58c6-4d0c-b47e-04e5290c61d8",
+      "name": "Guardar rascunhos",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1320,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "={{ $('Config').first().json.email_alertas }}",
+        "subject": "📝 3 publicações de LinkedIn para rever",
+        "emailType": "html",
+        "message": "=<p>Tens 3 rascunhos novos no separador <b>Conteudo</b> da Google Sheet.</p><p>Revê, edita o texto se quiseres e muda o <b>estado</b> para <b>aprovado</b>. Só as aprovadas são publicadas (terça, quarta e quinta às 8h30).</p><p><a href=\"https://docs.google.com/spreadsheets/d/{{ $('Config').first().json.sheet_id }}\">Abrir a Sheet</a></p>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "b38abdfd-1f89-4908-aa67-ede2a6633461",
+      "name": "Avisar que há rascunhos",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1540,
+        300
+      ],
+      "executeOnce": true
+    }
+  ],
+  "connections": {
+    "Domingo às 18h": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Publicações anteriores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publicações anteriores": {
+      "main": [
+        [
+          {
+            "node": "Preparar pedido de conteúdo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar pedido de conteúdo": {
+      "main": [
+        [
+          {
+            "node": "Claude · escrever publicações",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude · escrever publicações": {
+      "main": [
+        [
+          {
+            "node": "Linhas de conteúdo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Linhas de conteúdo": {
+      "main": [
+        [
+          {
+            "node": "Guardar rascunhos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar rascunhos": {
+      "main": [
+        [
+          {
+            "node": "Avisar que há rascunhos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Lisbon",
+    "saveManualExecutions": true
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

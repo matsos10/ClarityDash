@@ -1,0 +1,881 @@
+{
+  "name": "LinkedIn Leads · 03 · Sequência de mensagens",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 11 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "1c768c00-cf7b-418f-ad6c-dd39932c3370",
+      "name": "Dias úteis às 11h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "862b1936-68a1-4b93-b37d-07dc8c0223cc",
+              "name": "unipile_base_url",
+              "value": "https://apiX.unipile.com:XXXXX/api/v1",
+              "type": "string"
+            },
+            {
+              "id": "a6b99ff0-023b-4f6c-aae6-c46f32c4e025",
+              "name": "unipile_account_id",
+              "value": "ID_DA_CONTA_LINKEDIN_NA_UNIPILE",
+              "type": "string"
+            },
+            {
+              "id": "7a8e7ac5-16f6-4309-a2af-211c4797b18f",
+              "name": "sheet_id",
+              "value": "ID_DA_GOOGLE_SHEET",
+              "type": "string"
+            },
+            {
+              "id": "4f4b0f79-34aa-4ab3-9ee7-8be531b67a20",
+              "name": "nome_remetente",
+              "value": "O teu primeiro nome",
+              "type": "string"
+            },
+            {
+              "id": "ff145be7-e22b-45bc-b0a9-89e569733993",
+              "name": "oferta",
+              "value": "O que fazes, numa frase (ex.: ajudo CFOs de PMEs a fechar o mês em 2 dias em vez de 10)",
+              "type": "string"
+            },
+            {
+              "id": "8c57cebf-e99e-40ca-91c5-bc0a868220d9",
+              "name": "icp",
+              "value": "Diretores financeiros de PMEs portuguesas com 20-200 funcionários, setor de serviços, que ainda fazem reporting em Excel",
+              "type": "string"
+            },
+            {
+              "id": "7b3662fb-4e85-4c13-891f-4c75a09e59e5",
+              "name": "dor",
+              "value": "fecho de mês lento e reporting manual em Excel",
+              "type": "string"
+            },
+            {
+              "id": "17f05413-190a-4b2c-8166-161f8a897716",
+              "name": "prova",
+              "value": "Caso real com números (ex.: a empresa X passou de 10 para 2 dias de fecho)",
+              "type": "string"
+            },
+            {
+              "id": "100fd342-3819-4ac1-b1f7-bd8bbaae3f8c",
+              "name": "recurso_gratuito",
+              "value": "Guia curto sobre [tema] com o que resultou em [nº] empresas",
+              "type": "string"
+            },
+            {
+              "id": "978a257f-22db-40cb-ad59-d9ffc7d9d310",
+              "name": "link_agenda",
+              "value": "https://calendly.com/o-teu-link/20min",
+              "type": "string"
+            },
+            {
+              "id": "dc86de28-c298-4d5f-958c-704bd8fa4cbb",
+              "name": "limite_mensagens_dia",
+              "value": "40",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6fc79f16-2cca-4fcc-8b80-2a4bab25c702",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.unipile_base_url }}/users/relations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "account_id",
+              "value": "={{ $('Config').first().json.unipile_account_id }}"
+            },
+            {
+              "name": "limit",
+              "value": "100"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "79d50b17-1d72-452e-8ec9-e22395ff6175",
+      "name": "Ligações recentes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Prospects",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "96b9da89-6663-46e8-978e-04871ce8139a",
+      "name": "Ler prospects",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        660,
+        300
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const TZ = 'Europe/Lisbon';\nconst hoje = DateTime.now().setZone(TZ).startOf('day');\nconst hojeStr = hoje.toFormat('yyyy-MM-dd');\nfunction parseData(v) {\n  if (!v) return null;\n  const s = String(v).trim();\n  let d = DateTime.fromISO(s, { zone: TZ });\n  if (!d.isValid) d = DateTime.fromFormat(s, 'dd/MM/yyyy', { zone: TZ });\n  return d.isValid ? d.startOf('day') : null;\n}\nfunction diasDesde(v) {\n  const d = parseData(v);\n  return d ? Math.floor(hoje.diff(d, 'days').days) : Infinity;\n}\n\nconst limite = Number($('Config').first().json.limite_mensagens_dia) || 40;\nconst aceites = new Set(\n  ($('Ligações recentes').first().json.items || [])\n    .map(r => String(r.public_identifier || '').toLowerCase())\n    .filter(Boolean)\n);\n// dias de espera antes de cada passo: msg1 = D+1 após aceitar, FU1 +3, FU2 +5, FU3 +7\nconst ESPERA = [1, 3, 5, 7];\nconst aceitacoes = [];\nconst envios = [];\n\nfor (const { json: p } of $input.all()) {\n  if (!p.provider_id) continue;\n  if (p.estado === 'convite_enviado' && aceites.has(String(p.public_identifier || '').toLowerCase())) {\n    aceitacoes.push({ json: { acao: 'aceite', provider_id: p.provider_id, estado: 'ligado', data_ligacao: hojeStr, passo: 0 } });\n    continue;\n  }\n  if (!['ligado', 'em_sequencia'].includes(p.estado) || p.data_resposta) continue;\n  const passo = Number(p.passo) || 0;\n  if (passo > 3) continue;\n  const dias = diasDesde(passo === 0 ? p.data_ligacao : p.data_ultima_msg);\n  if (dias >= ESPERA[passo]) envios.push({ json: { acao: 'enviar', provider_id: p.provider_id, passo } });\n}\n\nenvios.sort((a, b) => a.json.passo - b.json.passo);\nreturn [...aceitacoes, ...envios.slice(0, limite)];\n"
+      },
+      "id": "d7d358b3-0f94-4e77-ad3e-a71470d2488e",
+      "name": "Calcular ações do dia",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2c97f25f-3c80-4015-a155-b0f3b365f502",
+              "leftValue": "={{ $json.acao === 'aceite' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "31faa933-e7bd-48e2-9de7-5d5264b5f6cd",
+      "name": "É aceitação?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Prospects",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "provider_id"
+          ],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW",
+          "handlingExtraData": "ignoreIt"
+        }
+      },
+      "id": "44fce3fa-df77-4f32-91df-773009a446d5",
+      "name": "Registar aceitação",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1320,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "a4157b82-7d89-44dd-8ec3-dc52c14ff548",
+      "name": "Um de cada vez",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1320,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Prospects",
+          "mode": "name"
+        },
+        "options": {},
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "provider_id",
+              "lookupValue": "={{ $json.provider_id }}"
+            }
+          ]
+        }
+      },
+      "id": "b3da6443-ecaa-48b5-a460-85bb8fc5142f",
+      "name": "Reler prospect",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1540,
+        500
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "92657d5a-3052-4c9d-85a3-c45f83e4ccad",
+              "leftValue": "={{ ['ligado', 'em_sequencia'].includes($json.estado) && !$json.data_resposta }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "ac9f2c41-bc72-4924-8723-ed9478e22da7",
+      "name": "Continua na sequência?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.unipile_base_url }}/users/{{ $json.provider_id }}/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "account_id",
+              "value": "={{ $('Config').first().json.unipile_account_id }}"
+            },
+            {
+              "name": "limit",
+              "value": "3"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "465c2ac0-abca-4144-ab1e-a46d307c426a",
+      "name": "Últimas publicações",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1980,
+        400
+      ],
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst p = $('Reler prospect').first().json;\nconst passo = Number(p.passo) || 0;\nlet publicacoes = [];\ntry {\n  publicacoes = ($input.first().json.items || [])\n    .slice(0, 2)\n    .map(x => String(x.text || '').slice(0, 500))\n    .filter(Boolean);\n} catch (e) {}\n\nconst system = `És ${cfg.nome_remetente}. ${cfg.oferta}.\nEscreves mensagens privadas de LinkedIn para prospects do teu cliente ideal (${cfg.icp}), numa sequência de 4 passos.\n\nRegras:\n- Português de Portugal, tratar por tu, tom humano e direto, frases curtas.\n- Máximo 300 caracteres. Sem emojis (no máximo 1). Sem links, exceto quando o passo o pede.\n- Usa apenas factos dos dados fornecidos; nunca inventes nada sobre a pessoa.\n- Responde apenas com o texto da mensagem, sem aspas nem explicações.\n\nPassos:\n0. Abertura (sem qualquer pitch): agradece ter aceitado a ligação, refere um detalhe específico (publicação recente, cargo, empresa; se fonte = \"comentario\", o comentário que fez ao teu post) e faz uma pergunta aberta sobre ${cfg.dor}.\n1. Valor: oferece \"${cfg.recurso_gratuito}\" e pergunta se quer que envies. Podes referir a prova: ${cfg.prova}.\n2. Direto: pergunta, numa linha, se ${cfg.dor} é prioridade para ela este trimestre ou nem por isso.\n3. Encerramento: diz que não queres incomodar, que ficas por aqui e que a porta fica aberta se o tema se tornar prioridade. Deseja boa semana.\nNos passos 1–3 não repitas a mensagem anterior e mantém a continuidade da conversa.`;\n\nconst dados = {\n  passo,\n  nome: p.nome, cargo: p.cargo, empresa: p.empresa,\n  fonte: p.fonte, contexto: p.contexto,\n  publicacoes_recentes: publicacoes,\n  mensagem_anterior: p.ultima_msg || '',\n};\n\nreturn [{ json: {\n  provider_id: p.provider_id,\n  passo,\n  claude_request: {\n    model: 'claude-opus-5',\n    max_tokens: 8000,\n    fallbacks: 'default',\n    output_config: { effort: 'medium' },\n    system,\n    messages: [{ role: 'user', content: `Escreve a mensagem do passo ${passo}.\\n` + JSON.stringify(dados, null, 2) }],\n  },\n} }];\n"
+      },
+      "id": "2455faea-63b4-4696-9d46-f7c5a8df0db3",
+      "name": "Preparar mensagem",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "anthropic-beta",
+              "value": "server-side-fallback-2026-07-01"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.claude_request) }}",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "22ab9a30-f036-4815-a10b-369e6ebe5080",
+      "name": "Claude · escrever mensagem",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2420,
+        400
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prep = $('Preparar mensagem').first().json;\nconst r = $input.first().json;\nlet texto = '';\nif (r.stop_reason !== 'refusal') {\n  const bloco = (r.content || []).find(c => c.type === 'text');\n  texto = String(bloco?.text || '').trim().replace(/^[\"“]+|[\"”]+$/g, '').trim();\n}\nreturn [{ json: { provider_id: prep.provider_id, passo: prep.passo, texto, ok: texto.length > 0 && texto.length <= 600 } }];\n"
+      },
+      "id": "51ae420b-3910-4f0a-8faf-e5ef919268ae",
+      "name": "Extrair mensagem",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2640,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "81db9660-81e2-47aa-abbd-e8e243824f54",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "0caacc51-b84e-4ac8-8e94-766f2e77834d",
+      "name": "Mensagem válida?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2860,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.unipile_base_url }}/chats",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formData",
+              "name": "account_id",
+              "value": "={{ $('Config').first().json.unipile_account_id }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "attendees_ids",
+              "value": "={{ $json.provider_id }}"
+            },
+            {
+              "parameterType": "formData",
+              "name": "text",
+              "value": "={{ $json.texto }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4eb1ffff-2e56-4370-9da0-76209edd0263",
+      "name": "Enviar mensagem",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3080,
+        300
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b12e8ac3-690b-41e8-a132-41230e3abf51",
+              "name": "provider_id",
+              "value": "={{ $('Extrair mensagem').item.json.provider_id }}",
+              "type": "string"
+            },
+            {
+              "id": "4fe50800-4f48-49cb-a081-f0497518c001",
+              "name": "passo",
+              "value": "={{ $('Extrair mensagem').item.json.passo + 1 }}",
+              "type": "number"
+            },
+            {
+              "id": "3bb45989-628e-48b0-974a-f9674b081a45",
+              "name": "estado",
+              "value": "={{ $('Extrair mensagem').item.json.passo + 1 >= 4 ? 'sequencia_terminada' : 'em_sequencia' }}",
+              "type": "string"
+            },
+            {
+              "id": "3df71274-0ff2-4451-ad66-c900f86cc529",
+              "name": "data_ultima_msg",
+              "value": "={{ $now.setZone('Europe/Lisbon').toFormat('yyyy-MM-dd') }}",
+              "type": "string"
+            },
+            {
+              "id": "b7fecd15-fd64-4e9f-acf8-d3898c469676",
+              "name": "ultima_msg",
+              "value": "={{ $('Extrair mensagem').item.json.texto }}",
+              "type": "string"
+            },
+            {
+              "id": "a2a8135d-a8d0-4c9e-a487-704b9b6b0766",
+              "name": "chat_id",
+              "value": "={{ $json.chat_id || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "68e83bac-5a45-4215-933b-294977a195c1",
+      "name": "Registar envio",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3300,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "689ffda5-1b1b-4289-a825-9daa8313c7b7",
+              "name": "provider_id",
+              "value": "={{ $('Extrair mensagem').item.json.provider_id }}",
+              "type": "string"
+            },
+            {
+              "id": "95ad54aa-7c18-46d6-a898-4a67b1de7406",
+              "name": "notas",
+              "value": "={{ 'Erro ao enviar passo ' + $('Extrair mensagem').item.json.passo + ': ' + ($json.error?.message || '').slice(0, 250) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0618b47a-f263-4514-87ed-448b63501fce",
+      "name": "Registar erro de envio",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3300,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Prospects",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "provider_id"
+          ],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW",
+          "handlingExtraData": "ignoreIt"
+        }
+      },
+      "id": "4d8abade-654a-4755-a5a8-4c8cf67d1979",
+      "name": "Atualizar prospect",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        3520,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor(Math.random() * 120) + 60 }}",
+        "unit": "seconds"
+      },
+      "id": "f13d7ecb-ae96-4945-b416-eb0534e86f7a",
+      "name": "Pausa humana 60–180 s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3740,
+        300
+      ],
+      "webhookId": "6619b41d-1823-4a5e-9f3d-5e79e73b2cfd"
+    }
+  ],
+  "connections": {
+    "Dias úteis às 11h": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Ligações recentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ligações recentes": {
+      "main": [
+        [
+          {
+            "node": "Ler prospects",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler prospects": {
+      "main": [
+        [
+          {
+            "node": "Calcular ações do dia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular ações do dia": {
+      "main": [
+        [
+          {
+            "node": "É aceitação?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É aceitação?": {
+      "main": [
+        [
+          {
+            "node": "Registar aceitação",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Um de cada vez",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Um de cada vez": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Reler prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reler prospect": {
+      "main": [
+        [
+          {
+            "node": "Continua na sequência?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continua na sequência?": {
+      "main": [
+        [
+          {
+            "node": "Últimas publicações",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Um de cada vez",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Últimas publicações": {
+      "main": [
+        [
+          {
+            "node": "Preparar mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar mensagem": {
+      "main": [
+        [
+          {
+            "node": "Claude · escrever mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude · escrever mensagem": {
+      "main": [
+        [
+          {
+            "node": "Extrair mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair mensagem": {
+      "main": [
+        [
+          {
+            "node": "Mensagem válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem válida?": {
+      "main": [
+        [
+          {
+            "node": "Enviar mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Um de cada vez",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar mensagem": {
+      "main": [
+        [
+          {
+            "node": "Registar envio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Registar erro de envio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registar envio": {
+      "main": [
+        [
+          {
+            "node": "Atualizar prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registar erro de envio": {
+      "main": [
+        [
+          {
+            "node": "Atualizar prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar prospect": {
+      "main": [
+        [
+          {
+            "node": "Pausa humana 60–180 s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pausa humana 60–180 s": {
+      "main": [
+        [
+          {
+            "node": "Um de cada vez",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Lisbon",
+    "saveManualExecutions": true
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

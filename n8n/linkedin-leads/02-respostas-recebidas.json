@@ -1,0 +1,454 @@
+{
+  "name": "LinkedIn Leads · 02 · Respostas recebidas",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "unipile-linkedin-mensagens",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "fd37f51f-3923-472a-98b4-88524fb76fb4",
+      "name": "Webhook Unipile",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "f8156a20-c0b5-4ef7-ae72-679b41f04e3e"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "131a7f11-5fd0-484a-a0c0-9502b6ae95c4",
+              "name": "unipile_base_url",
+              "value": "https://apiX.unipile.com:XXXXX/api/v1",
+              "type": "string"
+            },
+            {
+              "id": "ece82cae-804e-4060-99dd-52154c0f3aed",
+              "name": "unipile_account_id",
+              "value": "ID_DA_CONTA_LINKEDIN_NA_UNIPILE",
+              "type": "string"
+            },
+            {
+              "id": "4ba3b19e-cdd8-4167-b7c3-a094241356c7",
+              "name": "sheet_id",
+              "value": "ID_DA_GOOGLE_SHEET",
+              "type": "string"
+            },
+            {
+              "id": "3bee0747-61a6-40f8-a04d-068fcffe9c6d",
+              "name": "nome_remetente",
+              "value": "O teu primeiro nome",
+              "type": "string"
+            },
+            {
+              "id": "f1749e82-e425-4d37-bed4-5f51c0fcdf81",
+              "name": "oferta",
+              "value": "O que fazes, numa frase (ex.: ajudo CFOs de PMEs a fechar o mês em 2 dias em vez de 10)",
+              "type": "string"
+            },
+            {
+              "id": "d82a86e7-afdc-4303-89ae-166b9eadcf3c",
+              "name": "email_alertas",
+              "value": "o-teu-email@exemplo.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "759aaab7-5d27-4390-aee3-232fb8c47938",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d0fe0229-e324-4ccd-af69-1097d96db369",
+              "leftValue": "={{ $('Webhook Unipile').item.json.body.event === 'message_received' && $('Webhook Unipile').item.json.body.account_id === $('Config').first().json.unipile_account_id && $('Webhook Unipile').item.json.body.sender?.attendee_provider_id !== $('Webhook Unipile').item.json.body.account_info?.user_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "7ffa1dbd-3085-40f3-8533-e925de2751f8",
+      "name": "Mensagem recebida de outra pessoa?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Prospects",
+          "mode": "name"
+        },
+        "options": {},
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "provider_id",
+              "lookupValue": "={{ $('Webhook Unipile').item.json.body.sender.attendee_provider_id }}"
+            }
+          ]
+        }
+      },
+      "id": "353e1e39-ca46-417a-8c95-aaf383949e81",
+      "name": "Procurar prospect",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "83c12e56-668b-4fdd-aecc-dc76b3b20e13",
+              "leftValue": "={{ $json.estado !== 'lead' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "bf57a5a3-4657-4b3d-a4f9-8c53a132d40c",
+      "name": "Ainda não é lead?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst body = $('Webhook Unipile').first().json.body;\nconst p = $input.first().json;\n\nconst system = `Classificas respostas de prospects no LinkedIn para ${cfg.nome_remetente}, que ${cfg.oferta}.\nCategorias:\n- interessado: quer saber mais, aceita chamada, pede proposta/preço/recurso, ou descreve a dor como prioridade.\n- neutro: responde mas sem sinal claro (agradece, pergunta genérica, \"agora não mas talvez\", fora do escritório).\n- sem_interesse: recusa, não é a pessoa certa, pede para não contactar.\nEscreve também um resumo de uma frase e uma resposta sugerida (português de Portugal, tratar por tu, máx. 300 caracteres, humana, sem pitch agressivo; se interessado, propõe 20 min e 2 opções de dia).`;\n\nconst dados = {\n  prospect: { nome: p.nome, cargo: p.cargo, empresa: p.empresa },\n  minha_ultima_mensagem: p.ultima_msg || '',\n  resposta_recebida: body.message || '',\n};\n\nreturn [{ json: {\n  provider_id: p.provider_id,\n  mensagem: body.message || '',\n  chat_id: body.chat_id || p.chat_id || '',\n  claude_request: {\n    model: 'claude-opus-5',\n    max_tokens: 8000,\n    fallbacks: 'default',\n    output_config: {\n      effort: 'low',\n      format: {\n        type: 'json_schema',\n        schema: {\n          type: 'object',\n          properties: {\n            classificacao: { type: 'string', enum: ['interessado', 'neutro', 'sem_interesse'] },\n            resumo: { type: 'string' },\n            resposta_sugerida: { type: 'string' },\n          },\n          required: ['classificacao', 'resumo', 'resposta_sugerida'],\n          additionalProperties: false,\n        },\n      },\n    },\n    system,\n    messages: [{ role: 'user', content: JSON.stringify(dados, null, 2) }],\n  },\n} }];\n"
+      },
+      "id": "c4534d21-8977-4403-9a64-f754e39e82d9",
+      "name": "Preparar classificação",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "anthropic-beta",
+              "value": "server-side-fallback-2026-07-01"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.claude_request) }}",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "67590ad0-2a06-4396-bca0-556c9d0f961d",
+      "name": "Claude · classificar resposta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1320,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const TZ = 'Europe/Lisbon';\nconst hoje = DateTime.now().setZone(TZ).startOf('day');\nconst hojeStr = hoje.toFormat('yyyy-MM-dd');\nfunction parseData(v) {\n  if (!v) return null;\n  const s = String(v).trim();\n  let d = DateTime.fromISO(s, { zone: TZ });\n  if (!d.isValid) d = DateTime.fromFormat(s, 'dd/MM/yyyy', { zone: TZ });\n  return d.isValid ? d.startOf('day') : null;\n}\nfunction diasDesde(v) {\n  const d = parseData(v);\n  return d ? Math.floor(hoje.diff(d, 'days').days) : Infinity;\n}\n\nconst prep = $('Preparar classificação').first().json;\nconst r = $input.first().json;\nlet out = { classificacao: 'neutro', resumo: 'Classificação automática falhou: rever manualmente.', resposta_sugerida: '' };\ntry {\n  if (r.stop_reason !== 'refusal') {\n    const bloco = (r.content || []).find(c => c.type === 'text');\n    if (bloco) out = JSON.parse(bloco.text);\n  }\n} catch (e) {}\n\nconst estado = { interessado: 'lead', sem_interesse: 'sem_interesse' }[out.classificacao] || 'respondeu';\nreturn [{ json: {\n  provider_id: prep.provider_id,\n  estado,\n  classificacao: out.classificacao,\n  resumo_ia: out.resumo,\n  resposta_sugerida: out.resposta_sugerida,\n  resposta: String(prep.mensagem).slice(0, 1000),\n  data_resposta: hojeStr,\n  chat_id: prep.chat_id,\n} }];\n"
+      },
+      "id": "be7832a9-962b-4309-8f8a-5d8c13cd80c6",
+      "name": "Interpretar classificação",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Prospects",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "provider_id"
+          ],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW",
+          "handlingExtraData": "ignoreIt"
+        }
+      },
+      "id": "f0d5512e-f08d-4b27-be28-a0d388719731",
+      "name": "Atualizar prospect",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1760,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a2a3e9ef-bc7e-4457-9dfc-b43f2009adc8",
+              "leftValue": "={{ $json.estado !== 'sem_interesse' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "58ee8619-d810-4735-a877-2802979f2b1e",
+      "name": "Precisa de resposta tua?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1980,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "={{ $('Config').first().json.email_alertas }}",
+        "subject": "={{ ($json.estado === 'lead' ? '🔥 LEAD: ' : '💬 Resposta: ') + $('Procurar prospect').item.json.nome + ' (' + ($('Procurar prospect').item.json.empresa || '') + ')' }}",
+        "emailType": "html",
+        "message": "=<p><b>{{ $('Procurar prospect').item.json.nome }}</b> — {{ $('Procurar prospect').item.json.cargo }} @ {{ $('Procurar prospect').item.json.empresa }}</p><p><b>Classificação:</b> {{ $json.classificacao }}<br><b>Resumo:</b> {{ $json.resumo_ia }}</p><p><b>Mensagem recebida:</b><br>{{ $json.resposta }}</p><p><b>Resposta sugerida:</b><br>{{ $json.resposta_sugerida }}</p><p><a href=\"{{ $('Procurar prospect').item.json.linkedin_url }}\">Abrir perfil</a> · <a href=\"https://www.linkedin.com/messaging/\">Abrir mensagens</a></p>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "a4da1263-5153-47a8-87b4-5d9b1075e301",
+      "name": "Alertar por email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2200,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Unipile": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Mensagem recebida de outra pessoa?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem recebida de outra pessoa?": {
+      "main": [
+        [
+          {
+            "node": "Procurar prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Procurar prospect": {
+      "main": [
+        [
+          {
+            "node": "Ainda não é lead?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ainda não é lead?": {
+      "main": [
+        [
+          {
+            "node": "Preparar classificação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar classificação": {
+      "main": [
+        [
+          {
+            "node": "Claude · classificar resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude · classificar resposta": {
+      "main": [
+        [
+          {
+            "node": "Interpretar classificação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interpretar classificação": {
+      "main": [
+        [
+          {
+            "node": "Atualizar prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar prospect": {
+      "main": [
+        [
+          {
+            "node": "Precisa de resposta tua?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Precisa de resposta tua?": {
+      "main": [
+        [
+          {
+            "node": "Alertar por email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Lisbon",
+    "saveManualExecutions": true
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
