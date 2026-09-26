@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relógio Analógico</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      font-family: system-ui, sans-serif;
+      background: #f4f4f5;
+      color: #18181b;
+    }
+    svg { width: min(80vw, 360px); height: auto; }
+    .face { fill: #fff; stroke: #18181b; stroke-width: 4; }
+    .tick { stroke: #18181b; stroke-linecap: round; }
+    .num { font-size: 16px; text-anchor: middle; dominant-baseline: central; }
+    .hand { stroke-linecap: round; }
+    .hour { stroke: #18181b; stroke-width: 6; }
+    .minute { stroke: #18181b; stroke-width: 4; }
+    .second { stroke: #dc2626; stroke-width: 2; }
+    .controls { display: flex; gap: 8px; align-items: center; }
+    input, button { font-size: 18px; padding: 6px 10px; }
+  </style>
+</head>
+<body>
+  <svg viewBox="0 0 200 200" aria-label="Relógio analógico">
+    <circle class="face" cx="100" cy="100" r="95" />
+    <g id="ticks"></g>
+    <line id="hour" class="hand hour" x1="100" y1="100" x2="100" y2="55" />
+    <line id="minute" class="hand minute" x1="100" y1="100" x2="100" y2="30" />
+    <line id="second" class="hand second" x1="100" y1="110" x2="100" y2="22" />
+    <circle cx="100" cy="100" r="4" fill="#dc2626" />
+  </svg>
+
+  <div class="controls">
+    <label for="time">Hora:</label>
+    <input type="time" id="time" step="1" value="12:00:00">
+    <button id="set">Definir</button>
+  </div>
+
+  <script>
+    const ticks = document.getElementById('ticks');
+    for (let i = 0; i < 60; i++) {
+      const a = i * 6 * Math.PI / 180;
+      const long = i % 5 === 0;
+      const r1 = long ? 80 : 86, r2 = 90;
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('class', 'tick');
+      line.setAttribute('x1', 100 + r1 * Math.sin(a));
+      line.setAttribute('y1', 100 - r1 * Math.cos(a));
+      line.setAttribute('x2', 100 + r2 * Math.sin(a));
+      line.setAttribute('y2', 100 - r2 * Math.cos(a));
+      line.setAttribute('stroke-width', long ? 3 : 1);
+      ticks.appendChild(line);
+      if (long) {
+        const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('class', 'num');
+        t.setAttribute('x', 100 + 68 * Math.sin(a));
+        t.setAttribute('y', 100 - 68 * Math.cos(a));
+        t.textContent = i === 0 ? 12 : i / 5;
+        ticks.appendChild(t);
+      }
+    }
+
+    const hourHand = document.getElementById('hour');
+    const minuteHand = document.getElementById('minute');
+    const secondHand = document.getElementById('second');
+    const input = document.getElementById('time');
+
+    // Segundos desde a meia-noite da hora indicada, e o instante em que foi definida
+    let baseSeconds = 12 * 3600;
+    let baseTime = Date.now();
+
+    function setTime() {
+      const [h = 0, m = 0, s = 0] = input.value.split(':').map(Number);
+      baseSeconds = h * 3600 + m * 60 + s;
+      baseTime = Date.now();
+      draw();
+    }
+
+    function draw() {
+      const total = baseSeconds + Math.floor((Date.now() - baseTime) / 1000);
+      const s = total % 60;
+      const m = Math.floor(total / 60) % 60;
+      const h = Math.floor(total / 3600) % 12;
+      hourHand.setAttribute('transform', `rotate(${h * 30 + m * 0.5} 100 100)`);
+      minuteHand.setAttribute('transform', `rotate(${m * 6 + s * 0.1} 100 100)`);
+      secondHand.setAttribute('transform', `rotate(${s * 6} 100 100)`);
+    }
+
+    document.getElementById('set').addEventListener('click', setTime);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') setTime(); });
+
+    setTime();
+    setInterval(draw, 250);
+  </script>
+</body>
+</html>
