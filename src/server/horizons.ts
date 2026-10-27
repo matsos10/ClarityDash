@@ -1,6 +1,6 @@
 import { addDaysISO, dbDate, isoFromDb, isoWeekday } from "@/lib/dates";
 import { routineStreak } from "@/lib/calc/streaks";
-import { spaceIdsFor, spacesFor, type Ctx } from "./access";
+import { spaceIdsFor, spacesFor, type Ctx } from "./ctx";
 import { db } from "./db";
 
 /** Options « lier à » : projets actifs, objectifs et KR du trimestre. */

@@ -3,6 +3,7 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "./db";
+import { CALENDAR_SCOPE } from "./google";
 import { ensureUserSpaces } from "./spaces";
 
 export function allowedEmails(): string[] {
@@ -23,6 +24,10 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
       // e-mails vérifiés par Google et limités à la liste autorisée
       allowDangerousEmailAccountLinking: true,
+      // Google Agenda : lecture de l'agenda + création des blocs (timeboxing)
+      authorization: {
+        params: { scope: `openid email profile ${CALENDAR_SCOPE}`, access_type: "offline", prompt: "consent" },
+      },
     }),
     ...(devLogin
       ? [
@@ -54,8 +59,21 @@ export const authOptions: NextAuthOptions = {
     },
   },
   events: {
-    async signIn({ user }) {
+    async signIn({ user, account }) {
       await ensureUserSpaces(db, user);
+      // l'adaptateur ne met pas à jour les jetons d'un compte déjà lié
+      if (account?.provider === "google" && account.access_token) {
+        await db.account.updateMany({
+          where: { provider: "google", providerAccountId: account.providerAccountId },
+          data: {
+            access_token: account.access_token,
+            expires_at: account.expires_at,
+            scope: account.scope,
+            id_token: account.id_token,
+            ...(account.refresh_token ? { refresh_token: account.refresh_token } : {}),
+          },
+        });
+      }
     },
   },
 };

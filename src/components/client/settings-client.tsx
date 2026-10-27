@@ -1,6 +1,6 @@
 "use client";
 
-import { signOut } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { saveTheme } from "@/server/actions/daily";
 
@@ -102,6 +102,14 @@ export function LogoutButton() {
   return (
     <button className="btn-ghost w-full" onClick={() => signOut({ callbackUrl: "/login" })}>
       Se déconnecter
+    </button>
+  );
+}
+
+export function GoogleConnectButton({ label }: { label: string }) {
+  return (
+    <button className="btn w-full" onClick={() => signIn("google", { callbackUrl: "/settings" })}>
+      {label}
     </button>
   );
 }

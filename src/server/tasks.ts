@@ -1,6 +1,6 @@
 import type { TaskStatus } from "@prisma/client";
 import { dbDate, weekStartISO } from "@/lib/dates";
-import { spaceIdsFor, type Ctx } from "./access";
+import { spaceIdsFor, type Ctx } from "./ctx";
 import { db } from "./db";
 
 export const MAX_TODAY = 3;

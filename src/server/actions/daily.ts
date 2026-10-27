@@ -2,10 +2,9 @@
 
 import type { Domain, TaskStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { dbDate, todayISO, weekStartISO } from "@/lib/dates";
-import { assertSpace, getCtx, spaceIdsFor } from "../access";
+import { getCtx, spaceIdsFor } from "../access";
 import { db } from "../db";
-import { resolveLink, setTaskStatus } from "../tasks";
+import { applySuggestion, captureForUser, dismiss, routeToJournal, routeToTask } from "../captures";
 import { bool, guard, oneOf, req, str } from "./form";
 
 const DOMAINS = ["BUSINESS", "TRADING", "HOME", "FAMILY", "PERSONAL"] as const satisfies readonly Domain[];
@@ -51,35 +50,27 @@ export async function deleteRoutineItem(f: FormData) {
 
 // ─── Inbox ───
 
-async function captureForUser(id: string) {
-  const ctx = await getCtx();
-  const c = await db.capture.findFirst({ where: { id, userId: ctx.userId } });
-  if (!c) throw new Error("Capture introuvable");
-  return { ctx, capture: c };
-}
-
 export async function routeCaptureToTask(f: FormData) {
   return guard(async () => {
-    const { ctx, capture } = await captureForUser(req(f, "id"));
-    const spaceId = req(f, "spaceId");
-    assertSpace(ctx, spaceId, "HORIZONS");
-    const status = oneOf(f, "status", ["BACKLOG", "WEEK", "TODAY"] as const satisfies readonly TaskStatus[]);
-    const today = todayISO();
-    const task = await db.task.create({
-      data: {
-        spaceId,
-        title: req(f, "title"),
-        notes: capture.rawText.length > 120 ? capture.rawText : null,
-        domain: oneOf(f, "domain", DOMAINS),
-        status: status === "WEEK" ? "WEEK" : "BACKLOG",
-        weekStart: status === "WEEK" ? dbDate(weekStartISO(today)) : null,
-        captureId: capture.id,
-        assigneeId: ctx.userId,
-        ...(await resolveLink(ctx, str(f, "link"))),
-      },
+    const ctx = await getCtx();
+    const capture = await captureForUser(ctx.userId, req(f, "id"));
+    await routeToTask(ctx, capture, {
+      title: req(f, "title"),
+      domain: oneOf(f, "domain", DOMAINS),
+      status: oneOf(f, "status", ["BACKLOG", "WEEK", "TODAY"] as const satisfies readonly TaskStatus[]),
+      link: str(f, "link"),
+      spaceId: req(f, "spaceId"),
+      dueDate: str(f, "dueDate"),
     });
-    if (status === "TODAY") await setTaskStatus(ctx, task.id, "TODAY", today);
-    await db.capture.update({ where: { id: capture.id }, data: { status: "ROUTED", routedType: "task", routedId: task.id, processedAt: new Date() } });
+    revalidatePath("/inbox");
+    revalidatePath("/today");
+  });
+}
+
+export async function applyCaptureSuggestion(f: FormData) {
+  return guard(async () => {
+    const ctx = await getCtx();
+    await applySuggestion(ctx, await captureForUser(ctx.userId, req(f, "id")));
     revalidatePath("/inbox");
     revalidatePath("/today");
   });
@@ -87,20 +78,16 @@ export async function routeCaptureToTask(f: FormData) {
 
 export async function routeCaptureToJournal(f: FormData) {
   return guard(async () => {
-    const { ctx, capture } = await captureForUser(req(f, "id"));
-    const date = dbDate(todayISO());
-    const entry = await db.journalEntry.findUnique({ where: { userId_date: { userId: ctx.userId, date } } });
-    const done = [entry?.done, capture.rawText].filter(Boolean).join("\n");
-    await db.journalEntry.upsert({ where: { userId_date: { userId: ctx.userId, date } }, update: { done }, create: { userId: ctx.userId, date, done } });
-    await db.capture.update({ where: { id: capture.id }, data: { status: "ROUTED", routedType: "journal", processedAt: new Date() } });
+    const ctx = await getCtx();
+    await routeToJournal(ctx, await captureForUser(ctx.userId, req(f, "id")));
     revalidatePath("/inbox");
   });
 }
 
 export async function dismissCapture(f: FormData) {
   return guard(async () => {
-    const { capture } = await captureForUser(req(f, "id"));
-    await db.capture.update({ where: { id: capture.id }, data: { status: "DISMISSED", processedAt: new Date() } });
+    const ctx = await getCtx();
+    await dismiss(await captureForUser(ctx.userId, req(f, "id")));
     revalidatePath("/inbox");
   });
 }

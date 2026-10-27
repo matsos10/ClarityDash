@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { dbDate } from "@/lib/dates";
-import { assertSpace, type Ctx } from "./access";
+import { assertSpace, type Ctx } from "./ctx";
 import { db } from "./db";
 import { resolveLink, setTaskStatus } from "./tasks";
 

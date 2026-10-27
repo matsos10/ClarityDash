@@ -1,11 +1,13 @@
 import Link from "next/link";
+import { AgendaList } from "@/components/agenda";
 import { Badge, DomainDot, Empty, PageHeader, Section } from "@/components/ui";
 import { DOMAINS, domainLoad } from "@/lib/calc/load";
-import { addDaysISO, dbDate, formatDayFr, isoFromDb, timeInTz, todayISO, weekDaysISO, weekStartISO } from "@/lib/dates";
+import { addDaysISO, dbDate, formatDayFr, isoDateInTz, isoFromDb, timeInTz, todayISO, weekDaysISO, weekStartISO, zonedTimeToUtc } from "@/lib/dates";
 import { DOMAIN_COLOR, DOMAIN_LABEL } from "@/lib/labels";
 import { getCtx, spaceIdsFor } from "@/server/access";
 import { planTask } from "@/server/actions/horizons";
 import { db } from "@/server/db";
+import { safeListEvents } from "@/server/google";
 import { taskInclude } from "@/server/queries";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +22,7 @@ export default async function WeekPage({ searchParams }: { searchParams: { w?: s
   const spaceIds = spaceIdsFor(ctx, "HORIZONS");
   const mine = { OR: [{ assigneeId: ctx.userId }, { assigneeId: null }] };
 
-  const [planned, unplanned, outcomes, review, revisions] = await Promise.all([
+  const [planned, unplanned, outcomes, review, revisions, agenda] = await Promise.all([
     db.task.findMany({
       where: { spaceId: { in: spaceIds }, deletedAt: null, status: { not: "CANCELLED" }, plannedDate: { gte: dbDate(days[0]), lte: dbDate(days[6]) }, ...mine },
       include: taskInclude,
@@ -33,7 +35,11 @@ export default async function WeekPage({ searchParams }: { searchParams: { w?: s
     db.weeklyOutcome.findMany({ where: { spaceId: { in: spaceIds }, weekStart: dbDate(weekStart) }, orderBy: { rank: "asc" } }),
     db.weeklyReview.findFirst({ where: { spaceId: { in: spaceIds }, weekStart: dbDate(addDaysISO(weekStart, -7)) } }),
     db.routineItem.findMany({ where: { userId: ctx.userId, active: true, domain: "FAMILY" } }),
+    safeListEvents(ctx.userId, zonedTimeToUtc(days[0], "00:00"), zonedTimeToUtc(addDaysISO(days[6], 1), "00:00")),
   ]);
+  // les blocs créés depuis une tâche apparaissent déjà via la tâche
+  const eventsOf = (d: string) =>
+    agenda.events.filter((e) => !e.taskId && (e.allDay ? e.start.toISOString().slice(0, 10) <= d && d < e.end.toISOString().slice(0, 10) : isoDateInTz(e.start) === d));
 
   const { grid, totals } = domainLoad(
     planned.map((t) => ({ domain: t.domain, day: t.plannedDate ? isoFromDb(t.plannedDate) : null, estimateMin: t.estimateMin })),
@@ -123,8 +129,14 @@ export default async function WeekPage({ searchParams }: { searchParams: { w?: s
 
       {days.map((d) => {
         const list = planned.filter((t) => t.plannedDate && isoFromDb(t.plannedDate) === d);
+        const events = eventsOf(d);
         return (
           <Section key={d} title={formatDayFr(d, { weekday: "long", day: "numeric", month: "short" })} className={d === today ? "border-accent" : ""}>
+            {events.length > 0 && (
+              <div className="mb-2">
+                <AgendaList events={events} compact />
+              </div>
+            )}
             {list.length ? (
               <ul className="space-y-1.5">
                 {list.map((t) => (
@@ -139,7 +151,7 @@ export default async function WeekPage({ searchParams }: { searchParams: { w?: s
                   </li>
                 ))}
               </ul>
-            ) : (
+            ) : events.length ? null : (
               <Empty>—</Empty>
             )}
           </Section>

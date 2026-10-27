@@ -723,8 +723,9 @@ model DailyBrief {
   id      String    @id @default(cuid())
   userId  String
   date    DateTime  @db.Date
-  content Json
-  sentAt  DateTime?
+  content   Json
+  sentAt    DateTime?
+  updatedAt DateTime  @default(now()) @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

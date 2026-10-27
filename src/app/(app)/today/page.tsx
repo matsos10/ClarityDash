@@ -1,11 +1,13 @@
 import Link from "next/link";
+import { AgendaList } from "@/components/agenda";
 import { QuickTask } from "@/components/client/quick-task";
 import { RoutineList } from "@/components/client/routine-list";
 import { TaskRow } from "@/components/client/task-row";
 import { Badge, Empty, PageHeader, Section } from "@/components/ui";
-import { dbDate, formatDayFr, isoDateInTz, quarterOf, todayISO } from "@/lib/dates";
+import { addDaysISO, dbDate, formatDayFr, isoDateInTz, quarterOf, todayISO, zonedTimeToUtc } from "@/lib/dates";
 import { defaultSpaceId, getCtx, spaceIdsFor } from "@/server/access";
 import { db } from "@/server/db";
+import { safeListEvents } from "@/server/google";
 import { linkOptions, routineForDay, spaceOptions } from "@/server/horizons";
 import { taskInclude, toTaskView } from "@/server/queries";
 import { MAX_TODAY } from "@/server/tasks";
@@ -18,7 +20,7 @@ export default async function TodayPage() {
   const spaceIds = spaceIdsFor(ctx, "HORIZONS");
   const mine = { OR: [{ assigneeId: ctx.userId }, { assigneeId: null }] };
 
-  const [todayTasks, doneToday, backlog, routine, links, inboxCount, journal, session, accounts] = await Promise.all([
+  const [todayTasks, doneToday, backlog, routine, links, inboxCount, journal, session, accounts, agenda, brief] = await Promise.all([
     db.task.findMany({ where: { status: "TODAY", assigneeId: ctx.userId, deletedAt: null }, include: taskInclude, orderBy: { todayRank: "asc" } }),
     db.task.findMany({
       where: { status: "DONE", assigneeId: ctx.userId, completedAt: { gte: new Date(Date.now() - 36 * 3_600_000) } },
@@ -36,6 +38,8 @@ export default async function TodayPage() {
     db.journalEntry.findUnique({ where: { userId_date: { userId: ctx.userId, date: dbDate(today) } } }),
     db.tradingSession.findUnique({ where: { userId_date: { userId: ctx.userId, date: dbDate(today) } } }),
     db.tradingAccount.count({ where: { spaceId: ctx.personalSpaceId, status: "ACTIVE" } }),
+    safeListEvents(ctx.userId, zonedTimeToUtc(today, "00:00"), zonedTimeToUtc(addDaysISO(today, 1), "00:00")),
+    db.dailyBrief.findUnique({ where: { userId_date: { userId: ctx.userId, date: dbDate(today) } }, select: { id: true } }),
   ]);
 
   const week = backlog.filter((t) => t.status === "WEEK");
@@ -49,11 +53,16 @@ export default async function TodayPage() {
         title="Aujourd'hui"
         sub={<span className="capitalize">{formatDayFr(today, { weekday: "long", day: "numeric", month: "long" })}</span>}
         right={
-          inboxCount > 0 ? (
-            <Link href="/inbox" className="btn-sm">
-              Inbox <span className="num ml-1 font-semibold text-accent">{inboxCount}</span>
+          <div className="flex gap-1">
+            <Link href="/brief" className={`btn-sm ${brief ? "" : "border-accent text-accent"}`}>
+              Brief
             </Link>
-          ) : null
+            {inboxCount > 0 && (
+              <Link href="/inbox" className="btn-sm">
+                Inbox <span className="num ml-1 font-semibold text-accent">{inboxCount}</span>
+              </Link>
+            )}
+          </div>
         }
       />
 
@@ -83,6 +92,18 @@ export default async function TodayPage() {
             defaultSpaceId={defaultSpaceId(ctx, "HORIZONS")}
           />
         </div>
+      </Section>
+
+      <Section title={`Agenda · ${agenda.events.length}`}>
+        {agenda.events.length > 0 ? (
+          <AgendaList events={agenda.events} />
+        ) : agenda.connected ? (
+          <Empty>{agenda.error ?? "Rien à l'agenda aujourd'hui."}</Empty>
+        ) : (
+          <Link href="/settings" className="text-sm text-accent">
+            Connecter Google Agenda →
+          </Link>
+        )}
       </Section>
 
       {accounts > 0 && (

@@ -2,7 +2,8 @@ import { Badge, Empty, PageHeader, Section } from "@/components/ui";
 import { quarterOf, todayISO } from "@/lib/dates";
 import { DOMAIN_LABEL } from "@/lib/labels";
 import { defaultSpaceId, getCtx } from "@/server/access";
-import { dismissCapture, routeCaptureToJournal, routeCaptureToTask } from "@/server/actions/daily";
+import { applyCaptureSuggestion, dismissCapture, routeCaptureToJournal, routeCaptureToTask } from "@/server/actions/daily";
+import type { Suggestion } from "@/server/captures";
 import { db } from "@/server/db";
 import { linkOptions, spaceOptions } from "@/server/horizons";
 
@@ -30,13 +31,36 @@ export default async function InboxPage() {
             <span className="num">{c.createdAt.toLocaleString("fr-FR", { timeZone: "Europe/Lisbon", dateStyle: "short", timeStyle: "short" })}</span>
           </div>
           <p className="mb-3 whitespace-pre-line text-[15px]">{c.rawText}</p>
+          {(() => {
+            const s = c.suggestion as Suggestion | null;
+            if (!s) return null;
+            const link = links.find((l) => l.value === s.link)?.label;
+            return (
+              <div className="mb-3 rounded-xl border border-accent/40 bg-accent/5 p-3">
+                <div className="mb-1 flex items-center gap-2 text-xs font-medium text-accent">
+                  Suggestion IA · {s.kind === "journal" ? "journal" : `tâche ${s.status === "TODAY" ? "aujourd'hui" : s.status === "WEEK" ? "cette semaine" : "backlog"}`}
+                </div>
+                {s.kind === "task" && <div className="text-[15px] font-medium">{s.title}</div>}
+                <div className="text-xs text-muted">
+                  {DOMAIN_LABEL[s.domain]}
+                  {link ? ` · ${link}` : " · sans lien"}
+                  {s.dueDate ? ` · échéance ${s.dueDate}` : ""}
+                </div>
+                <div className="mt-1 text-xs italic text-muted">{s.reason}</div>
+                <form action={applyCaptureSuggestion} className="mt-2">
+                  <input type="hidden" name="id" value={c.id} />
+                  <button className="btn w-full">Appliquer</button>
+                </form>
+              </div>
+            );
+          })()}
           <details>
-            <summary className="cursor-pointer text-sm font-medium text-accent">→ Tâche</summary>
+            <summary className="cursor-pointer text-sm font-medium text-accent">{c.suggestion ? "Modifier → tâche" : "→ Tâche"}</summary>
             <form action={routeCaptureToTask} className="mt-2 space-y-2">
               <input type="hidden" name="id" value={c.id} />
-              <input name="title" className="input" defaultValue={c.rawText.split("\n")[0].slice(0, 200)} required />
+              <input name="title" className="input" defaultValue={(c.suggestion as Suggestion | null)?.title ?? c.rawText.split("\n")[0].slice(0, 200)} required />
               <div className="grid grid-cols-2 gap-2">
-                <select name="domain" className="input" defaultValue="BUSINESS">
+                <select name="domain" className="input" defaultValue={(c.suggestion as Suggestion | null)?.domain ?? "BUSINESS"}>
                   {Object.entries(DOMAIN_LABEL).map(([k, v]) => (
                     <option key={k} value={k}>
                       {v}
@@ -49,7 +73,7 @@ export default async function InboxPage() {
                   <option value="TODAY">Aujourd&apos;hui</option>
                 </select>
               </div>
-              <select name="link" className="input" defaultValue="">
+              <select name="link" className="input" defaultValue={(c.suggestion as Suggestion | null)?.link ?? ""}>
                 <option value="">— Sans lien (orpheline) —</option>
                 {links.map((l) => (
                   <option key={l.value} value={l.value}>

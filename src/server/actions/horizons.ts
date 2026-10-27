@@ -7,8 +7,9 @@ import { krScore } from "@/lib/calc/okr-score";
 import { addDaysISO, dbDate, todayISO, weekStartISO, zonedTimeToUtc } from "@/lib/dates";
 import { assertSpace, getCtx, spaceIdsFor } from "../access";
 import { db } from "../db";
+import { deleteEvent, upsertTaskEvent } from "../google";
 import { findTaskForUser, resolveLink } from "../tasks";
-import { guard, int, num, oneOf, req, str } from "./form";
+import { bool, guard, int, num, oneOf, req, str } from "./form";
 
 const DOMAINS = ["BUSINESS", "TRADING", "HOME", "FAMILY", "PERSONAL"] as const satisfies readonly Domain[];
 const AREAS = ["AUTONOMOUS_INCOME", "DREAM_PROPERTY", "NET_WORTH", "HEALTH", "SOCIAL_IMPACT"] as const satisfies readonly ObjectiveArea[];
@@ -215,21 +216,42 @@ export async function saveTask(f: FormData) {
     const ctx = await getCtx();
     const task = await findTaskForUser(ctx, req(f, "id"));
     const links = await resolveLink(ctx, str(f, "link"));
-    const date = str(f, "plannedDate");
     const tbStart = str(f, "timeboxStart");
-    const tbEnd = str(f, "timeboxEnd");
+    const date = str(f, "plannedDate") ?? (tbStart ? todayISO() : null);
+    let tbEnd = str(f, "timeboxEnd");
+    const duration = int(f, "duration");
+    if (tbStart && !tbEnd && duration) {
+      const [h, m] = tbStart.split(":").map(Number);
+      const total = h * 60 + m + duration;
+      tbEnd = `${String(Math.min(23, Math.floor(total / 60))).padStart(2, "0")}:${String(total >= 24 * 60 ? 59 : total % 60).padStart(2, "0")}`;
+    }
+    const timeboxStart = date && tbStart ? zonedTimeToUtc(date, tbStart) : null;
+    const timeboxEnd = date && tbEnd ? zonedTimeToUtc(date, tbEnd) : null;
+    if (timeboxStart && timeboxEnd && timeboxEnd <= timeboxStart) throw new Error("La fin du bloc doit suivre le début");
+    const title = req(f, "title");
+
+    // Timebox → événement Google Agenda (création / mise à jour / suppression)
+    let calendarEventId = task.calendarEventId;
+    if (bool(f, "calendar") && timeboxStart && timeboxEnd) {
+      calendarEventId = await upsertTaskEvent(ctx.userId, { id: task.id, title, calendarEventId, start: timeboxStart, end: timeboxEnd, description: str(f, "notes") });
+    } else if (calendarEventId) {
+      await deleteEvent(ctx.userId, calendarEventId).catch(() => undefined);
+      calendarEventId = null;
+    }
+
     await db.task.update({
       where: { id: task.id },
       data: {
-        title: req(f, "title"),
+        title,
         notes: str(f, "notes"),
         domain: oneOf(f, "domain", DOMAINS),
         ...links,
-        estimateMin: int(f, "estimateMin"),
+        estimateMin: int(f, "estimateMin") ?? (timeboxStart && timeboxEnd ? Math.round((timeboxEnd.getTime() - timeboxStart.getTime()) / 60_000) : null),
         plannedDate: date ? dbDate(date) : null,
         dueDate: str(f, "dueDate") ? dbDate(req(f, "dueDate")) : null,
-        timeboxStart: date && tbStart ? zonedTimeToUtc(date, tbStart) : null,
-        timeboxEnd: date && tbEnd ? zonedTimeToUtc(date, tbEnd) : null,
+        timeboxStart,
+        timeboxEnd,
+        calendarEventId,
       },
     });
     revalidatePath("/today");
@@ -242,7 +264,8 @@ export async function deleteTask(f: FormData) {
   return guard(async () => {
     const ctx = await getCtx();
     const task = await findTaskForUser(ctx, req(f, "id"));
-    await db.task.update({ where: { id: task.id }, data: { deletedAt: new Date(), status: "CANCELLED", todayRank: null } });
+    if (task.calendarEventId) await deleteEvent(ctx.userId, task.calendarEventId).catch(() => undefined);
+    await db.task.update({ where: { id: task.id }, data: { deletedAt: new Date(), status: "CANCELLED", todayRank: null, calendarEventId: null } });
     revalidatePath("/today");
     redirect(str(f, "back") ?? "/today");
   });

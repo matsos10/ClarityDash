@@ -1,8 +1,13 @@
 import type { Module } from "@prisma/client";
-import { LogoutButton, PushToggle, ThemePicker } from "@/components/client/settings-client";
+import { GoogleConnectButton, LogoutButton, PushToggle, ThemePicker } from "@/components/client/settings-client";
 import { PageHeader, Section } from "@/components/ui";
 import { getCtx } from "@/server/access";
 import { toggleSpaceModule } from "@/server/actions/daily";
+import { createTelegramLink, unlinkTelegram } from "@/server/actions/integrations";
+import { aiEnabled } from "@/server/ai/triage";
+import { db } from "@/server/db";
+import { googleStatus } from "@/server/google";
+import { sttEnabled } from "@/server/stt";
 
 const MODULES: { key: Module; label: string; phase?: number }[] = [
   { key: "HORIZONS", label: "Horizons (tâches, OKR, vision)" },
@@ -28,6 +33,12 @@ const EXPORTS = [
 export default async function SettingsPage() {
   const ctx = await getCtx();
   const shared = ctx.spaces.filter((s) => s.kind !== "PERSONAL");
+  const [google, telegram, code] = await Promise.all([
+    googleStatus(ctx.userId),
+    db.telegramLink.findUnique({ where: { userId: ctx.userId } }),
+    db.verificationToken.findFirst({ where: { identifier: `telegram:${ctx.userId}`, expires: { gt: new Date() } } }),
+  ]);
+  const bot = process.env.TELEGRAM_BOT_USERNAME;
 
   return (
     <>
@@ -37,9 +48,51 @@ export default async function SettingsPage() {
         <ThemePicker />
       </Section>
 
+      <Section title="Google Agenda">
+        {google.calendar ? (
+          <p className="mb-2 text-sm text-good">Connecté ✓ — agenda du jour, brief et blocs de timeboxing.</p>
+        ) : (
+          <p className="mb-2 text-sm text-muted">
+            {google.linked ? "Compte Google lié sans accès à l'agenda." : "Aucun compte Google lié."} Autorise l&apos;accès à Google Agenda pour afficher
+            l&apos;agenda et créer les blocs.
+          </p>
+        )}
+        {!google.refresh && google.calendar && <p className="mb-2 text-xs text-warn">Jeton de rafraîchissement absent : reconnecte pour éviter les déconnexions.</p>}
+        <GoogleConnectButton label={google.calendar ? "Reconnecter Google" : "Connecter Google Agenda"} />
+      </Section>
+
+      <Section title="Telegram">
+        {telegram ? (
+          <>
+            <p className="mb-2 text-sm text-good">Lié ✓ — capture texte / vocale, brief du matin à 7:00.</p>
+            <form action={unlinkTelegram}>
+              <button className="btn-ghost w-full">Délier</button>
+            </form>
+          </>
+        ) : code ? (
+          <>
+            <p className="mb-2 text-sm">Ouvre le lien (valable 15 min) puis appuie sur « Démarrer » :</p>
+            {bot ? (
+              <a href={`https://t.me/${bot}?start=${code.token}`} className="btn w-full">
+                Ouvrir @{bot}
+              </a>
+            ) : (
+              <p className="num rounded-xl bg-line p-3 text-center text-sm">/start {code.token}</p>
+            )}
+          </>
+        ) : (
+          <form action={createTelegramLink}>
+            <button className="btn w-full">Lier ce compte</button>
+          </form>
+        )}
+        <p className="mt-2 text-xs text-muted">
+          Tri IA : {aiEnabled() ? "actif" : "inactif (ANTHROPIC_API_KEY)"} · Vocal : {sttEnabled() ? "actif" : "inactif (STT_URL)"}
+        </p>
+      </Section>
+
       <Section title="Notifications push">
         <PushToggle publicKey={process.env.VAPID_PUBLIC_KEY || null} />
-        <p className="mt-2 text-xs text-muted">Rappels : revue du soir (21:00), revue hebdo (dimanche 18:00), check-list trading.</p>
+        <p className="mt-2 text-xs text-muted">Brief du matin (07:00), check-list trading (08:45), revue du soir (21:00), revue hebdo (dimanche 18:00).</p>
       </Section>
 
       {shared.map((s) => (

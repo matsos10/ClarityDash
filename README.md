@@ -16,6 +16,16 @@ Application Android (PWA Next.js packagée en APK via TWA), auto-hébergée sur 
 | Trading | Check-list pré-session **bloquante**, journal par compte et par trade (setup, R, émotion, capture), MLL, consistance 40 %, payouts et cycle, statistiques (win rate, espérance, créneaux), scaling du fonds perso, analyse macro en 6 sections, **verrou après 2 pertes** |
 | Transverse | Comptes Matias / Ana, espaces privés + couple / famille avec partage par module, mode clair / sombre, export CSV, notifications push, sauvegarde quotidienne |
 
+## Phase 2 — Google Agenda, Telegram, brief du matin
+
+| Fonction | Détail |
+| --- | --- |
+| Google Agenda | Agenda du jour (Aujourd'hui) et de la semaine. Une tâche avec timebox (début + durée) peut créer ou mettre à jour un bloc dans Google Agenda, en cochant la case ; supprimer la tâche supprime le bloc |
+| Brief du matin (07:00) | Notification push + message Telegram + page `/brief`. Contenu : agenda, 3 priorités proposées et justifiées (échéances, KR du trimestre, objectifs sans action depuis 14 j, prochaines actions de projet), échéances famille / maison / admin, rappel trading (macro, check-list, MLL, payouts, P&L de la veille), résultats de la semaine. La vision est relue le lundi. Bouton « Prendre ces priorités » |
+| Bot Telegram | Texte ou note vocale → inbox → suggestion de Claude (tâche ou journal, domaine, projet / KR, échéance) → boutons Appliquer / Laisser / Archiver. `/brief` à la demande |
+| Tri IA de l'inbox | Toute capture (app, partage Android, Telegram) reçoit une suggestion ; rien n'est créé sans un tap de validation |
+| Notes vocales | Service `stt` (faster-whisper sur CPU, français / portugais), interne au docker-compose |
+
 Le schéma Prisma couvre déjà toutes les phases (finances, maison, famille, admin, coach IA) : aucune migration lourde n'est à prévoir plus tard.
 
 ## Développement local
@@ -43,7 +53,10 @@ Le service worker n'est actif qu'en build de production (`npm run build && npm s
    docker compose up -d --build
    docker compose exec worker npx tsx prisma/seed.ts
    ```
-4. Dans **Nginx Proxy Manager**, créer un Proxy Host `<domaine>` → `palmela-app` port `3000`, avec Websockets et SSL Let's Encrypt (Force SSL).
+4. **Telegram** : créer le bot avec @BotFather → `TELEGRAM_BOT_TOKEN` et `TELEGRAM_BOT_USERNAME`. Le worker interroge Telegram en *long polling* : aucun webhook à exposer. Ensuite, dans l'app : Réglages → Telegram → « Lier ce compte » (à faire pour Matias et pour Ana).
+5. **IA** : `ANTHROPIC_API_KEY` (le modèle par défaut est `claude-opus-5-5` ; effort `low` pour le tri ; repli serveur activé en cas de refus).
+6. **Google Agenda** : à l'écran de consentement OAuth, ajouter le scope `…/auth/calendar.events`. Si un compte était déjà connecté avant la phase 2 : Réglages → « Connecter Google Agenda ».
+7. Dans **Nginx Proxy Manager**, créer un Proxy Host `<domaine>` → `palmela-app` port `3000`, avec Websockets et SSL Let's Encrypt (Force SSL).
 
 Services :
 - `app` : Next.js en mode standalone. Les captures de trades sont stockées dans le volume `uploads`.
@@ -51,7 +64,11 @@ Services :
   - sauvegarde `pg_dump` quotidienne à 03:15 dans `./backups`, conservée 30 jours ;
   - rappel trading à 08:45 en semaine ;
   - revue du soir à 21:00 ;
-  - revue hebdo le dimanche à 18:00.
+  - revue hebdo le dimanche à 18:00 ;
+  - brief du matin à 07:00 (`docker compose exec worker npx tsx worker/index.ts --brief-now` pour le forcer) ;
+  - tri IA des captures toutes les minutes ;
+  - bot Telegram.
+- `stt` : transcription des vocaux. Le modèle `WHISPER_MODEL` (par défaut `small`) est téléchargé au premier vocal dans le volume `whisper`.
 - `db` : PostgreSQL 16.
 
 Sauvegarde immédiate : `docker compose exec worker sh scripts/backup.sh`.
@@ -91,13 +108,15 @@ src/app/         pages (App Router), API (auth, sync hors ligne, push, export CS
 src/lib/calc/    calculs purs testés (consistance, MLL, payout, stats, verrou, scaling, OKR, séries, charge)
 src/lib/offline/ file de mutations IndexedDB rejouée au retour du réseau
 src/server/      accès / espaces, server actions, logique trading, push
-worker/          tâches planifiées (rappels, sauvegarde)
+src/server/telegram/  bot Telegram (capture, brief, boutons)
+src/server/ai/   tri de l'inbox par Claude (sortie structurée)
+stt/             service Python FastAPI de transcription (faster-whisper)
+worker/          tâches planifiées (brief, rappels, tri IA, sauvegarde) + long polling Telegram
 android/         configuration TWA + script de build de l'APK
 tests/           tests Vitest des calculs
 ```
 
 ## Phases suivantes
 
-2. Google Calendar (timeboxing), bot Telegram (capture vocale, briefs), brief du matin à 7h.
 3. Finances, maison & chantiers, famille, véhicule & admin.
 4. Coach IA multi-agents (Chef de cabinet + sous-agents) et revues automatiques.

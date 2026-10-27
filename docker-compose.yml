@@ -27,11 +27,22 @@ services:
     environment:
       DATABASE_URL: postgresql://palmela:${POSTGRES_PASSWORD}@db:5432/palmela
       BACKUP_DIR: /backups
+      STT_URL: ${STT_URL:-http://stt:8000}
       TZ: Europe/Lisbon
     volumes:
       - ./backups:/backups
     depends_on:
       db: { condition: service_healthy }
+    networks: [internal]
+
+  # Transcription des notes vocales Telegram (faster-whisper sur CPU, modèle téléchargé au 1er appel)
+  stt:
+    build: ./stt
+    restart: unless-stopped
+    environment:
+      WHISPER_MODEL: ${WHISPER_MODEL:-small}
+    volumes:
+      - whisper:/models
     networks: [internal]
 
   app:
@@ -53,6 +64,7 @@ services:
 volumes:
   pgdata:
   uploads:
+  whisper:
 
 networks:
   internal:
