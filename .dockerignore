@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.env
+.env.*
+!.env.example
+uploads
+backups
+android
+coverage
+public/sw.js
+public/swe-worker-*.js

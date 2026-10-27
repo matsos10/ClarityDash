@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 248 248 246;
+  --card: 255 255 255;
+  --fg: 24 24 27;
+  --muted: 113 113 122;
+  --line: 228 228 231;
+  --accent: 37 99 235;
+  --good: 22 163 74;
+  --bad: 220 38 38;
+  --warn: 217 119 6;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: 12 12 14;
+  --card: 24 24 27;
+  --fg: 244 244 245;
+  --muted: 161 161 170;
+  --line: 39 39 42;
+  --accent: 96 165 250;
+  --good: 74 222 128;
+  --bad: 248 113 113;
+  --warn: 251 191 36;
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--fg));
+  -webkit-tap-highlight-color: transparent;
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-line bg-card p-4;
+  }
+  .h2 {
+    @apply mb-2 text-xs font-semibold uppercase tracking-wide text-muted;
+  }
+  .btn {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-medium text-white active:opacity-80 disabled:opacity-40;
+  }
+  .btn-ghost {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-line px-4 text-sm active:bg-line/50 disabled:opacity-40;
+  }
+  .btn-sm {
+    @apply inline-flex min-h-[36px] items-center justify-center rounded-lg border border-line px-3 text-xs active:bg-line/50 disabled:opacity-40;
+  }
+  .input {
+    @apply min-h-[44px] w-full rounded-xl border border-line bg-bg px-3 text-base outline-none focus:border-accent;
+  }
+  .label {
+    @apply mb-1 block text-xs font-medium text-muted;
+  }
+  .num {
+    @apply font-mono tabular-nums;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium;
+  }
+}

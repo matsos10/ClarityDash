@@ -1,0 +1,1629 @@
+// Base Palmela — schéma Prisma (PostgreSQL)
+// Conventions : ids cuid générables côté client (sync hors ligne), montants Decimal,
+// dates "jour" en @db.Date (fuseau Europe/Lisbon), deletedAt = suppression douce synchronisable.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ═════════════════════════ ENUMS ═════════════════════════
+
+enum Theme {
+  SYSTEM
+  LIGHT
+  DARK
+}
+
+enum SpaceKind {
+  PERSONAL
+  COUPLE
+  FAMILY
+}
+
+enum SpaceRole {
+  OWNER
+  MEMBER
+}
+
+enum Module {
+  HORIZONS
+  ROUTINE
+  TRADING
+  BUSINESS
+  FINANCE
+  HOME
+  FAMILY
+  ADMIN
+  PERSONAL
+}
+
+enum Domain {
+  BUSINESS
+  TRADING
+  HOME
+  FAMILY
+  PERSONAL
+}
+
+enum ObjectiveArea {
+  AUTONOMOUS_INCOME
+  DREAM_PROPERTY
+  NET_WORTH
+  HEALTH
+  SOCIAL_IMPACT
+}
+
+enum ProjectStatus {
+  ACTIVE
+  WAITING
+  BLOCKED
+  DONE
+  ARCHIVED
+}
+
+enum ProjectKind {
+  GENERIC
+  CONSTRUCTION
+  RENOVATION
+  SOLAR
+  LITIGATION
+  BOOK
+  ASSOCIATION
+}
+
+enum TaskStatus {
+  INBOX
+  BACKLOG
+  WEEK
+  TODAY
+  DONE
+  CANCELLED
+}
+
+enum CaptureSource {
+  APP
+  VOICE
+  SHARE
+  TELEGRAM
+}
+
+enum CaptureStatus {
+  PENDING
+  SUGGESTED
+  ROUTED
+  DISMISSED
+}
+
+enum PropFirm {
+  TOPSTEP
+  FUNDEDNEXT
+  PERSONAL
+  OTHER
+}
+
+enum AccountType {
+  EVALUATION
+  FUNDED
+  LIVE
+  PERSONAL
+}
+
+enum AccountStatus {
+  ACTIVE
+  BREACHED
+  PASSED
+  CLOSED
+}
+
+enum DrawdownType {
+  TRAILING_EOD
+  TRAILING_INTRADAY
+  STATIC
+}
+
+enum PayoutStatus {
+  PLANNED
+  REQUESTED
+  PAID
+  REJECTED
+}
+
+enum Instrument {
+  XAUUSD
+  MGC
+  GC
+  OTHER
+}
+
+enum Direction {
+  LONG
+  SHORT
+}
+
+enum Emotion {
+  CALM
+  CONFIDENT
+  FOMO
+  FEAR
+  REVENGE
+  BORED
+  TIRED
+  EUPHORIC
+}
+
+enum Bias {
+  BULLISH
+  BEARISH
+  NEUTRAL
+}
+
+enum LeadStage {
+  NEW
+  CONTACTED
+  MEETING
+  AUDIT
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum ActivityType {
+  CALL
+  EMAIL
+  WHATSAPP
+  VISIT
+  MEETING
+  NOTE
+}
+
+enum AssetKind {
+  PROPERTY
+  BANK
+  TRADING
+  INVESTMENT
+  VEHICLE
+  CASH
+  OTHER
+}
+
+enum LiabilityKind {
+  MORTGAGE
+  LOAN
+  CREDIT_CARD
+  OTHER
+}
+
+enum JarCode {
+  NEC
+  FFA
+  LTSS
+  EDU
+  PLAY
+  GIVE
+}
+
+enum TransactionKind {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+enum PropertyKind {
+  HOME
+  RENTAL
+  LAND
+}
+
+enum TaxKind {
+  IRS
+  IVA
+  IRC
+  IUC
+  IMI
+  SEGURANCA_SOCIAL
+  IMT
+  OTHER
+}
+
+enum TaxEntity {
+  PERSONAL
+  COMPANY
+}
+
+enum PhaseStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  BLOCKED
+}
+
+enum QuoteStatus {
+  REQUESTED
+  RECEIVED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum DossierKind {
+  PERMIT
+  LITIGATION
+  ADMIN
+}
+
+enum DossierEventKind {
+  LETTER_SENT
+  LETTER_RECEIVED
+  SUBMISSION
+  DECISION
+  HEARING
+  DEADLINE
+  NOTE
+}
+
+enum MemberRole {
+  PARTNER
+  CHILD
+}
+
+enum SchoolEventKind {
+  TEST
+  MEETING
+  HOMEWORK
+  PROJECT
+  HOLIDAY
+  OTHER
+}
+
+enum ApplicationStage {
+  TARGET
+  APPLIED
+  SCREENING
+  INTERVIEW
+  OFFER
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum VehicleEventKind {
+  SERVICE
+  IPO
+  INSURANCE
+  IUC
+  TYRES
+  REPAIR
+}
+
+enum WorkoutKind {
+  WALK
+  TENNIS
+  GOLF
+  RUN
+  GYM
+  OTHER
+}
+
+enum CropEventKind {
+  SOW
+  TRANSPLANT
+  WATER
+  FERTILIZE
+  HARVEST
+}
+
+enum AgentKind {
+  CHIEF
+  TRADING
+  BUSINESS
+  FINANCE
+  HOME
+  FAMILY
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  TOOL
+}
+
+enum AiActionKind {
+  SEND_EMAIL
+  CREATE_EVENT
+  CREATE_TASK
+  UPDATE_RECORD
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXECUTED
+  FAILED
+}
+
+enum AlertKind {
+  OVERLOAD
+  STALE_OBJECTIVE
+  ORPHAN_TASK
+  DOCUMENT_EXPIRY
+  FOLLOW_UP
+  PAYOUT_WINDOW
+  MLL_PROXIMITY
+  TAX_DUE
+  OTHER
+}
+
+// ═════════════════════════ AUTH (NextAuth) ═════════════════════════
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  locale        String    @default("fr")
+  timezone      String    @default("Europe/Lisbon")
+  theme         Theme     @default(SYSTEM)
+  createdAt     DateTime  @default(now())
+
+  accounts          Account[]
+  sessions          Session[]
+  memberships       SpaceMember[]
+  pushSubscriptions PushSubscription[]
+  telegramLink      TelegramLink?
+  assignedTasks     Task[]             @relation("TaskAssignee")
+  ownedKeyResults   KeyResult[]
+  journalEntries    JournalEntry[]
+  routineItems      RoutineItem[]
+  captures          Capture[]
+  tradingSessions   TradingSession[]
+  dailyBriefs       DailyBrief[]
+  workouts          Workout[]
+  aiConversations   AiConversation[]
+  aiActions         AiAction[]
+  alerts            Alert[]
+  syncMutations     SyncMutation[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ═════════════════════════ ESPACES & PARTAGE ═════════════════════════
+// Chaque utilisateur a un espace PERSONAL (privé). Les espaces COUPLE / FAMILY
+// ne voient que les modules activés dans SpaceModule (partage explicite par module).
+
+model Space {
+  id        String    @id @default(cuid())
+  name      String
+  kind      SpaceKind
+  createdAt DateTime  @default(now())
+
+  members SpaceMember[]
+  modules SpaceModule[]
+
+  visions           Vision[]
+  objectives        Objective[]
+  quarterlyReviews  QuarterlyReview[]
+  projects          Project[]
+  tasks             Task[]
+  weeklyOutcomes    WeeklyOutcome[]
+  weeklyReviews     WeeklyReview[]
+  tradingAccounts   TradingAccount[]
+  checklistItems    PreSessionChecklistItem[]
+  tradeSetups       TradeSetup[]
+  macroAnalyses     MacroAnalysis[]
+  brands            Brand[]
+  assets            Asset[]
+  liabilities       Liability[]
+  netWorthSnapshots NetWorthSnapshot[]
+  jars              Jar[]
+  transactions      Transaction[]
+  properties        Property[]
+  taxObligations    TaxObligation[]
+  ebfItems          EbfChecklistItem[]
+  suppliers         Supplier[]
+  dossiers          Dossier[]
+  familyMembers     FamilyMember[]
+  jobApplications   JobApplication[]
+  outingIdeas       OutingIdea[]
+  vehicles          Vehicle[]
+  documents         Document[]
+  books             Book[]
+  crops             Crop[]
+}
+
+model SpaceMember {
+  spaceId  String
+  userId   String
+  role     SpaceRole @default(MEMBER)
+  joinedAt DateTime  @default(now())
+
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([spaceId, userId])
+}
+
+model SpaceModule {
+  spaceId String
+  module  Module
+  enabled Boolean @default(true)
+
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@id([spaceId, module])
+}
+
+// ═════════════════════════ HORIZONS ═════════════════════════
+
+model Vision {
+  id         String   @id @default(cuid())
+  spaceId    String
+  title      String
+  textFr     String   @db.Text
+  textPt     String?  @db.Text
+  targetDate DateTime @db.Date
+  updatedAt  DateTime @updatedAt
+
+  space      Space       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  objectives Objective[]
+  milestones Milestone[]
+}
+
+model Objective {
+  id           String        @id @default(cuid())
+  spaceId      String
+  visionId     String?
+  area         ObjectiveArea
+  title        String
+  description  String?       @db.Text
+  order        Int           @default(0)
+  lastActionAt DateTime? // alerte coach si > 14 jours
+  createdAt    DateTime      @default(now())
+
+  space        Space         @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  vision       Vision?       @relation(fields: [visionId], references: [id], onDelete: SetNull)
+  keyResults   KeyResult[]
+  milestones   Milestone[]
+  projects     Project[]
+  tasks        Task[]
+  routineItems RoutineItem[]
+}
+
+model Milestone {
+  id          String    @id @default(cuid())
+  visionId    String
+  objectiveId String?
+  title       String
+  dueDate     DateTime  @db.Date
+  doneAt      DateTime?
+  order       Int       @default(0)
+
+  vision    Vision     @relation(fields: [visionId], references: [id], onDelete: Cascade)
+  objective Objective? @relation(fields: [objectiveId], references: [id], onDelete: SetNull)
+}
+
+model KeyResult {
+  id           String    @id @default(cuid())
+  objectiveId  String
+  ownerId      String?
+  quarter      String // "2026-Q4"
+  title        String
+  unit         String? // "€", "clients", "%"
+  startValue   Decimal   @db.Decimal(14, 2)
+  targetValue  Decimal   @db.Decimal(14, 2)
+  currentValue Decimal   @db.Decimal(14, 2)
+  score        Decimal   @default(0) @db.Decimal(3, 2) // 0.00 – 1.00
+  archivedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  objective      Objective          @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  owner          User?              @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  checkins       KeyResultCheckin[]
+  projects       Project[]
+  tasks          Task[]
+  weeklyOutcomes WeeklyOutcome[]
+
+  @@index([quarter])
+}
+
+model KeyResultCheckin {
+  id          String   @id @default(cuid())
+  keyResultId String
+  weekStart   DateTime @db.Date
+  value       Decimal  @db.Decimal(14, 2)
+  score       Decimal  @db.Decimal(3, 2)
+  note        String?
+
+  keyResult KeyResult @relation(fields: [keyResultId], references: [id], onDelete: Cascade)
+
+  @@unique([keyResultId, weekStart])
+}
+
+model QuarterlyReview {
+  id          String    @id @default(cuid())
+  spaceId     String
+  quarter     String
+  wentWell    String?   @db.Text
+  wentBadly   String?   @db.Text
+  lessons     String?   @db.Text
+  completedAt DateTime?
+
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@unique([spaceId, quarter])
+}
+
+model Project {
+  id               String        @id @default(cuid())
+  spaceId          String
+  objectiveId      String?
+  keyResultId      String?
+  brandId          String?
+  kind             ProjectKind   @default(GENERIC)
+  domain           Domain
+  status           ProjectStatus @default(ACTIVE)
+  title            String
+  description      String?       @db.Text
+  nextActionTaskId String?       @unique // "prochaine action" obligatoire (contrôlée côté app)
+  blockedReason    String?
+  specs            Json? // ex. solaire : kWc, batterie kWh, onduleur
+  startDate        DateTime?     @db.Date
+  dueDate          DateTime?     @db.Date
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  deletedAt        DateTime?
+
+  space             Space              @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  objective         Objective?         @relation(fields: [objectiveId], references: [id], onDelete: SetNull)
+  keyResult         KeyResult?         @relation(fields: [keyResultId], references: [id], onDelete: SetNull)
+  brand             Brand?             @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  nextActionTask    Task?              @relation("ProjectNextAction", fields: [nextActionTaskId], references: [id], onDelete: SetNull)
+  tasks             Task[]             @relation("ProjectTasks")
+  phases            ProjectPhase[]
+  quotes            Quote[]
+  supplierFollowUps SupplierFollowUp[]
+  dossiers          Dossier[]
+
+  @@index([spaceId, status])
+}
+
+// Tâche orpheline = projectId, keyResultId et objectiveId tous nuls.
+model Task {
+  id              String     @id @default(cuid())
+  spaceId         String
+  projectId       String?
+  keyResultId     String?
+  objectiveId     String?
+  assigneeId      String?
+  captureId       String?    @unique
+  phaseId         String?
+  title           String
+  notes           String?    @db.Text
+  domain          Domain
+  status          TaskStatus @default(BACKLOG)
+  todayRank       Int? // 1..3 si status = TODAY
+  plannedDate     DateTime?  @db.Date
+  weekStart       DateTime?  @db.Date
+  dueDate         DateTime?  @db.Date
+  estimateMin     Int?
+  timeboxStart    DateTime?
+  timeboxEnd      DateTime?
+  calendarEventId String?
+  completedAt     DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
+
+  space        Space         @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  project      Project?      @relation("ProjectTasks", fields: [projectId], references: [id], onDelete: SetNull)
+  keyResult    KeyResult?    @relation(fields: [keyResultId], references: [id], onDelete: SetNull)
+  objective    Objective?    @relation(fields: [objectiveId], references: [id], onDelete: SetNull)
+  assignee     User?         @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  capture      Capture?      @relation(fields: [captureId], references: [id], onDelete: SetNull)
+  nextActionOf Project?      @relation("ProjectNextAction")
+  phase        ProjectPhase? @relation(fields: [phaseId], references: [id], onDelete: SetNull)
+
+  @@index([spaceId, status])
+  @@index([spaceId, plannedDate])
+  @@index([spaceId, weekStart])
+}
+
+model WeeklyOutcome {
+  id          String   @id @default(cuid())
+  spaceId     String
+  weekStart   DateTime @db.Date
+  rank        Int // 1..5
+  title       String
+  keyResultId String?
+  done        Boolean  @default(false)
+
+  space     Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  keyResult KeyResult? @relation(fields: [keyResultId], references: [id], onDelete: SetNull)
+
+  @@unique([spaceId, weekStart, rank])
+}
+
+model WeeklyReview {
+  id           String    @id @default(cuid())
+  spaceId      String
+  weekStart    DateTime  @db.Date
+  routineRate  Decimal?  @db.Decimal(5, 2) // % de routine cochée
+  tradingPnl   Decimal?  @db.Decimal(14, 2)
+  projectsNote String?   @db.Text
+  wins         String?   @db.Text
+  lessons      String?   @db.Text
+  familyMoment String?
+  completedAt  DateTime?
+
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@unique([spaceId, weekStart])
+}
+
+// Revue du soir (privée)
+model JournalEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @db.Date
+  done      String?  @db.Text
+  blocked   String?  @db.Text
+  tomorrow  String?  @db.Text
+  mood      Int? // 1..5
+  energy    Int? // 1..5
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+model DailyBrief {
+  id      String    @id @default(cuid())
+  userId  String
+  date    DateTime  @db.Date
+  content Json
+  sentAt  DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+// ═════════════════════════ ROUTINE ═════════════════════════
+
+model RoutineItem {
+  id          String    @id @default(cuid())
+  userId      String
+  objectiveId String?
+  title       String
+  domain      Domain
+  daysOfWeek  Int[] // 1 = lundi … 7 = dimanche
+  timeOfDay   String? // "07:30"
+  order       Int       @default(0)
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  objective Objective?     @relation(fields: [objectiveId], references: [id], onDelete: SetNull)
+  checks    RoutineCheck[]
+}
+
+model RoutineCheck {
+  id        String   @id @default(cuid())
+  itemId    String
+  date      DateTime @db.Date
+  done      Boolean  @default(true)
+  checkedAt DateTime @default(now())
+
+  item RoutineItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([itemId, date])
+}
+
+// ═════════════════════════ CAPTURE / INBOX ═════════════════════════
+
+model Capture {
+  id              String        @id @default(cuid())
+  userId          String
+  source          CaptureSource
+  rawText         String        @db.Text
+  audioUrl        String?
+  transcript      String?       @db.Text
+  suggestedModule Module?
+  suggestion      Json? // proposition de l'IA (type d'entité + champs)
+  status          CaptureStatus @default(PENDING)
+  routedType      String?
+  routedId        String?
+  createdAt       DateTime      @default(now())
+  processedAt     DateTime?
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task?
+
+  @@index([userId, status])
+}
+
+// ═════════════════════════ TRADING ═════════════════════════
+
+model TradingAccount {
+  id                 String        @id @default(cuid())
+  spaceId            String
+  name               String
+  firm               PropFirm
+  type               AccountType
+  status             AccountStatus @default(ACTIVE)
+  currency           String        @default("USD")
+  startingBalance    Decimal       @db.Decimal(14, 2)
+  balance            Decimal       @db.Decimal(14, 2)
+  highWaterMark      Decimal       @db.Decimal(14, 2) // solde EOD max (MLL trailing)
+  maxLossLimit       Decimal?      @db.Decimal(14, 2) // montant du MLL
+  drawdownType       DrawdownType  @default(TRAILING_EOD)
+  mllLockBalance     Decimal?      @db.Decimal(14, 2) // le MLL cesse de suivre à ce niveau
+  dailyLossLimit     Decimal?      @db.Decimal(14, 2)
+  consistencyPct     Int? // 40
+  payoutMinDays      Int? // jours gagnants / délai min. entre payouts (3)
+  payoutMinDayProfit Decimal?      @db.Decimal(14, 2) // profit min. d'un jour qualifiant
+  profitSplitPct     Int?
+  isPersonalFund     Boolean       @default(false)
+  openedAt           DateTime      @db.Date
+  closedAt           DateTime?     @db.Date
+
+  space        Space         @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  trades       Trade[]
+  payouts      Payout[]
+  scalingTiers ScalingTier[]
+  asset        Asset?
+}
+
+model Payout {
+  id          String       @id @default(cuid())
+  accountId   String
+  amount      Decimal      @db.Decimal(14, 2)
+  status      PayoutStatus @default(PLANNED)
+  requestedAt DateTime?
+  paidAt      DateTime?
+  note        String?
+
+  account TradingAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+model PreSessionChecklistItem {
+  id       String  @id @default(cuid())
+  spaceId  String
+  label    String
+  order    Int     @default(0)
+  required Boolean @default(true)
+  active   Boolean @default(true)
+
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+}
+
+// Une session par utilisateur et par jour : check-list bloquante + verrou "2 pertes".
+model TradingSession {
+  id                String    @id @default(cuid())
+  userId            String
+  date              DateTime  @db.Date
+  macroAnalysisId   String?
+  checklist         Json // [{ itemId, label, checked }]
+  checklistPassedAt DateTime?
+  lossesCount       Int       @default(0)
+  lockedAt          DateTime?
+  lockReason        String?
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  macroAnalysis MacroAnalysis? @relation(fields: [macroAnalysisId], references: [id], onDelete: SetNull)
+  trades        Trade[]
+
+  @@unique([userId, date])
+}
+
+model TradeSetup {
+  id          String  @id @default(cuid())
+  spaceId     String
+  name        String
+  description String? @db.Text
+  active      Boolean @default(true)
+
+  space  Space   @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  trades Trade[]
+}
+
+model Trade {
+  id            String     @id @default(cuid())
+  accountId     String
+  sessionId     String?
+  setupId       String?
+  copyGroupId   String? // même trade répliqué sur plusieurs comptes = 1 perte pour la règle des 2 pertes
+  instrument    Instrument
+  direction     Direction
+  entryAt       DateTime
+  exitAt        DateTime?
+  entryPrice    Decimal    @db.Decimal(12, 3)
+  exitPrice     Decimal?   @db.Decimal(12, 3)
+  stopPrice     Decimal?   @db.Decimal(12, 3)
+  targetPrice   Decimal?   @db.Decimal(12, 3)
+  quantity      Decimal    @db.Decimal(10, 2) // lots ou contrats
+  pnl           Decimal    @db.Decimal(14, 2) // net de frais
+  fees          Decimal    @default(0) @db.Decimal(10, 2)
+  riskAmount    Decimal?   @db.Decimal(14, 2)
+  rMultiple     Decimal?   @db.Decimal(6, 2)
+  emotion       Emotion?
+  emotionNote   String?
+  followedPlan  Boolean?
+  screenshotUrl String?
+  notes         String?    @db.Text
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  deletedAt     DateTime?
+
+  account TradingAccount  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  session TradingSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  setup   TradeSetup?     @relation(fields: [setupId], references: [id], onDelete: SetNull)
+
+  @@index([accountId, entryAt])
+  @@index([copyGroupId])
+}
+
+model MacroAnalysis {
+  id           String     @id @default(cuid())
+  spaceId      String
+  date         DateTime   @db.Date
+  instrument   Instrument @default(XAUUSD)
+  newsImpact   Json // [{ event, actual, forecast, previous, impact }]
+  score        Int // -10 … +10
+  bias         Bias
+  levels       Json // { resistances: [], supports: [], pivot }
+  causalChain  String     @db.Text
+  mainCatalyst String
+  createdAt    DateTime   @default(now())
+
+  space     Space            @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  scenarios MacroScenario[]
+  sessions  TradingSession[]
+
+  @@unique([spaceId, date, instrument])
+}
+
+model MacroScenario {
+  id           String  @id @default(cuid())
+  analysisId   String
+  order        Int
+  label        String
+  probability  Int // %
+  trigger      String
+  target       String?
+  invalidation String?
+
+  analysis MacroAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+}
+
+// Plan de scaling du fonds perso
+model ScalingTier {
+  id         String    @id @default(cuid())
+  accountId  String
+  order      Int
+  label      String
+  capitalMin Decimal   @db.Decimal(14, 2)
+  lotSize    Decimal   @db.Decimal(6, 2) // 0.01, 0.02 …
+  maxRiskPct Decimal?  @db.Decimal(5, 2)
+  reachedAt  DateTime?
+
+  account TradingAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+// ═════════════════════════ BUSINESS / CRM ═════════════════════════
+
+model Brand {
+  id      String  @id @default(cuid())
+  spaceId String
+  name    String // PME-IA, OfficePulse, Transparência salarial, Orçamentos IA
+  color   String?
+
+  space     Space             @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  projects  Project[]
+  leads     Lead[]
+  templates MessageTemplate[]
+}
+
+model Lead {
+  id             String    @id @default(cuid())
+  brandId        String
+  company        String
+  contactName    String?
+  role           String?
+  email          String?
+  phone          String?
+  city           String?
+  source         String?
+  stage          LeadStage @default(NEW)
+  valueEur       Decimal?  @db.Decimal(12, 2)
+  nextAction     String?
+  nextFollowUpAt DateTime?
+  lostReason     String?
+  notes          String?   @db.Text
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  brand      Brand          @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  activities LeadActivity[]
+
+  @@index([brandId, stage])
+  @@index([nextFollowUpAt])
+}
+
+model LeadActivity {
+  id      String       @id @default(cuid())
+  leadId  String
+  type    ActivityType
+  at      DateTime     @default(now())
+  summary String       @db.Text
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+}
+
+model MessageTemplate {
+  id       String       @id @default(cuid())
+  brandId  String
+  name     String
+  channel  ActivityType @default(EMAIL)
+  language String       @default("pt-PT")
+  subject  String?
+  body     String       @db.Text
+
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+}
+
+// ═════════════════════════ FINANCES ═════════════════════════
+
+model Asset {
+  id               String    @id @default(cuid())
+  spaceId          String
+  kind             AssetKind
+  name             String
+  propertyId       String?   @unique
+  tradingAccountId String?   @unique
+
+  space          Space            @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  property       Property?        @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  tradingAccount TradingAccount?  @relation(fields: [tradingAccountId], references: [id], onDelete: SetNull)
+  valuations     AssetValuation[]
+}
+
+model AssetValuation {
+  id      String   @id @default(cuid())
+  assetId String
+  month   DateTime @db.Date // 1er du mois
+  value   Decimal  @db.Decimal(14, 2)
+
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, month])
+}
+
+model Liability {
+  id             String        @id @default(cuid())
+  spaceId        String
+  propertyId     String?
+  kind           LiabilityKind
+  name           String
+  lender         String?
+  principal      Decimal       @db.Decimal(14, 2)
+  rateAnnualPct  Decimal       @db.Decimal(6, 3)
+  monthlyPayment Decimal       @db.Decimal(12, 2)
+  startDate      DateTime      @db.Date
+  termMonths     Int
+
+  space    Space              @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  property Property?          @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  balances LiabilityBalance[]
+}
+
+model LiabilityBalance {
+  id          String   @id @default(cuid())
+  liabilityId String
+  month       DateTime @db.Date
+  balance     Decimal  @db.Decimal(14, 2)
+
+  liability Liability @relation(fields: [liabilityId], references: [id], onDelete: Cascade)
+
+  @@unique([liabilityId, month])
+}
+
+model NetWorthSnapshot {
+  id               String   @id @default(cuid())
+  spaceId          String
+  month            DateTime @db.Date
+  totalAssets      Decimal  @db.Decimal(14, 2)
+  totalLiabilities Decimal  @db.Decimal(14, 2)
+  netWorth         Decimal  @db.Decimal(14, 2)
+
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@unique([spaceId, month])
+}
+
+model Jar {
+  id      String  @id @default(cuid())
+  spaceId String
+  code    JarCode
+  pct     Decimal @db.Decimal(5, 2) // 55 / 10 / 10 / 10 / 10 / 5
+
+  space        Space         @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([spaceId, code])
+}
+
+model Transaction {
+  id        String          @id @default(cuid())
+  spaceId   String
+  jarId     String?
+  date      DateTime        @db.Date
+  kind      TransactionKind
+  amount    Decimal         @db.Decimal(12, 2)
+  label     String
+  category  String?
+  createdAt DateTime        @default(now())
+
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  jar   Jar?  @relation(fields: [jarId], references: [id], onDelete: SetNull)
+
+  @@index([spaceId, date])
+}
+
+model Property {
+  id            String       @id @default(cuid())
+  spaceId       String
+  kind          PropertyKind
+  name          String
+  address       String?
+  municipality  String?
+  areaM2        Decimal?     @db.Decimal(8, 2)
+  purchasePrice Decimal?     @db.Decimal(14, 2)
+  purchaseDate  DateTime?    @db.Date
+
+  space       Space       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  leases      Lease[]
+  asset       Asset?
+  liabilities Liability[]
+}
+
+model Lease {
+  id              String    @id @default(cuid())
+  propertyId      String
+  tenantName      String
+  startDate       DateTime  @db.Date
+  endDate         DateTime? @db.Date
+  baseRent        Decimal   @db.Decimal(10, 2)
+  currentRent     Decimal   @db.Decimal(10, 2)
+  indexationMonth Int // mois anniversaire (1..12)
+  active          Boolean   @default(true)
+
+  property    Property         @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  indexations RentIndexation[]
+  payments    RentPayment[]
+}
+
+model RentIndexation {
+  id            String    @id @default(cuid())
+  leaseId       String
+  year          Int
+  coefficient   Decimal   @db.Decimal(7, 5) // 1.02240 pour 2026
+  previousRent  Decimal   @db.Decimal(10, 2)
+  newRent       Decimal   @db.Decimal(10, 2)
+  effectiveDate DateTime  @db.Date
+  letterSentAt  DateTime?
+
+  lease Lease @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+
+  @@unique([leaseId, year])
+}
+
+model RentPayment {
+  id      String    @id @default(cuid())
+  leaseId String
+  month   DateTime  @db.Date
+  amount  Decimal   @db.Decimal(10, 2)
+  paidAt  DateTime?
+
+  lease Lease @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+
+  @@unique([leaseId, month])
+}
+
+model TaxObligation {
+  id         String    @id @default(cuid())
+  spaceId    String
+  kind       TaxKind
+  entity     TaxEntity
+  label      String
+  period     String? // "2026", "2026-T3"
+  dueDate    DateTime  @db.Date
+  amount     Decimal?  @db.Decimal(12, 2)
+  recurrence String? // RRULE
+  paidAt     DateTime?
+
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@index([spaceId, dueDate])
+}
+
+model EbfChecklistItem {
+  id      String  @id @default(cuid())
+  spaceId String
+  year    Int
+  article String? // ex. "Art. 43.º-B EBF"
+  label   String
+  done    Boolean @default(false)
+  notes   String? @db.Text
+
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+}
+
+// ═════════════════════════ MAISON & CHANTIERS ═════════════════════════
+
+model ProjectPhase {
+  id        String      @id @default(cuid())
+  projectId String
+  order     Int
+  name      String
+  status    PhaseStatus @default(TODO)
+  startDate DateTime?   @db.Date
+  endDate   DateTime?   @db.Date
+  budget    Decimal?    @db.Decimal(12, 2)
+
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  materials Material[]
+  tasks     Task[]
+}
+
+model Material {
+  id          String    @id @default(cuid())
+  phaseId     String
+  supplierId  String?
+  name        String
+  unit        String // m², ml, un, kg
+  qtyNet      Decimal   @db.Decimal(10, 2)
+  wastePct    Decimal   @default(10) @db.Decimal(5, 2) // qté à commander = qtyNet × (1 + wastePct/100)
+  unitPrice   Decimal?  @db.Decimal(10, 2)
+  purchasedAt DateTime?
+
+  phase    ProjectPhase @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+  supplier Supplier?    @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+}
+
+model Supplier {
+  id          String  @id @default(cuid())
+  spaceId     String
+  name        String
+  trade       String? // LSF, solaire, canalização…
+  contactName String?
+  phone       String?
+  email       String?
+  nif         String?
+
+  space     Space              @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  quotes    Quote[]
+  followUps SupplierFollowUp[]
+  materials Material[]
+}
+
+model Quote {
+  id          String      @id @default(cuid())
+  projectId   String
+  supplierId  String
+  label       String
+  amountExVat Decimal     @db.Decimal(12, 2)
+  vatRatePct  Decimal     @default(23) @db.Decimal(5, 2)
+  status      QuoteStatus @default(REQUESTED)
+  receivedAt  DateTime?
+  validUntil  DateTime?   @db.Date
+  scope       Json? // postes comparables
+  fileUrl     String?
+
+  project  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+}
+
+model SupplierFollowUp {
+  id         String    @id @default(cuid())
+  supplierId String
+  projectId  String?
+  dueAt      DateTime
+  doneAt     DateTime?
+  note       String?
+
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  project  Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+}
+
+model Dossier {
+  id        String      @id @default(cuid())
+  spaceId   String
+  projectId String?
+  kind      DossierKind
+  title     String
+  reference String? // n.º processo
+  authority String? // Câmara Municipal de Palmela, tribunal…
+  status    String?
+
+  space   Space          @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  project Project?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  events  DossierEvent[]
+}
+
+model DossierEvent {
+  id        String           @id @default(cuid())
+  dossierId String
+  kind      DossierEventKind
+  date      DateTime         @db.Date
+  dueAt     DateTime?        @db.Date
+  title     String
+  notes     String?          @db.Text
+  fileUrl   String?
+
+  dossier Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+}
+
+// ═════════════════════════ FAMILLE ═════════════════════════
+
+model FamilyMember {
+  id        String     @id @default(cuid())
+  spaceId   String
+  name      String
+  role      MemberRole
+  birthDate DateTime?  @db.Date
+  school    String?
+  grade     String? // "3.º ano"
+  teacher   String?
+
+  space            Space                @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  schoolEvents     SchoolEvent[]
+  revisionSessions RevisionSession[]
+  exercises        PortugueseExercise[]
+  recurringErrors  RecurringError[]
+}
+
+model SchoolEvent {
+  id       String          @id @default(cuid())
+  memberId String
+  kind     SchoolEventKind
+  subject  String?
+  title    String
+  date     DateTime
+  result   String?
+  notes    String?
+
+  member FamilyMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+}
+
+model RevisionSession {
+  id          String    @id @default(cuid())
+  memberId    String
+  subject     String
+  plannedAt   DateTime
+  doneAt      DateTime?
+  durationMin Int?
+  notes       String?
+
+  member FamilyMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+}
+
+model PortugueseExercise {
+  id        String   @id @default(cuid())
+  memberId  String
+  topic     String
+  level     String?
+  content   Json
+  answers   Json?
+  score     Decimal? @db.Decimal(5, 2)
+  createdAt DateTime @default(now())
+
+  member FamilyMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+}
+
+model RecurringError {
+  id         String   @id @default(cuid())
+  memberId   String
+  category   String // ortografia, acentuação, concordância…
+  example    String
+  correction String?
+  count      Int      @default(1)
+  lastSeenAt DateTime @default(now())
+
+  member FamilyMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+}
+
+model JobApplication {
+  id          String           @id @default(cuid())
+  spaceId     String
+  company     String
+  role        String // HRBP, CHRO…
+  location    String?
+  salaryRange String?
+  url         String?
+  stage       ApplicationStage @default(TARGET)
+  appliedAt   DateTime?        @db.Date
+  nextStep    String?
+  nextStepAt  DateTime?
+  notes       String?          @db.Text
+
+  space      Space       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  interviews Interview[]
+}
+
+model Interview {
+  id            String   @id @default(cuid())
+  applicationId String
+  at            DateTime
+  kind          String? // RH, manager, painel
+  interviewer   String?
+  notes         String?  @db.Text
+  outcome       String?
+
+  application JobApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+model OutingIdea {
+  id       String    @id @default(cuid())
+  spaceId  String
+  title    String
+  location String?
+  costEur  Decimal?  @db.Decimal(8, 2)
+  season   String?
+  doneAt   DateTime?
+  rating   Int?
+
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+}
+
+// ═════════════════════════ VÉHICULE & ADMIN ═════════════════════════
+
+model Vehicle {
+  id         String  @id @default(cuid())
+  spaceId    String
+  make       String
+  model      String
+  year       Int
+  plate      String?
+  odometerKm Int?
+
+  space  Space          @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  events VehicleEvent[]
+}
+
+model VehicleEvent {
+  id          String           @id @default(cuid())
+  vehicleId   String
+  kind        VehicleEventKind
+  date        DateTime         @db.Date
+  km          Int?
+  cost        Decimal?         @db.Decimal(10, 2)
+  nextDueDate DateTime?        @db.Date
+  nextDueKm   Int?
+  notes       String?
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+}
+
+model Document {
+  id              String    @id @default(cuid())
+  spaceId         String
+  title           String
+  kind            String? // CC, passaporte, carta de condução, seguro…
+  holderName      String?
+  number          String?
+  expiresAt       DateTime? @db.Date
+  alertDaysBefore Int       @default(30)
+  fileUrl         String?
+
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+// ═════════════════════════ PERSO ═════════════════════════
+
+model Book {
+  id          String    @id @default(cuid())
+  spaceId     String
+  title       String
+  targetWords Int?
+  targetPages Int?
+  deadline    DateTime? @db.Date
+
+  space    Space            @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  chapters Chapter[]
+  sessions WritingSession[]
+}
+
+model Chapter {
+  id        String @id @default(cuid())
+  bookId    String
+  order     Int
+  title     String
+  wordCount Int    @default(0)
+  status    String @default("DRAFT")
+
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+}
+
+model WritingSession {
+  id      String   @id @default(cuid())
+  bookId  String
+  date    DateTime @db.Date
+  words   Int
+  minutes Int?
+
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+}
+
+model Workout {
+  id          String      @id @default(cuid())
+  userId      String
+  date        DateTime    @db.Date
+  kind        WorkoutKind
+  durationMin Int
+  distanceKm  Decimal?    @db.Decimal(6, 2)
+  notes       String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Crop {
+  id      String  @id @default(cuid())
+  spaceId String
+  name    String
+  variety String?
+  plot    String?
+
+  space  Space       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  events CropEvent[]
+}
+
+model CropEvent {
+  id        String        @id @default(cuid())
+  cropId    String
+  kind      CropEventKind
+  plannedAt DateTime      @db.Date
+  doneAt    DateTime?
+  notes     String?
+
+  crop Crop @relation(fields: [cropId], references: [id], onDelete: Cascade)
+}
+
+// ═════════════════════════ COACH IA ═════════════════════════
+
+model AiConversation {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String?
+  createdAt DateTime @default(now())
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages AiMessage[]
+  actions  AiAction[]
+}
+
+model AiMessage {
+  id             String      @id @default(cuid())
+  conversationId String
+  role           MessageRole
+  agent          AgentKind   @default(CHIEF)
+  content        String      @db.Text
+  inputTokens    Int?
+  outputTokens   Int?
+  createdAt      DateTime    @default(now())
+
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+// Validation humaine obligatoire avant e-mail / événement
+model AiAction {
+  id             String         @id @default(cuid())
+  userId         String
+  conversationId String?
+  kind           AiActionKind
+  payload        Json
+  status         ApprovalStatus @default(PENDING)
+  approvedAt     DateTime?
+  executedAt     DateTime?
+  error          String?
+  createdAt      DateTime       @default(now())
+
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation AiConversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+}
+
+model Alert {
+  id         String    @id @default(cuid())
+  userId     String
+  kind       AlertKind
+  title      String
+  body       String?
+  entityType String?
+  entityId   String?
+  dueAt      DateTime?
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+}
+
+// ═════════════════════════ INFRA : PUSH, TELEGRAM, SYNC ═════════════════════════
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TelegramLink {
+  userId   String   @id
+  chatId   BigInt   @unique
+  linkedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Idempotence de la file de mutations hors ligne (id généré par le client)
+model SyncMutation {
+  id        String   @id
+  userId    String
+  kind      String
+  appliedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

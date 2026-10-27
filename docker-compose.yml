@@ -1,0 +1,61 @@
+# Déploiement VPS Contabo derrière Nginx Proxy Manager.
+# NPM : Proxy Host → palmela-app:3000 (réseau partagé ${NPM_NETWORK}), SSL Let's Encrypt, Websockets ON.
+name: palmela
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: palmela
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant}
+      POSTGRES_DB: palmela
+      TZ: Europe/Lisbon
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U palmela -d palmela"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [internal]
+
+  worker:
+    build: { context: ., target: worker }
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://palmela:${POSTGRES_PASSWORD}@db:5432/palmela
+      BACKUP_DIR: /backups
+      TZ: Europe/Lisbon
+    volumes:
+      - ./backups:/backups
+    depends_on:
+      db: { condition: service_healthy }
+    networks: [internal]
+
+  app:
+    build: { context: ., target: app }
+    container_name: palmela-app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://palmela:${POSTGRES_PASSWORD}@db:5432/palmela
+      UPLOAD_DIR: /data/uploads
+      TZ: Europe/Lisbon
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      db: { condition: service_healthy }
+      worker: { condition: service_started }
+    networks: [internal, proxy]
+
+volumes:
+  pgdata:
+  uploads:
+
+networks:
+  internal:
+  proxy:
+    external: true
+    name: ${NPM_NETWORK:-npm_default}

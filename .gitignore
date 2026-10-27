@@ -1,0 +1,17 @@
+node_modules
+.next
+.env
+.env.local
+*.tsbuildinfo
+next-env.d.ts
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js
+uploads/
+backups/
+android/app/
+android/*.keystore
+android/*.apk
+android/*.aab
+coverage/
+android/twa-manifest.local.json
