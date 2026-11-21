@@ -401,6 +401,103 @@ window.RECIPES = [
     ]
   },
 
+  {
+    id: "carne-porco-alentejana-yammi", t: "Carne de porco à alentejana (Yämmi)", c: "pratos", e: "🐚",
+    s: [4, "pessoas"], tm: "23 min", d: "Fácil", src: "Continente · Yämmi",
+    i: [
+      "500 g de carne de porco em cubos", "2 dentes de alho", "50 g de azeite", "1 c. chá de massa de pimentão",
+      "100 ml de vinho branco", "500 g de batatas em cubos pequenos", "300 g de amêijoas", "1 folha de louro",
+      "Sal a gosto", "Pimenta a gosto", "Coentros picados q.b."
+    ],
+    p: [
+      "Coloque no copo o alho e o azeite. Programe 5 seg/vel 5.",
+      "Junte a carne, a massa de pimentão, o vinho branco, o louro, o sal e a pimenta. Programe 10 min/120 °C/vel 1/inversa.",
+      "Junte as batatas e programe 8 min/100 °C/vel 1/inversa.",
+      "Junte as amêijoas e programe 5 min/100 °C/vel 1/inversa.",
+      "Retire a folha de louro.",
+      "Passe para uma travessa, finalize com coentros picados e sirva de imediato."
+    ]
+  },
+  {
+    id: "feijoada-transmontana", t: "Feijoada à transmontana", c: "pratos", e: "🫘",
+    s: [8, "pessoas"], tm: "60 min", d: "Média", src: "Continente · The Healthy Sins",
+    i: [
+      "200 g de peito de novilho", "300 g de entremeada", "½ nervo de porco", "½ pezinho de porco", "½ orelha de porco",
+      "½ morcela", "½ farinheira", "½ chouriço", "2 cebolas", "2 dentes de alho", "210 g de polpa de tomate",
+      "50 ml de vinho branco", "260 g de feijão encarnado cozido", "300 g de couve lombarda", "1 folha de louro",
+      "Sal q.b.", "Azeite q.b.", "Coentros frescos q.b."
+    ],
+    p: [
+      "Num tacho com água, coloque uma cebola em pedaços, um dente de alho e a folha de louro e tempere com sal.",
+      "Junte as carnes e os enchidos (a água deve cobrir tudo). Tape e deixe cozer 20 minutos.",
+      "Retire só os enchidos, tape e deixe a carne cozer mais 10 minutos.",
+      "Retire as carnes e guarde a água da cozedura.",
+      "Corte os enchidos e as carnes em pedaços e reserve.",
+      "Num tacho grande, refogue num fio de azeite a outra cebola e o outro dente de alho laminado. Quando a cebola estiver translúcida, junte a polpa de tomate e refresque com o vinho branco. Deixe cozinhar alguns minutos.",
+      "Junte o feijão escorrido, as carnes e a couve em juliana e cubra com a água da cozedura. Envolva, tape e deixe ferver 15 a 20 minutos.",
+      "Ajuste os temperos e junte os enchidos só 5 minutos antes de servir.",
+      "Polvilhe com coentros picados e sirva de imediato."
+    ]
+  },
+  {
+    id: "feijoada-portuguesa", t: "Feijoada portuguesa", c: "pratos", e: "🫘",
+    s: [8, "pessoas"], tm: "65 min", d: "Fácil", src: "Continente · The Healthy Sins",
+    n: "Sirva com arroz branco.",
+    i: [
+      "# Carnes", "250 g de entremeada", "300 g de entrecosto", "1 chouriço", "1 orelha de porco cozida, em pedaços",
+      "1 cebola laminada", "Água q.b.", "1 c. café de sal",
+      "# Feijoada", "1 fio de azeite", "1 cebola picada", "2 dentes de alho picados", "1 folha de louro", "1 tomate em cubos",
+      "4 cenouras às rodelas", "½ couve portuguesa em juliana", "1 lata pequena de feijão branco"
+    ],
+    p: [
+      "Numa panela com água a ferver e sal, junte o entrecosto, a entremeada, a orelha, a cebola e o chouriço. Tape e deixe cozer.",
+      "Passe as carnes para uma travessa, retire o excesso de gordura, pele e cartilagens e deixe arrefecer. Guarde o caldo.",
+      "Noutra panela, refogue no azeite a cebola e o alho picados com a folha de louro.",
+      "Junte o tomate, as cenouras e a couve. Deixe cozinhar 10 minutos.",
+      "Junte as carnes e mexa.",
+      "Junte o feijão escorrido e envolva. Junte o caldo de cozer as carnes (e, se necessário, um pouco do caldo do feijão). Sirva com arroz branco."
+    ]
+  },
+  {
+    id: "feijoada-brasileira-farofa", t: "Feijoada brasileira com farofa", c: "pratos", e: "🇧🇷",
+    s: [6, "pessoas"], tm: "70 min", d: "Fácil", src: "Continente · The Healthy Sins",
+    i: [
+      "# Feijoada", "1 cebola roxa", "100 g de linguiça", "175 g de paio", "100 g de bacon em cubos", "100 g de barriga fumada em cubos",
+      "550 g de costeletas de porco em pedaços", "Azeite q.b.", "1 folha de louro", "3 c. chá de alho em pó",
+      "350 g de feijão preto escorrido", "Água q.b.", "Sal q.b.", "Pimenta q.b.",
+      "# Farofa", "Azeite q.b.", "2 c. sopa de manteiga", "1 cebola picada", "140 g de farinha de mandioca", "Sal, pimenta e orégãos q.b."
+    ],
+    p: [
+      "# Feijoada",
+      "Num tacho grande, refogue num fio de azeite a cebola roxa picada com a folha de louro.",
+      "Junte a linguiça e o paio fatiados, o bacon, a barriga fumada e as costeletas. Junte o alho em pó, mexa e deixe refogar alguns minutos, mexendo, até a carne ganhar cor.",
+      "Junte o feijão preto escorrido e cubra com água. Tempere com sal e pimenta e deixe cozer 15 a 20 minutos, mexendo regularmente.",
+      "# Farofa",
+      "Num tacho, derreta a manteiga com um fio de azeite e aloure a cebola picada.",
+      "Junte a farinha de mandioca e mexa sem parar 1 a 2 minutos. Quando estiver solta e crocante, retire do lume.",
+      "Tempere com sal, pimenta e orégãos e misture.",
+      "Sirva a farofa com a feijoada."
+    ]
+  },
+  {
+    id: "vaca-atolada", t: "Vaca atolada", c: "pratos", e: "🥘",
+    s: [6, "pessoas"], tm: "50 min", d: "Fácil", src: "Continente · The Healthy Sins",
+    i: [
+      "1 c. sopa de azeite", "500 g de mandioca em pedaços", "4 tomates picados", "2 cebolas picadas", "Água q.b.",
+      "1 c. café de sal", "Pimenta q.b.", "2 folhas de louro", "800 g de costela de vaca em pedaços",
+      "4 dentes de alho esmagados", "Salsa picada q.b."
+    ],
+    p: [
+      "Num tacho, coloque o azeite e a mandioca.",
+      "Cubra com água e deixe cozinhar até a mandioca ficar bem macia e a desfazer-se.",
+      "Junte os tomates e as cebolas picados.",
+      "Junte água até cobrir, tempere com o sal, a pimenta e o louro. Mexa e deixe cozinhar alguns minutos.",
+      "Junte a costela de vaca e os alhos esmagados.",
+      "Deixe cozinhar em lume médio cerca de 40 minutos, até a carne ficar macia e o caldo apurado.",
+      "Sirva polvilhado com salsa picada."
+    ]
+  },
+
   // ───────────────────────── ENTRADAS, SOPAS E ACOMPANHAMENTOS ─────────────────────────
   {
     id: "veloute-cogumelos", t: "Creme de cogumelos", o: "Velouté de champignons", c: "entradas", e: "🥣",
@@ -963,6 +1060,23 @@ window.RECIPES = [
     ]
   },
 
+  {
+    id: "bolo-de-leite", t: "Bolo de leite", c: "bolos", e: "🥛",
+    s: [12, "fatias"], tm: "60 min", d: "Fácil", src: "Continente · The Healthy Sins",
+    i: [
+      "2 ovos", "395 g de leite condensado", "2 c. sopa de manteiga derretida", "90 g de açúcar branco", "800 ml de leite",
+      "240 g de farinha de trigo peneirada", "Açúcar em pó q.b."
+    ],
+    p: [
+      "Numa taça, bata bem os ovos, o leite condensado, a manteiga derretida, o açúcar e o leite.",
+      "Junte a farinha peneirada e envolva até a massa ficar lisa e sem grumos.",
+      "Verta numa forma untada.",
+      "Leve ao forno pré-aquecido a 180 °C, em banho-maria, cerca de 50 minutos, até estar cozido.",
+      "Deixe arrefecer ligeiramente e desenforme.",
+      "Sirva polvilhado com açúcar em pó."
+    ]
+  },
+
   // ───────────────────────── SOBREMESAS E DOCES ─────────────────────────
   {
     id: "pasteis-de-nata", t: "Pastéis de nata", c: "sobremesas", e: "🥧",
@@ -1487,6 +1601,249 @@ window.RECIPES = [
       "Retire do forno, polvilhe o fundo com a amêndoa em pó e espalhe os mirtilos por cima. Leve de novo ao forno 15 minutos.",
       "Entretanto, prepare o creme: bata os ovos e junte as natas, o açúcar e o açúcar baunilhado. Reserve.",
       "Retire a tarte do forno, verta o creme e coza mais 20 minutos."
+    ]
+  },
+
+  {
+    id: "quindim", t: "Quindim", c: "sobremesas", e: "🥥",
+    s: [8, "pessoas"], tm: "70 min", d: "Fácil", src: "Continente · The Healthy Sins",
+    i: [
+      "250 g de gemas de ovo", "200 g de açúcar branco", "100 ml de leite de coco", "50 ml de água", "100 g de coco ralado",
+      "Manteiga e açúcar em pó (para a forma)", "Coco ralado q.b. (para decorar)", "Raspa de lima q.b."
+    ],
+    p: [
+      "Numa taça, coloque as gemas peneiradas, o açúcar, o leite de coco, a água e o coco ralado. Mexa bem até ficar homogéneo.",
+      "Unte uma forma com manteiga, polvilhe com açúcar em pó e verta o preparado.",
+      "Leve ao forno pré-aquecido a 180 °C, em banho-maria, 45 a 55 minutos, até ficar firme.",
+      "Deixe arrefecer, desenforme e decore com coco ralado e raspa de lima."
+    ]
+  },
+  {
+    id: "dom-rodrigo", t: "Dom Rodrigo", c: "sobremesas", e: "✨",
+    s: [10, "pessoas"], tm: "35 min", d: "Fácil", src: "Continente · The Healthy Sins",
+    n: "Doce tradicional do Algarve.",
+    i: [
+      "# Doce de ovos", "250 g de açúcar branco", "200 ml de água", "50 g de amêndoas sem pele picadas", "4 gemas de ovo",
+      "# Fios de ovos", "50 g de açúcar branco", "35 ml de água", "250 g de fios de ovos",
+      "# Para servir", "Amêndoa laminada tostada q.b.", "Canela em pó q.b."
+    ],
+    p: [
+      "Num tacho, cubra os 250 g de açúcar com os 200 ml de água e leve a ferver até obter uma calda.",
+      "Junte as amêndoas picadas, misture e retire do lume.",
+      "Numa taça, passe as gemas por uma peneira e junte um pouco da calda quente, mexendo sempre para as gemas não cozerem.",
+      "Volte a levar a calda ao lume, junte as gemas e mexa sem parar cerca de 10 minutos, até engrossar. Retire do lume e deixe arrefecer.",
+      "Noutro tacho, leve a ferver os 50 g de açúcar com os 35 ml de água.",
+      "Junte os fios de ovos e envolva delicadamente.",
+      "Com o lume já desligado, junte o doce de ovos com amêndoa e envolva com cuidado com um garfo.",
+      "Distribua por taças individuais e deixe arrefecer.",
+      "Antes de servir, decore com amêndoa laminada tostada e polvilhe com canela."
+    ]
+  },
+  {
+    id: "baba-de-rinoceronte", t: "Baba de rinoceronte", c: "sobremesas", e: "🦏",
+    s: [6, "pessoas"], tm: "60 min", d: "Fácil", src: "Continente",
+    i: [
+      "# Mousse de chocolate", "3 gemas", "100 g de leite", "120 g de açúcar", "250 g de chocolate meio amargo", "250 ml de natas (para bater)",
+      "# Caramelo", "100 ml de natas", "15 g de manteiga", "120 g de açúcar", "1 pitada de sal",
+      "# Ganache", "200 g de chocolate", "100 g de natas",
+      "# Cobertura", "200 g de bolachas Maria (normais e de chocolate)", "200 g de natas (para bater)"
+    ],
+    p: [
+      "# Mousse",
+      "Bata as natas até ficarem bem firmes.",
+      "Num tacho, junte as gemas, o açúcar e o leite. Leve ao lume até ferver e engrossar ligeiramente.",
+      "Junte o chocolate e mexa até derreter. Deixe arrefecer e envolva as natas batidas.",
+      "# Caramelo",
+      "Noutro tacho, derreta o açúcar até ficar dourado.",
+      "Junte a manteiga com cuidado e mexa. Depois junte as natas aos poucos e a pitada de sal. Deixe arrefecer.",
+      "# Ganache",
+      "Derreta o chocolate com as natas no micro-ondas, de 30 em 30 segundos, mexendo sempre para não queimar. Reserve.",
+      "# Cobertura",
+      "Triture as bolachas em pedaços pequenos e reserve. Bata as natas até ficarem firmes.",
+      "# Montagem",
+      "Numa taça, faça uma camada de mousse, uma de caramelo e outra de ganache. Termine com as natas batidas e as bolachas trituradas.",
+      "Leve ao frigorífico até ficar firme."
+    ]
+  },
+  {
+    id: "mousse-de-limao", t: "Mousse de limão", c: "sobremesas", e: "🍋",
+    s: [8, "pessoas"], tm: "55 min", d: "Fácil", src: "Continente · The Healthy Sins",
+    i: [
+      "500 ml de natas", "1 lata de leite condensado magro", "150 ml de iogurte grego natural", "180 ml de sumo de limão",
+      "Bolacha Maria esfarelada q.b.", "Raspa de limão q.b."
+    ],
+    p: [
+      "Numa taça, bata as natas até ficarem firmes.",
+      "Junte o leite condensado e o iogurte grego e bata até obter um creme homogéneo.",
+      "Junte o sumo de limão em fio, mexendo delicadamente. Leve ao frigorífico cerca de 40 minutos.",
+      "Distribua por taças, alternando camadas de mousse com bolacha Maria esfarelada.",
+      "Termine com uma camada de mousse e decore com raspa de limão."
+    ]
+  },
+  {
+    id: "papos-de-anjo", t: "Papos de anjo", c: "sobremesas", e: "😇",
+    s: [8, "pessoas"], tm: "50 min", d: "Fácil", src: "Continente",
+    i: ["# Massa", "8 gemas", "2 ovos", "Manteiga e farinha (para as formas)", "# Calda", "600 g de açúcar", "500 ml de água", "1 pau de canela", "Casca de 1 limão"],
+    p: [
+      "Bata as gemas e os ovos com a batedeira elétrica até triplicarem de volume.",
+      "Verta a massa em forminhas de queque untadas com manteiga e polvilhadas com farinha, até meia altura.",
+      "Leve ao forno pré-aquecido a 200 °C durante 10 minutos, ou até estarem firmes e levemente dourados.",
+      "Calda: num tachinho, aqueça em lume médio o açúcar, a água, o pau de canela e a casca de limão até obter uma calda ligeiramente espessa.",
+      "Desenforme os papos de anjo, pique-os com um palito e passe-os pela calda ainda quente."
+    ]
+  },
+  {
+    id: "creme-brulee", t: "Crème brûlée", c: "sobremesas", e: "🔥",
+    s: [6, "pessoas"], tm: "2h30", d: "Fácil", src: "Continente · The Healthy Sins",
+    i: ["1 ovo", "4 gemas de ovo", "40 g de açúcar branco", "100 ml de bebida vegetal", "500 ml de natas", "1 vagem de baunilha", "Açúcar branco q.b. (para queimar)"],
+    p: [
+      "Bata o ovo com as gemas e o açúcar.",
+      "Junte a bebida vegetal, as natas e a baunilha. Distribua por ramequins e coza em banho-maria, no forno a 160 °C, durante 2 horas.",
+      "Polvilhe com açúcar e queime com o maçarico até formar um caramelo estaladiço."
+    ]
+  },
+  {
+    id: "pave", t: "Pavê", c: "sobremesas", e: "🍮",
+    s: [10, "pessoas"], tm: "85 min", d: "Fácil", src: "Continente · The Healthy Sins",
+    i: [
+      "600 ml de bebida vegetal de soja", "30 g de amido de milho", "2 latas de leite condensado magro", "400 g de creme de leite",
+      "Bolacha maizena (ou Maria) q.b.", "Leite q.b. (para molhar as bolachas)"
+    ],
+    p: [
+      "Num tacho, dissolva bem o amido de milho na bebida de soja.",
+      "Junte o leite condensado e leve ao lume, mexendo sempre, até obter um creme consistente.",
+      "Passe para uma taça, envolva o creme de leite e deixe arrefecer.",
+      "Numa travessa, faça uma camada de creme. Molhe as bolachas em leite e faça uma camada de bolacha.",
+      "Alterne camadas de creme e bolacha, terminando com creme.",
+      "Polvilhe com bolacha esfarelada e leve ao frio até servir. Sirva bem fresco."
+    ]
+  },
+  {
+    id: "pudim-de-castanhas", t: "Pudim de castanhas", c: "sobremesas", e: "🌰",
+    s: [8, "pessoas"], tm: "70 min", d: "Fácil", src: "Continente · The Healthy Sins",
+    i: [
+      "# Caramelo", "150 g de açúcar branco", "50 ml de água",
+      "# Pudim", "500 g de castanhas cozidas e peladas", "500 ml de leite ou bebida vegetal", "4 ovos", "150 g de açúcar branco",
+      "1 c. chá de essência de baunilha"
+    ],
+    p: [
+      "Num tacho, deixe caramelizar o açúcar com a água. Retire do lume.",
+      "Cubra o fundo e as paredes de uma forma de pudim com o caramelo e reserve.",
+      "No processador, triture as castanhas com o leite até obter um puré liso. Reserve.",
+      "Numa taça, bata os ovos com o açúcar e a baunilha.",
+      "Junte o puré de castanhas e envolva bem.",
+      "Verta na forma caramelizada.",
+      "Leve ao forno pré-aquecido a 180 °C, em banho-maria, cerca de 50 minutos.",
+      "Deixe arrefecer completamente, desenforme e sirva."
+    ]
+  },
+  {
+    id: "pudim-de-pao", t: "Pudim de pão", c: "sobremesas", e: "🍞",
+    s: [8, "pessoas"], tm: "60 min", d: "Fácil", src: "Continente · The Healthy Sins",
+    n: "Ótimo para aproveitar pão que sobrou.",
+    i: [
+      "# Caramelo", "150 g de açúcar branco", "100 ml de água",
+      "# Pudim", "250 ml de bebida vegetal morna", "300 g de pão em pedaços", "250 ml de bebida vegetal", "200 g de açúcar mascavado",
+      "4 ovos", "Raspa de limão q.b."
+    ],
+    p: [
+      "Num tacho pequeno, leve o açúcar e a água a ferver até virar caramelo. Retire do lume, verta numa forma de pudim e reserve.",
+      "Numa taça, deixe o pão amolecer na bebida vegetal morna.",
+      "Triture com a varinha mágica até ficar homogéneo.",
+      "Junte a restante bebida vegetal, o açúcar mascavado, os ovos e a raspa de limão e bata bem.",
+      "Verta na forma e coza em banho-maria, no forno a 180 °C, durante 40 minutos.",
+      "Desenforme e sirva."
+    ]
+  },
+  {
+    id: "pudim-abade-priscos", t: "Pudim Abade de Priscos", c: "sobremesas", e: "🍮",
+    s: [10, "pessoas"], tm: "1h30 + arrefecer", d: "Média", src: "Continente · The Healthy Sins",
+    n: "Clássico de Braga, presença habitual na consoada. Deixe arrefecer 3 a 4 horas antes de desenformar.",
+    i: [
+      "# Caramelo", "190 g de açúcar branco", "75 ml de água fria", "75 ml de vinho do Porto Ruby", "Azeite q.b. (para untar)",
+      "# Pudim", "340 g de açúcar branco", "375 ml de água", "1 pau de canela", "3 tiras de casca de limão (sem a parte branca)",
+      "40 g de toucinho em tiras", "14 gemas de ovo", "2 c. sopa de vinho do Porto"
+    ],
+    p: [
+      "Num tacho, deixe caramelizar o açúcar com a água fria até ficar dourado. Junte o vinho do Porto, deixe aromatizar uns instantes e retire do lume.",
+      "Unte uma forma com azeite, verta o caramelo e espalhe bem. Reserve.",
+      "Noutro tacho, junte o açúcar, a água, a canela, as cascas de limão e o toucinho. Deixe cozinhar até a calda chegar a cerca de 107 °C.",
+      "Numa taça, bata as gemas com o vinho do Porto. Junte a calda morna aos poucos, passando-a por uma peneira, e envolva delicadamente.",
+      "Verta na forma caramelizada e coza em banho-maria, no forno pré-aquecido a 150 °C, cerca de 1 hora.",
+      "Deixe arrefecer 3 a 4 horas antes de desenformar e sirva às fatias."
+    ]
+  },
+  {
+    id: "toucinho-ceu-peras-vinho", t: "Toucinho-do-céu com peras em vinho (Yämmi)", c: "sobremesas", e: "🍐",
+    s: [4, "pessoas"], tm: "82 min", d: "Média", src: "Hélio Loureiro · Continente Yämmi",
+    i: [
+      "# Toucinho-do-céu", "125 g de amêndoas peladas", "150 g de açúcar", "100 g de água", "25 g de manteiga (+ q.b. para untar)",
+      "2 ovos", "4 gemas", "Farinha q.b. (para polvilhar)", "Açúcar em pó q.b.",
+      "# Peras em vinho", "5 peras", "75 g de açúcar", "1 pau de canela", "100 g de vinho do Porto LBV", "250 g de vinho tinto",
+      "½ c. sobremesa de amido de milho (maizena)", "Água q.b."
+    ],
+    p: [
+      "# Toucinho-do-céu",
+      "Pré-aqueça o forno a 160 °C. Triture as amêndoas no copo 10 seg/vel 10. Retire e reserve.",
+      "No copo limpo, junte o açúcar e a água e programe 15 min/120 °C/vel 2. Junte a manteiga.",
+      "À parte, bata os ovos e as gemas com uma vara. Programe 1 min/vel 3 e, com a máquina a trabalhar, verta os ovos pela abertura da tampa. Junte as amêndoas e misture com a espátula.",
+      "Deite numa forma redonda de 15 a 20 cm forrada com papel vegetal untado e enfarinhado e leve ao forno 50 minutos. Deixe arrefecer, desenforme e polvilhe com açúcar em pó.",
+      "# Peras",
+      "Descasque as peras e retire o caroço com um tira-caroços. Coloque-as num tacho, polvilhe com o açúcar e junte a canela, o Porto e o vinho tinto. Cozinhe em lume muito brando 15 minutos e deixe arrefecer no caldo.",
+      "Retire as peras, corte-as ao meio e lamine-as em leque. Reserve a calda.",
+      "Dissolva a maizena num pouco de água fria, junte à calda e leve ao lume para engrossar.",
+      "Sirva cada fatia de toucinho-do-céu com pera laminada e calda."
+    ]
+  },
+  {
+    id: "gelado-frito", t: "Gelado frito", c: "sobremesas", e: "🍨",
+    s: [4, "pessoas"], tm: "2h25", d: "Fácil", src: "Continente · The Healthy Sins",
+    i: [
+      "4 bolas de gelado (sabor à escolha)", "150 g de corn flakes", "50 g de farinha de trigo", "2 ovos batidos",
+      "Óleo vegetal q.b. (para fritar)", "Caramelo líquido q.b."
+    ],
+    p: [
+      "Prepare 4 bolas de gelado bem firmes.",
+      "Triture os corn flakes e passe cada bola por eles.",
+      "Envolva cada bola em película aderente e leve ao congelador 1 hora. Retire a película.",
+      "Passe cada bola por farinha e depois por ovo batido.",
+      "Volte a passar por corn flakes, pressionando ligeiramente.",
+      "Leve de novo ao congelador pelo menos 1 hora, para o revestimento ficar bem firme.",
+      "Aqueça bastante óleo numa frigideira ou fritadeira.",
+      "Frite cada bola apenas alguns segundos, até ficar dourada e estaladiça.",
+      "Retire logo e escorra rapidamente em papel absorvente.",
+      "Sirva de imediato, decorado com caramelo líquido."
+    ]
+  },
+  {
+    id: "mousse-de-oreo", t: "Mousse de Oreo", c: "sobremesas", e: "🍪",
+    s: [4, "pessoas"], tm: "10 min + 4 h", d: "Fácil", src: "Continente",
+    i: ["180 g de bolachas Oreo", "350 g de natas", "200 g de leite condensado", "400 g de bolachas mini Oreo (para decorar)"],
+    p: [
+      "Triture as bolachas numa picadora e reserve.",
+      "Bata as natas até ficarem firmes.",
+      "Junte o leite condensado e envolva delicadamente, juntando as bolachas trituradas.",
+      "Verta em tacinhas e leve ao frigorífico 4 horas.",
+      "Decore com mini Oreo e sirva bem fresca."
+    ]
+  },
+  {
+    id: "natas-do-ceu", t: "Natas do céu", c: "sobremesas", e: "☁️",
+    s: [10, "pessoas"], tm: "20 min + 3 h", d: "Média", src: "Continente",
+    i: [
+      "# Doce de ovos", "100 ml de água", "100 g de açúcar", "4 gemas",
+      "# Creme", "200 g de bolacha Maria", "4 claras", "100 g de açúcar", "200 ml de natas"
+    ],
+    p: [
+      "# Doce de ovos",
+      "Num tacho, leve a água e o açúcar ao lume até a calda atingir o ponto de pérola (108 °C).",
+      "Retire do lume e deixe arrefecer 5 a 10 minutos. Junte as gemas em fio, sem parar de mexer. Volte ao lume até ficar consistente e leve ao frigorífico.",
+      "# Creme",
+      "Triture as bolachas numa picadora e reserve.",
+      "Bata as claras com o açúcar até formar um merengue.",
+      "Bata as natas bem frias até ficarem firmes e misture-as delicadamente com o merengue.",
+      "# Montagem",
+      "Em taças, coloque primeiro a bolacha e depois o creme. Leve ao frigorífico 3 horas, cubra com o doce de ovos e sirva frio."
     ]
   },
 
