@@ -93,6 +93,8 @@
     if (w.length < 3 || /^[A-Z0-9]/.test(w) && w.length < 3) return w;
     if (plural) {
       if (/[aeiouáéíóú]s$|[^aeiou]s$|ões$|ães$/.test(w)) return w;
+      if (/^(pão|cão|alemão|capitão)$/.test(w)) return w.slice(0, -2) + "ães";
+      if (/^(mão|irmão|cidadão|grão)$/.test(w)) return w + "s";
       if (/ão$/.test(w)) return w.slice(0, -2) + "ões";
       if (/m$/.test(w)) return w.slice(0, -1) + "ns";
       if (/[rz]$/.test(w)) return w + "es";
@@ -101,6 +103,7 @@
       return w;
     }
     if (/ões$|ães$/.test(w)) return w.slice(0, -3) + "ão";
+    if (/ãos$/.test(w)) return w.slice(0, -1);
     if (/ns$/.test(w)) return w.slice(0, -2) + "m";
     if (/[rz]es$/.test(w)) return w.slice(0, -2);
     if (/[aeiouáéíóú]s$/.test(w)) return w.slice(0, -1);

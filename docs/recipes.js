@@ -614,6 +614,283 @@ window.RECIPES = [
     ]
   },
 
+  {
+    id: "sopa-de-peixe-jose-alves", t: "Sopa de peixe tradicional", c: "entradas", e: "🐟",
+    s: [5, "pessoas"], tm: "1h10", d: "Fácil", src: "Chef José Alves · Cookpad",
+    u: "https://cookpad.com/pt/receitas/24917493",
+    n: "Para 4 a 6 pessoas. Para uma versão mais rica, junte camarão, amêijoas ou mexilhões nos últimos minutos.",
+    i: [
+      "# Caldo", "500 g de peixe branco (pescada, tamboril ou garoupa)", "1 cebola em quartos", "1 cenoura às rodelas", "1 folha de louro",
+      "1 ramo de salsa", "1 dente de alho esmagado", "Água q.b.", "Sal q.b.",
+      "# Sopa", "1 cebola picada", "2 dentes de alho picados", "2 tomates maduros (ou 1 lata pequena de tomate pelado)",
+      "1 pimento vermelho (opcional)", "1 cenoura ralada ou em cubinhos", "1 batata grande em cubos", "2 c. sopa de azeite",
+      "1 c. chá de pimentão-doce", "Piripiri ou malagueta (opcional)", "Sal e pimenta q.b.", "Coentros ou salsa picada q.b.",
+      "Fatias de pão torrado (opcional)"
+    ],
+    p: [
+      "# Caldo",
+      "Numa panela grande, junte o peixe, a cebola, a cenoura, o louro, o alho, a salsa e a água. Tempere com sal e deixe ferver em lume médio 20 a 25 minutos.",
+      "Coe o caldo e reserve. Desfie o peixe, retirando espinhas e peles.",
+      "# Sopa",
+      "Numa panela, aqueça o azeite e refogue a cebola e o alho até ficarem translúcidos.",
+      "Junte o tomate picado, o pimento, a cenoura e a batata e deixe cozinhar alguns minutos.",
+      "Junte o pimentão-doce e tempere com sal, pimenta e piripiri, se quiser.",
+      "Junte o caldo coado e deixe cozinhar 20 a 30 minutos, até os legumes ficarem macios.",
+      "# Finalizar",
+      "Triture a sopa com a varinha (opcional, para ficar mais cremosa).",
+      "Junte o peixe desfiado e deixe ferver mais 5 minutos. Retifique os temperos.",
+      "Sirva quente, polvilhada com coentros ou salsa, com pão torrado ou croutons."
+    ]
+  },
+  {
+    id: "creme-abobora-frango", t: "Creme de abóbora com frango desfiado", c: "entradas", e: "🎃",
+    s: [4, "pessoas"], tm: "30 min", d: "Fácil", src: "Receiteria",
+    n: "Fica bem com torradas e um toque de gengibre.",
+    i: [
+      "½ abóbora (tipo hokkaido/kabocha) descascada em pedaços", "Água q.b. (para cozer a abóbora)", "Caldo da cozedura do frango q.b.",
+      "1 fio de azeite", "½ cebola picada", "2 dentes de alho picados", "250 g de frango cozido e desfiado",
+      "3 c. sopa de tomate de lata", "Sal e pimenta preta a gosto", "Cebolinho picado a gosto"
+    ],
+    p: [
+      "Numa panela, cubra a abóbora com água e deixe cozer até ficar bem macia.",
+      "Escorra e passe a abóbora para a liquidificadora. Junte um pouco do caldo do frango e triture até formar um creme. Reserve.",
+      "Noutra panela, aqueça o azeite e aloure a cebola e o alho. Junte o frango e o tomate e deixe refogar mais um pouco.",
+      "Junte o creme de abóbora, tempere com sal e pimenta e cozinhe em lume brando cerca de 5 minutos.",
+      "Polvilhe com cebolinho, misture e sirva."
+    ]
+  },
+  {
+    id: "creme-grao-de-bico", t: "Creme de grão-de-bico com linguiça", c: "entradas", e: "🥣",
+    s: [5, "pessoas"], tm: "40 min", d: "Fácil", src: "Receiteria",
+    i: [
+      "2 latas de grão-de-bico cozido", "2 tomates maduros (tipo italiano)", "1 cenoura", "1 talo de aipo", "½ cebola média",
+      "1 dente de alho", "1 l de água", "½ c. chá de cominhos em pó", "1 c. chá de pimentão-doce", "1 folha de louro",
+      "200 g de linguiça fina", "2 c. sopa de azeite", "Sal a gosto", "Pimenta preta a gosto"
+    ],
+    p: [
+      "Escorra o grão. Descasque e pique em cubinhos a cebola, a cenoura e o alho. Corte o talo de aipo (sem folhas) em cubos e o tomate em cubinhos, sem sementes.",
+      "Aqueça uma panela em lume médio com 1 colher de sopa de azeite. Refogue a cebola, a cenoura e o aipo com 1 colher de chá de sal, cerca de 3 minutos.",
+      "Junte o tomate e mexa até se desfazer numa pasta. Junte o alho, os cominhos, o pimentão-doce e o louro e mexa mais 1 minuto.",
+      "Junte 2/3 do grão e a água. Quando ferver, baixe o lume e deixe apurar 20 minutos.",
+      "Entretanto, numa frigideira antiaderente com o resto do azeite, aloure as linguiças inteiras com o resto do grão, cerca de 10 minutos. Reserve o grão na frigideira.",
+      "Retire as linguiças e corte-as em rodelas com cerca de um dedo de largura.",
+      "Retire o louro da sopa e triture tudo na liquidificadora até ficar bem liso.",
+      "Volte a pôr o creme na panela com o grão alourado e deixe apurar mais 3 minutos.",
+      "Sirva com a linguiça e um pouco de grão estaladiço por cima."
+    ]
+  },
+  {
+    id: "sopa-brocolos-cenoura", t: "Sopa cremosa de brócolos com cenoura", c: "entradas", e: "🥦",
+    s: [4, "pessoas"], tm: "50 min", d: "Fácil", src: "Receiteria",
+    n: "Para os brócolos ficarem bem verdes, passe-os por água com gelo logo depois de cozidos. Com caldo de legumes caseiro em vez de água fica ainda melhor.",
+    i: [
+      "1 brócolo pequeno", "Azeite a gosto", "2 cenouras pequenas", "2 talos de aipo", "½ cebola", "3 dentes de alho",
+      "Sal e pimenta preta a gosto", "1 c. chá de ervas finas secas", "Água q.b.", "1 c. sopa de natas ou iogurte natural"
+    ],
+    p: [
+      "Separe os raminhos do brócolo e pique o talo.",
+      "Descasque e pique as cenouras, o aipo, a cebola e o alho.",
+      "Numa panela alta, aqueça um fio de azeite e refogue a cenoura e o aipo em lume médio cerca de 5 minutos.",
+      "Junte a cebola e refogue mais 3 minutos.",
+      "Junte o alho, tempere com sal e ervas finas e refogue 1 minuto.",
+      "Cubra com água e deixe cozinhar em lume brando cerca de 30 minutos, sem ferver muito (junte água se reduzir).",
+      "Noutra panela, ferva água com sal e coza os raminhos de brócolo 3 a 4 minutos. Escorra e reserve.",
+      "Quando as cenouras estiverem macias, junte o talo do brócolo picado e cozinhe 4 minutos. Desligue.",
+      "Triture na liquidificadora com as natas até ficar homogéneo. Retifique sal e pimenta.",
+      "Sirva com os raminhos de brócolo por cima."
+    ]
+  },
+  {
+    id: "sopa-cremosa-cebola", t: "Sopa cremosa de cebola", c: "entradas", e: "🧅",
+    s: [2, "pessoas"], tm: "45 min", d: "Fácil", src: "Receiteria",
+    n: "Pode acompanhar com bacon frito ou torradas.",
+    i: [
+      "1 c. sopa de manteiga (15 g)", "3 c. sopa de azeite (45 ml)", "3 cebolas grandes", "3 batatas grandes", "Água q.b. (para cozer as batatas)",
+      "2 c. chá de sal", "1 folha de louro", "1 c. chá de pimentão-doce fumado", "Malagueta seca em flocos a gosto",
+      "Pimenta preta a gosto", "1 c. sopa de farinha de trigo (20 g)", "200 g de natas", "30 g de queijo parmesão ralado"
+    ],
+    p: [
+      "Descasque e pique as cebolas em cubos pequenos. Descasque e corte as batatas em cubos médios.",
+      "Numa panela grande, derreta a manteiga com o azeite em lume brando.",
+      "Junte as cebolas e refogue em lume brando 8 minutos, mexendo de vez em quando, até ficarem bem douradas e levemente caramelizadas.",
+      "Entretanto, cubra as batatas com água noutra panela e tempere com o sal, o louro, o pimentão fumado e as pimentas.",
+      "Coza 15 minutos, até as batatas ficarem bem macias.",
+      "Retire o louro e triture as batatas com 200 ml da água da cozedura até ficar um creme liso. Guarde o resto da água.",
+      "Junte a farinha às cebolas e refogue 2 a 3 minutos.",
+      "Junte o creme de batata e misture.",
+      "Aos poucos, junte cerca de 100 ml da água reservada, mexendo, até ficar com a cremosidade que quer.",
+      "Deixe cozinhar 5 minutos.",
+      "Junte as natas e misture sem deixar ferver muito. Retifique sal e pimenta.",
+      "Sirva bem quente com o parmesão por cima."
+    ]
+  },
+  {
+    id: "sopa-cremosa-frango-legumes", t: "Sopa cremosa de frango com legumes", c: "entradas", e: "🍗",
+    s: [1, "pessoa"], tm: "20 min", d: "Fácil", src: "Receiteria",
+    n: "Boa forma de aproveitar sobras de frango assado ou estufado. A mandioquinha é uma raiz brasileira; pode usar batata-doce ou pastinaca.",
+    i: [
+      "100 g de mandioquinha (ou batata-doce) cozida, às rodelas", "100 g de cenoura cozida, às rodelas",
+      "2,5 chávenas de água da cozedura dos legumes", "100 g de peito de frango cozido, desfiado e temperado",
+      "Cebolinho picado a gosto", "Pimenta preta a gosto", "Sal a gosto"
+    ],
+    p: [
+      "Triture na liquidificadora a mandioquinha, a cenoura, a água da cozedura e o sal até ficar homogéneo.",
+      "Deite a sopa numa taça, junte o frango, o cebolinho e a pimenta e misture.",
+      "Aqueça no micro-ondas ou num tacho e sirva."
+    ]
+  },
+  {
+    id: "sopa-de-carne", t: "Sopa de carne (panela de pressão)", c: "entradas", e: "🥩",
+    s: [5, "pessoas"], tm: "60 min", d: "Fácil", src: "Receiteria",
+    i: [
+      "300 g de chambão ou acém em cubos médios", "300 g de abóbora picada", "100 g de feijão-verde picado", "1 cenoura picada",
+      "1 cebola em cubos", "⅓ de talo de alho-francês", "Caldo de carne, de legumes ou água q.b.", "1 c. sopa de manteiga",
+      "½ limão", "Ervas a gosto", "Sal e pimenta preta a gosto", "Azeite q.b. (para refogar)"
+    ],
+    p: [
+      "Tempere a carne com sal e pimenta e reserve.",
+      "Aqueça a panela de pressão com um fio de azeite e sele a carne até dourar dos dois lados.",
+      "Junte a cebola, o alho-francês, a cenoura e a abóbora e refogue.",
+      "Junte caldo ou água até cinco dedos acima dos ingredientes.",
+      "Ajuste os temperos, feche a panela e cozinhe 20 minutos depois de ganhar pressão.",
+      "Deixe sair a pressão, abra e junte o feijão-verde; cozinhe 3 minutos.",
+      "Termine com o sumo de meio limão, as ervas e a manteiga. Sirva."
+    ]
+  },
+  {
+    id: "sopa-de-cenoura", t: "Sopa de cenoura", c: "entradas", e: "🥕",
+    s: [2, "pessoas"], tm: "40 min", d: "Fácil", src: "Receiteria",
+    n: "Para variar, termine com um fio de azeite, natas, parmesão, gengibre ralado, noz-moscada ou salva. Ajuste o sal só no fim.",
+    i: [
+      "1 c. sopa de azeite", "½ cebola", "2 dentes de alho", "3 cenouras", "½ batata", "Sal a gosto", "Pimenta preta a gosto",
+      "480 ml de caldo de legumes", "Cebolinho picado q.b."
+    ],
+    p: [
+      "Pique a cebola em cubos pequenos e o alho finamente. Descasque as cenouras e corte-as em meias-luas. Corte a batata em cubos médios.",
+      "Aqueça o azeite numa panela e refogue a cebola até ficar transparente. Junte o alho e refogue 3 minutos, até alourar ligeiramente.",
+      "Junte a cenoura e refogue cerca de 2 minutos.",
+      "Junte a batata e tempere com sal e pimenta.",
+      "Junte o caldo e cozinhe cerca de 20 minutos, até a cenoura e a batata ficarem macias.",
+      "Desligue o lume e deixe repousar cerca de 10 minutos.",
+      "Triture com a varinha (ou na liquidificadora) até ficar um creme liso.",
+      "Sirva quente, com cebolinho picado."
+    ]
+  },
+  {
+    id: "sopa-ervilha-batata", t: "Sopa de ervilha com batata (panela de pressão)", c: "entradas", e: "🫛",
+    s: [8, "pessoas"], tm: "20 min", d: "Fácil", src: "Receiteria",
+    i: [
+      "1 cebola", "½ alho-francês", "500 g de ervilha seca partida", "10 batatas pequenas inteiras (ou 3 grandes ao meio)",
+      "Água q.b. (até cobrir bem)", "½ c. sopa de tomilho fresco", "½ c. sopa de pimentão-doce fumado", "½ c. sopa de alho em pó",
+      "½ c. sopa de cebola em pó", "Sal a gosto"
+    ],
+    p: [
+      "Descasque e pique a cebola em cubinhos. Corte o alho-francês finamente.",
+      "Na panela de pressão, refogue a cebola até ficar translúcida. Junte o alho-francês e refogue mais 2 minutos.",
+      "Junte a ervilha partida e refogue cerca de 3 minutos.",
+      "Junte as batatas e água até cobrir bem (cerca de um palmo acima). Misture.",
+      "Tempere com sal, tomilho, pimentão fumado, alho em pó e cebola em pó.",
+      "Feche a panela e, depois de ganhar pressão, cozinhe cerca de 7 minutos.",
+      "Deixe a pressão sair naturalmente, abra e deixe ferver mais 5 minutos para engrossar.",
+      "Ajuste o sal e sirva."
+    ]
+  },
+  {
+    id: "sopa-ervilha-simples", t: "Sopa de ervilha simples", c: "entradas", e: "🫛",
+    s: [8, "pessoas"], tm: "75 min", d: "Fácil", src: "Receiteria",
+    n: "Demolhe a ervilha em água morna pelo menos 2 horas antes. Não use panela de pressão: a ervilha pode entupir a válvula. Quem não for vegetariano pode juntar bacon frito em cubinhos.",
+    i: ["½ cabeça de alho", "1 kg de ervilha seca partida", "Azeite a gosto", "1 c. chá de sal", "3 l de água"],
+    p: [
+      "Descasque o alho e esmague-o bem num almofariz.",
+      "Lave a ervilha em água corrente e escorra bem.",
+      "Numa panela grande, aqueça o azeite e aloure ligeiramente o alho.",
+      "Junte a ervilha e refogue cerca de 5 minutos. Cubra com a água, tempere com o sal e misture bem.",
+      "Coza cerca de 1 hora, até os grãos ficarem bem macios e a sopa cremosa."
+    ]
+  },
+  {
+    id: "sopa-feijao-legumes", t: "Sopa de feijão com legumes e massa", c: "entradas", e: "🫘",
+    s: [2, "pessoas"], tm: "30 min", d: "Fácil", src: "Receiteria",
+    n: "Para uma sopa mais rala, passe o feijão batido por um passador. Pode usar os legumes que tiver e juntar pimento ou alho-francês ao refogado.",
+    i: [
+      "1 chávena de massa miúda (estrelinhas ou cotovelinhos)", "500 g de feijão cozido", "700 ml de água", "2 chuchus", "2 cenouras",
+      "2 batatas", "4 dentes de alho esmagados", "½ cebola pequena picada", "4 c. sopa de azeite", "340 g de molho de tomate",
+      "Salsa e cebolinho a gosto", "Sal, pimenta preta e pimentão-doce a gosto"
+    ],
+    p: [
+      "Triture o feijão cozido com a água na liquidificadora até obter um caldo liso. Reserve.",
+      "Pique os chuchus, as cenouras e as batatas em pedaços pequenos.",
+      "Numa panela, aqueça um fio de azeite e refogue a cebola e o alho.",
+      "Junte os legumes e cozinhe cerca de 7 minutos, até ficarem al dente. Tempere com sal, pimentão-doce e pimenta.",
+      "Junte o caldo de feijão e o molho de tomate.",
+      "Junte a massa e coza 6 a 8 minutos em lume médio, mexendo de vez em quando para não pegar.",
+      "Desligue, termine com salsa e cebolinho e retifique os temperos."
+    ]
+  },
+  {
+    id: "sopa-legumes-alho-frances", t: "Sopa de legumes com alho-francês", c: "entradas", e: "🥬",
+    s: null, tm: "25 min", d: "Fácil", src: "Receiteria",
+    n: "A receita original dá cerca de 380 g de sopa (1 a 2 pessoas).",
+    i: [
+      "1 batata grande", "1 cebola média", "½ alho-francês", "Sal a gosto", "1 c. sopa de óleo", "¼ c. chá de pimenta preta",
+      "500 ml de água", "1 cubo de caldo de legumes", "1 c. chá de cebolinho", "1 c. sopa de azeite"
+    ],
+    p: [
+      "Descasque a cebola e corte-a em pedaços pequenos. Corte o alho-francês em rodelas finas e pique-as. Descasque a batata e corte-a em cubos pequenos.",
+      "Numa panela média, aqueça o óleo em lume médio e refogue a cebola cerca de 2 minutos, até ficar transparente.",
+      "Junte o alho-francês e refogue mais 2 a 3 minutos, até ficar macio.",
+      "Junte a batata e o cubo de caldo e misture bem.",
+      "Cubra com a água, mexa, tape e deixe ferver. Depois baixe para lume médio-brando e cozinhe até a batata ficar bem macia.",
+      "Triture com a varinha (cuidado com os salpicos). Se ficar grossa, junte um pouco de água. Ajuste sal e pimenta.",
+      "Sirva com cebolinho picado e um fio de azeite."
+    ]
+  },
+  {
+    id: "sopa-lentilhas-cenoura", t: "Sopa de lentilhas com cenoura e especiarias", c: "entradas", e: "🍲",
+    s: [8, "pessoas"], tm: "25 min + demolhar", d: "Fácil", src: "Receiteria",
+    n: "As lentilhas ficam de molho 12 horas antes. Feita em panela de pressão.",
+    i: [
+      "150 g de lentilhas (demolhadas 12 horas)", "1 c. sopa de azeite", "½ cebola em cubos", "2 dentes de alho picados",
+      "1 c. chá de curcuma (açafrão-da-terra)", "2 dentes de alho inteiros", "1 cenoura média em cubos", "50 g de bacon em cubos",
+      "500 ml de água", "1 tomate médio em cubos", "Salsa picada a gosto", "Sal a gosto"
+    ],
+    p: [
+      "Na panela de pressão, aloure o bacon.",
+      "Junte o azeite, a cebola, o alho picado e a curcuma e deixe fritar mais um pouco.",
+      "Junte os dois dentes de alho inteiros, as lentilhas escorridas e a cenoura. Misture.",
+      "Junte a água, feche a panela e cozinhe cerca de 3 minutos depois de ganhar pressão.",
+      "Deixe sair a pressão, abra e junte o tomate e a salsa.",
+      "Confirme que as lentilhas estão cozidas, acerte o sal e sirva quente."
+    ]
+  },
+  {
+    id: "sopa-de-frango", t: "Sopa de frango com massa e legumes", c: "entradas", e: "🍜",
+    s: [5, "pessoas"], tm: "1h40", d: "Média", src: "Receiteria",
+    n: "Use caldo de galinha ou de legumes em vez de água para mais sabor. O limão e os ovos cozidos servem para acompanhar.",
+    i: [
+      "400 g de sobrecoxas de frango", "2 c. sopa de azeite", "1 c. sopa rasa de sal (ou a gosto)", "1 c. chá de pimenta preta",
+      "½ cebola roxa (70 g)", "½ cebola branca (90 g)", "1 cenoura (160 g)", "300 g de abóbora (tipo hokkaido/kabocha)",
+      "2 dentes de alho", "1 c. sopa de gengibre ralado na hora", "1 c. sopa de malagueta suave picada",
+      "1 c. chá de mistura de especiarias (baharat / 7 especiarias)", "1 c. sopa de concentrado de tomate", "½ lima",
+      "8 raminhos de coentros (talos e folhas)", "1 chávena de massa conchinhas (120 g)", "½ chávena de vinho branco seco (opcional)",
+      "3 cascas de parmesão (opcional)", "1,5 l de caldo de galinha ou água", "2 folhas de louro", "1 chávena de ervilhas congeladas (120 g)",
+      "3 ovos cozidos (opcional)"
+    ],
+    p: [
+      "Corte as cebolas em cubos médios. Corte a cenoura e a abóbora descascada em cubos médios.",
+      "Descasque e pique o alho. Separe as folhas dos coentros para o fim e fatie finamente os talos.",
+      "Corte as sobrecoxas em pedaços (de preferência com pele), separando os ossos. Tempere carne e ossos com sal e pimenta.",
+      "Numa panela grande em lume médio, aqueça o azeite e aloure o frango com a pele para baixo, em duas vezes. Vire e aloure do outro lado. Faça o mesmo com os ossos. Retire e reserve.",
+      "Na mesma panela, em lume mais brando, aloure as cebolas.",
+      "Junte a cenoura, a abóbora e o alho e refogue, mexendo.",
+      "Junte os talos dos coentros, o gengibre, a malagueta e o concentrado de tomate. Tempere com sal e as especiarias.",
+      "Junte a massa, o vinho, o frango (com os ossos) e as cascas de parmesão e misture.",
+      "Junte o caldo até três dedos acima dos ingredientes e o louro. Cozinhe até a massa ficar al dente (ver embalagem).",
+      "Quase no fim, junte as ervilhas e cozinhe mais 2 minutos.",
+      "Termine com as folhas de coentros e sirva com a lima e os ovos cozidos, se quiser."
+    ]
+  },
+
   // ───────────────────────── SALGADOS E PETISCOS ─────────────────────────
   {
     id: "croquetes-carne", t: "Croquetes de carne", c: "petiscos", e: "🥖",
@@ -717,6 +994,57 @@ window.RECIPES = [
       "Numa taça, misture o vinho, o azeite e os ovos, um a um.",
       "Junte a farinha, o queijo ralado, o fermento e o sal e, por fim, o fiambre e as azeitonas cortadas ao meio.",
       "Coza numa forma de cake untada e enfarinhada durante 45 minutos a 190 °C."
+    ]
+  },
+
+  {
+    id: "pao-alentejano-recheado", t: "Pão alentejano recheado", c: "petiscos", e: "🥖",
+    s: [1, "pão"], tm: "50 min", d: "Fácil", src: "SaborIntenso (taniam55)",
+    n: "Pode trocar a linguiça por 1 chouriço, 150 g de fiambre ou 150 g de bacon. Truque da autora: use um frasco grande de maionese (450 ml) e, nos últimos 10 minutos, tire o alumínio e a tampa para tostar. Há quem junte 2 dentes de alho picados e pimenta.",
+    i: [
+      "1 pão alentejano ou de Rio Maior (cerca de 1 kg)", "200 g de queijo da ilha ralado", "200 g de queijo mozzarella ralado",
+      "200 g de queijo emmental ralado", "1 frasco de maionese (225 ml)", "4 linguiças (cerca de 150 g)"
+    ],
+    p: [
+      "Corte uma tampa no cimo do pão e escave o interior sem romper, até ficar só a côdea.",
+      "Tire a pele à linguiça e pique-a na picadora.",
+      "Numa taça grande, misture bem os queijos, a maionese e a linguiça.",
+      "Recheie o pão, ponha a tampa e embrulhe em papel de alumínio.",
+      "Leve ao forno pré-aquecido a 200 °C cerca de 40 minutos, até o queijo derreter.",
+      "Sirva de imediato com tostas ou com o miolo do pão tostado 5 minutos no forno."
+    ]
+  },
+  {
+    id: "pao-recheado-alheira", t: "Pão recheado com alheira", c: "petiscos", e: "🥖",
+    s: [8, "pessoas"], tm: "45 min", d: "Fácil", src: "Pingo Doce",
+    n: "Para uma versão mais completa, junte ovos mexidos e cogumelos salteados ao recheio. Sirva com o miolo tostado em cubos.",
+    i: [
+      "400 g de pão da avó", "1 c. sopa de azeite", "3 c. sopa de cebola picada", "1 dente de alho", "50 g de chouriço de carne",
+      "1 alheira", "100 g de queijo creme", "150 g de queijo mozzarella ralado", "2 c. sopa de maionese", "100 g de espinafres", "Pimenta q.b."
+    ],
+    p: [
+      "Pré-aqueça o forno a 180 °C.",
+      "Corte uma tampa no pão e retire o miolo.",
+      "Aqueça o azeite numa frigideira e refogue a cebola e o alho picados durante 2 minutos.",
+      "Junte o chouriço picado e cozinhe mais 3 minutos. Junte a alheira às fatias e cozinhe cerca de 5 minutos.",
+      "Desfaça a alheira e junte o queijo creme, ¾ da mozzarella, a maionese e os espinafres. Deixe o queijo derreter e tempere com pimenta.",
+      "Recheie o pão, polvilhe com o resto do queijo e leve ao forno cerca de 15 minutos, até dourar."
+    ]
+  },
+  {
+    id: "pao-recheado-queijo-linguica", t: "Pão recheado com queijo e linguiça", c: "petiscos", e: "🧀",
+    s: [6, "pessoas"], tm: "30 min", d: "Fácil", src: "Continente · The Healthy Sins",
+    i: [
+      "1 pão saloio redondo grande", "1 linguiça", "1 chouriço", "2 dentes de alho", "150 g de queijo mozzarella ralado",
+      "50 g de queijo emmental ralado", "300 g de maionese", "Orégãos q.b.", "Azeite q.b."
+    ],
+    p: [
+      "Retire a pele aos enchidos, corte-os às rodelas e triture-os bem na picadora.",
+      "Numa taça, misture a maionese, os queijos, os enchidos, o alho picado e um pouco de orégãos. Reserve.",
+      "Corte a tampa do pão e retire o miolo, fazendo uma cavidade. Guarde a tampa e o miolo.",
+      "Recheie o pão, polvilhe com mais orégãos, tape e coloque num tabuleiro.",
+      "Espalhe à volta o miolo em pedaços pequenos e regue com azeite.",
+      "Leve ao forno 20 minutos a 200 °C."
     ]
   },
 
