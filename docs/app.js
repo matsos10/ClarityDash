@@ -350,6 +350,7 @@
           <div class="source">
             ${r.src ? `<span>Fonte: ${esc(r.src)}</span>` : ""}
             ${drive ? `<a class="drive-link" href="${drive}" target="_blank" rel="noopener">${I.drive} Ver original no Google Drive</a>` : ""}
+            ${r.u ? `<a class="drive-link" href="${esc(r.u)}" target="_blank" rel="noopener">${I.share} Ver receita original</a>` : ""}
           </div>
         </div>
       </div>

@@ -8,6 +8,7 @@
  *   s     [n, "pessoas"]    doses base (null = receita sem nº de doses → multiplicador)
  *   tm    tempo             d   dificuldade
  *   src   fonte             f   id do ficheiro no Drive ("doc:" para Google Docs)
+ *   u     endereço da receita original na internet (opcional)
  *   n     nota (opcional)
  *   i     ingredientes — "200 g de farinha"; "# Título" cria uma secção;
  *         "(s)" e "{singular|plural}" ajustam o plural à quantidade.
@@ -323,6 +324,83 @@ window.RECIPES = [
     ]
   },
 
+  {
+    id: "bochechas-porco-estufadas", t: "Bochechas de porco estufadas", c: "pratos", e: "🐖",
+    s: [6, "pessoas"], tm: "75 min", d: "Média", src: "Continente · The Healthy Sins",
+    n: "Prato da tradição alentejana. Sirva com puré de batata.",
+    i: [
+      "800 g de bochechas de porco", "2 cebolas pequenas", "5 dentes de alho", "2 cenouras", "½ pimento vermelho",
+      "1 c. chá de massa de pimentão", "100 ml de polpa de tomate", "200 ml de vinho branco", "1 folha de louro",
+      "Azeite q.b.", "Sal q.b.", "Pimenta q.b.", "Salsa q.b.", "Puré de batata q.b."
+    ],
+    p: [
+      "Corte as cebolas em meias-luas e pique o alho. Reserve.",
+      "Corte as cenouras e o pimento em cubos pequenos. Reserve.",
+      "Num tacho, refogue a cebola num fio de azeite com o louro e o alho picado.",
+      "Junte a cenoura e o pimento e deixe refogar alguns instantes.",
+      "Junte as bochechas, a massa de pimentão, a polpa de tomate e o vinho branco. Tempere com sal e pimenta a gosto e cozinhe cerca de 60 minutos, mexendo regularmente.",
+      "Sirva com puré de batata e salsa a gosto."
+    ]
+  },
+  {
+    id: "vaca-molho-ostras", t: "Vaca com molho de ostras", c: "pratos", e: "🥩",
+    s: null, tm: "40 min", d: "Fácil", src: "Cátia Goarmon · 24Kitchen",
+    u: "https://www.24kitchen.pt/receita/vaca-com-molho-de-ostras",
+    i: [
+      "# Carne", "400 g de carne de vaca", "1 cebola em cubos", "1 pimento verde em cubos", "2 dentes de alho",
+      "1 c. sopa de molho de soja escuro", "50 ml de vinho Shaoxing", "1 c. sopa de óleo de sésamo", "100 ml de caldo de legumes",
+      "70 ml de molho de ostras", "2 c. chá de gengibre fresco picado", "1 c. sopa de farinha de araruta", "1 pitada de sal",
+      "Óleo de sésamo q.b. (para fritar no wok)",
+      "# Arroz", "200 g de arroz basmati lavado", "Água (o dobro do volume do arroz)", "Sal q.b."
+    ],
+    p: [
+      "Tempere a carne com o óleo de sésamo, o alho, o molho de soja escuro, o vinho Shaoxing e uma pitada de sal. Frite a carne com a marinada num fio de óleo de sésamo.",
+      "Leve ao lume o arroz lavado coberto com o dobro do volume de água. Tempere com sal, tape e deixe cozer.",
+      "Retire a carne e, no mesmo wok, frite a cebola, o pimento e o gengibre.",
+      "Volte a juntar a carne, o caldo de legumes e o molho de ostras e deixe cozinhar.",
+      "Dilua a araruta num pouco de água, junte ao wok e deixe engrossar.",
+      "Sirva com o arroz basmati."
+    ]
+  },
+  {
+    id: "pato-estufado-cerveja", t: "Pato estufado em cerveja", o: "啤酒鸭 · Beer braised duck", c: "pratos", e: "🍺",
+    s: null, tm: "1h15", d: "Média", src: "Reddit r/chinesefood (SnooMacaroons8360)",
+    u: "https://www.reddit.com/r/chinesefood/comments/1dccl45/",
+    n: "A publicação original só tem os ingredientes: os passos abaixo seguem o método clássico do pato com cerveja chinês. O original diz «cerveja (1 tampa)»; neste prato usa-se normalmente uma lata, o suficiente para quase cobrir o pato.",
+    i: [
+      "½ pato", "2 c. sopa de farinha de trigo", "1 c. sopa de vinagre de maçã", "½ c. chá de sal", "10 fatias de gengibre",
+      "2 molhos de cebolinho", "3 malaguetas vermelhas", "Umas folhas de manjericão", "2 c. sopa de molho de soja claro",
+      "2 c. chá de molho de ostras", "1 c. chá de feijão preto fermentado", "1 lata de cerveja", "3 pedras de açúcar cristalizado",
+      "2 folhas de louro secas", "1 anis-estrelado"
+    ],
+    p: [
+      "Corte o pato em pedaços. Esfregue-os com a farinha, o vinagre e o sal (limpa a pele e tira o cheiro) e passe bem por água.",
+      "Coloque o pato num tacho com água fria, algumas fatias de gengibre e um pouco de cebolinho. Leve a ferver, retire a espuma, deixe 2 a 3 minutos e escorra.",
+      "Num wok sem óleo, em lume médio, aloure os pedaços de pato até largarem a gordura e ficarem dourados.",
+      "Junte o resto do gengibre, a parte branca do cebolinho, as malaguetas, o feijão preto fermentado, o anis-estrelado e o louro. Salteie 1 minuto.",
+      "Junte o molho de soja, o molho de ostras e o açúcar e envolva bem.",
+      "Verta a cerveja até quase cobrir o pato. Quando ferver, tape e deixe estufar em lume brando cerca de 40 minutos, até a carne ficar tenra.",
+      "Destape e deixe reduzir o molho em lume forte. No fim, junte o manjericão e o resto do cebolinho e sirva."
+    ]
+  },
+  {
+    id: "alheira-a-bras", t: "Alheira à Brás", c: "pratos", e: "🍳",
+    s: [4, "pessoas"], tm: "20 min", d: "Fácil", src: "Continente",
+    u: "https://feed.continente.pt/receitas/alheira-a-bras",
+    n: "O ficheiro enviado (pesquisa do Google) só tinha os ingredientes: os passos seguem o método clássico «à Brás», como no bacalhau à Brás.",
+    i: [
+      "1 c. sopa de azeite", "1 cebola em meias-luas", "2 dentes de alho picados", "2 alheiras sem pele, esmagadas",
+      "400 g de batata palha", "5 ovos batidos", "Azeitonas pretas q.b.", "Salsa picada q.b."
+    ],
+    p: [
+      "Numa frigideira larga, aqueça o azeite e aloure a cebola até ficar macia. Junte o alho e deixe mais 1 minuto.",
+      "Junte a alheira esmagada e salteie em lume brando, mexendo, até ficar solta e quente.",
+      "Junte a batata palha e envolva.",
+      "Verta os ovos batidos e mexa suavemente, só até ficarem cremosos — não os deixe secar.",
+      "Sirva polvilhado com salsa e decorado com as azeitonas."
+    ]
+  },
+
   // ───────────────────────── ENTRADAS, SOPAS E ACOMPANHAMENTOS ─────────────────────────
   {
     id: "veloute-cogumelos", t: "Creme de cogumelos", o: "Velouté de champignons", c: "entradas", e: "🥣",
@@ -419,6 +497,23 @@ window.RECIPES = [
       "Aqueça um wok, junte o azeite e salteie o alho e a cebola alguns minutos em lume forte.",
       "Junte os legumes e salteie cerca de 10 minutos em lume forte, mexendo com frequência.",
       "No fim, junte o caldo concentrado e misture até ser absorvido. Sirva quente, morno ou frio, com ervas frescas picadas."
+    ]
+  },
+
+  {
+    id: "sopa-caramela", t: "Sopa caramela", c: "entradas", e: "🍲",
+    s: [6, "pessoas"], tm: "1h20", d: "Fácil", src: "Teleculinária",
+    u: "https://teleculinaria.pt/receitas/sopa-caramela/",
+    n: "Sopa típica da região de Palmela e Pinhal Novo — dá uma refeição.",
+    i: [
+      "300 g de carne de porco em cubos", "1 chouriço de carne", "1 chouriço de sangue", "1 lata de feijão vermelho cozido",
+      "2 cenouras médias", "2 batatas", "1 nabo", "½ couve lombarda", "Azeite q.b.", "Sal e pimenta q.b."
+    ],
+    p: [
+      "Numa panela grande com bastante água, coza a carne de porco e os enchidos.",
+      "Corte a couve em tiras e, depois de descascados, as cenouras, as batatas e o nabo em cubos.",
+      "Quando as carnes estiverem bem cozidas, retire-as para um prato e reserve. Junte os legumes ao caldo e deixe cozer. Quase no fim, junte o feijão escorrido.",
+      "Corte os enchidos às rodelas e junte-os à sopa com a carne de porco. Regue com um fio de azeite, retifique o sal e a pimenta e sirva quente."
     ]
   },
 
@@ -1375,6 +1470,23 @@ window.RECIPES = [
       "Passe para uma travessa forrada com papel vegetal, achate bem e cubra com película.",
       "Deixe endurecer no congelador 20 a 30 minutos.",
       "Corte as barras e guarde numa caixa hermética (5 a 6 dias no máximo)."
+    ]
+  },
+
+  {
+    id: "tarte-mirtilos-alsacia", t: "Tarte de mirtilos da Alsácia", o: "Tarte aux myrtilles d'Alsace", c: "sobremesas", e: "🫐",
+    s: [1, "tarte"], tm: "55 min", d: "Fácil", src: "La Cuisine d'Adeline",
+    u: "https://www.adeline-cuisine.fr/recette/tarte-aux-myrtilles-dalsace/",
+    n: "Uma tarte para 4 a 6 pessoas. A amêndoa em pó (50 a 80 g) absorve o sumo e mantém a massa estaladiça; pode trocar por avelã ou noz em pó. Lave os mirtilos e deixe-os secar num pano; se forem congelados, descongele-os primeiro. Pode sobrar creme, conforme a forma.",
+    i: [
+      "1 disco de massa quebrada doce (ou sablée)", "800 g de mirtilos", "65 g de amêndoa em pó", "15 cl de natas líquidas",
+      "80 g de açúcar", "1 saqueta de açúcar baunilhado", "2 ovos"
+    ],
+    p: [
+      "Pré-aqueça o forno a 180 °C. Forre uma tarteira com a massa, pique-a com um garfo e coza em branco 10 minutos.",
+      "Retire do forno, polvilhe o fundo com a amêndoa em pó e espalhe os mirtilos por cima. Leve de novo ao forno 15 minutos.",
+      "Entretanto, prepare o creme: bata os ovos e junte as natas, o açúcar e o açúcar baunilhado. Reserve.",
+      "Retire a tarte do forno, verta o creme e coza mais 20 minutos."
     ]
   },
 
