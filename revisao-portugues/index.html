@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revisão de Português – Eva (2.º ano)</title>
+<style>
+  :root {
+    --bg: #f6f8fb; --card: #ffffff; --text: #1d2733; --muted: #5d6b7a;
+    --accent: #2f6fdb; --ok: #1e8e3e; --ok-bg: #e6f4ea; --bad: #c5221f; --bad-bg: #fce8e6;
+    --border: #d9e0e8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141a22; --card: #1e2731; --text: #e6ecf2; --muted: #9aa8b7;
+      --accent: #7aa8ff; --ok: #6fd28a; --ok-bg: #173325; --bad: #ff8a80; --bad-bg: #3a1d1b;
+      --border: #2e3a47;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141a22; --card: #1e2731; --text: #e6ecf2; --muted: #9aa8b7;
+    --accent: #7aa8ff; --ok: #6fd28a; --ok-bg: #173325; --bad: #ff8a80; --bad-bg: #3a1d1b;
+    --border: #2e3a47;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.5; }
+  header { padding: 20px 16px 8px; max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  header p { margin: 0; color: var(--muted); font-size: .95rem; }
+  main { max-width: 760px; margin: 0 auto; padding: 8px 16px 40px; }
+  .topics { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin: 12px 0 20px; }
+  .topic-btn { background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: left; cursor: pointer; font: inherit; }
+  .topic-btn strong { display: block; }
+  .topic-btn small { color: var(--muted); }
+  .topic-btn:hover, .topic-btn:focus-visible { border-color: var(--accent); outline: none; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+  .back { background: none; border: none; color: var(--accent); font: inherit; cursor: pointer; padding: 0; margin-bottom: 10px; }
+  .progress { height: 6px; background: var(--border); border-radius: 4px; overflow: hidden; margin: 8px 0 14px; }
+  .progress > div { height: 100%; background: var(--accent); width: 0; transition: width .3s; }
+  .q { font-size: 1.1rem; font-weight: 600; margin: 0 0 12px; }
+  .text-box { background: var(--bg); border-left: 4px solid var(--accent); padding: 12px 14px; border-radius: 8px; margin-bottom: 14px; }
+  .opts { display: grid; gap: 8px; }
+  .opt { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px; text-align: left; font: inherit; cursor: pointer; }
+  .opt:hover:not(:disabled) { border-color: var(--accent); }
+  .opt.correct { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); font-weight: 600; }
+  .opt.wrong { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+  .feedback { margin-top: 12px; padding: 10px 12px; border-radius: 10px; font-size: .95rem; display: none; }
+  .feedback.ok { display: block; background: var(--ok-bg); color: var(--ok); }
+  .feedback.bad { display: block; background: var(--bad-bg); color: var(--bad); }
+  .btn { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 10px 18px; font: inherit; font-weight: 600; cursor: pointer; margin-top: 14px; }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .btn.secondary { background: var(--card); color: var(--accent); border: 1px solid var(--accent); }
+  .score { font-size: 2rem; font-weight: 700; margin: 6px 0; }
+  .check label { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; cursor: pointer; }
+  .check input { margin-top: 5px; transform: scale(1.2); }
+  textarea { width: 100%; min-height: 120px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); padding: 10px; font: inherit; }
+  .footer-note { color: var(--muted); font-size: .85rem; margin-top: 18px; }
+  .theme-toggle { float: right; background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 4px 10px; font: inherit; font-size: .85rem; cursor: pointer; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <button class="theme-toggle" id="themeBtn" aria-label="Alternar tema">Tema</button>
+  <h1>Revisão de Português – Eva</h1>
+  <p>Prova escrita trimestral · 18 de maio · Manual p. 88–129 · Livro de Fichas p. 34–50, 55 e 56 · Aprendo em casa p. 24–38</p>
+</header>
+
+<main>
+  <!-- Menu -->
+  <section id="menu">
+    <div class="topics" id="topicList"></div>
+    <div class="card" id="scoresCard">
+      <strong>As tuas pontuações</strong>
+      <div id="scores" class="footer-note"></div>
+      <button class="btn secondary" id="resetScores">Apagar pontuações</button>
+    </div>
+    <p class="footer-note">Dica: faz primeiro os temas de gramática e depois a leitura. Na escrita, usa a lista para rever o texto.</p>
+  </section>
+
+  <!-- Quiz -->
+  <section id="quiz" class="hidden">
+    <button class="back" id="backToMenu">← Voltar ao menu</button>
+    <div class="card">
+      <div id="quizTitle" style="font-weight:700"></div>
+      <div class="progress"><div id="bar"></div></div>
+      <div id="textBox" class="text-box hidden"></div>
+      <p class="q" id="question"></p>
+      <div class="opts" id="options"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="btn" id="nextBtn" disabled>Seguinte</button>
+    </div>
+  </section>
+
+  <!-- Resultado -->
+  <section id="result" class="hidden">
+    <div class="card" style="text-align:center">
+      <div id="resultTitle" style="font-weight:700"></div>
+      <div class="score" id="resultScore"></div>
+      <p id="resultMsg"></p>
+      <button class="btn" id="retryBtn">Repetir</button>
+      <button class="btn secondary" id="menuBtn">Menu</button>
+    </div>
+  </section>
+
+  <!-- Escrita -->
+  <section id="writing" class="hidden">
+    <button class="back" id="backToMenu2">← Voltar ao menu</button>
+    <div class="card">
+      <div style="font-weight:700">Produção escrita – pequena narrativa</div>
+      <p>Escolhe um tema, escreve um texto com início, meio e fim e depois usa a lista para o rever.</p>
+      <div class="text-box">
+        <strong>Temas:</strong>
+        <ul>
+          <li>Um dia muito especial que passei com a família.</li>
+          <li>Um animal que encontrei no jardim.</li>
+          <li>Uma viagem ao mar (ou à montanha).</li>
+        </ul>
+      </div>
+      <textarea id="draft" placeholder="Escreve aqui a tua narrativa (também podes escrever no caderno)."></textarea>
+      <p><strong>Lista de verificação</strong></p>
+      <div class="check" id="checklist"></div>
+      <p class="footer-note">Esta lista é só para rever; não guarda nem corrige o texto.</p>
+    </div>
+  </section>
+
+  <!-- Leitura de texto -->
+</main>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const STORE_KEY = "revisaoPT_eva_scores";
+
+  // ---------- Dados ----------
+  const TOPICS = [
+    {
+      id: "adj", nome: "Adjetivos", desc: "Flexão em género e número",
+      perguntas: [
+        { q: "Completa: «Os meninos são ___.» (alto)", o: ["altos", "altas", "altes", "altoss"], r: 0, e: "O adjetivo concorda em género e número com o nome: «os meninos» → masculino plural → altos." },
+        { q: "Completa: «As casas são ___.» (grande)", o: ["grandos", "grandes", "grands", "grandas"], r: 1, e: "«grande» é invariável em género, mas varia em número: grandes." },
+        { q: "Completa: «A parede é ___.» (branco)", o: ["branco", "branca", "brancas", "brancos"], r: 1, e: "«a parede» é feminino singular → branca." },
+        { q: "Completa: «A menina é muito ___.» (feliz)", o: ["felizes", "feliz", "felis", "felizs"], r: 1, e: "«feliz» não muda no feminino: a menina é feliz." },
+        { q: "Completa: «Os bolos estavam ___.» (delicioso)", o: ["deliciosos", "deliciosas", "delicioso", "deliciozos"], r: 0, e: "«os bolos» → masculino plural → deliciosos." },
+        { q: "Completa: «As flores são ___.» (bonito)", o: ["bonitas", "bonitos", "bonita", "bonitoas"], r: 0, e: "«as flores» → feminino plural → bonitas." }
+      ]
+    },
+    {
+      id: "sin", nome: "Antónimos e sinónimos", desc: "Palavras com sentido contrário ou igual",
+      perguntas: [
+        { q: "Antónimo de «alegre»:", o: ["contente", "triste", "feliz", "bonito"], r: 1, e: "Antónimo = palavra de sentido contrário. «alegre» ↔ «triste»." },
+        { q: "Sinónimo de «rapidamente»:", o: ["devagar", "lentamente", "depressa", "tarde"], r: 2, e: "Sinónimo = palavra com sentido igual ou muito parecido. «rapidamente» ≈ «depressa»." },
+        { q: "Antónimo de «grande»:", o: ["enorme", "pequeno", "alto", "largo"], r: 1, e: "«grande» ↔ «pequeno»." },
+        { q: "Sinónimo de «belo»:", o: ["feio", "bonito", "velho", "novo"], r: 1, e: "«belo» ≈ «bonito»." },
+        { q: "Antónimo de «entrar»:", o: ["chegar", "ficar", "sair", "passar"], r: 2, e: "«entrar» ↔ «sair»." },
+        { q: "Sinónimo de «começar»:", o: ["acabar", "iniciar", "parar", "guardar"], r: 1, e: "«começar» ≈ «iniciar»." }
+      ]
+    },
+    {
+      id: "pont", nome: "Pontuação", desc: "Ponto final, de exclamação e de interrogação",
+      perguntas: [
+        { q: "Qual sinal se usa no fim de uma frase interrogativa?", o: ["ponto final", "ponto de exclamação", "ponto de interrogação", "vírgula"], r: 2, e: "As perguntas terminam com o ponto de interrogação (?)." },
+        { q: "Qual sinal se usa numa frase que mostra emoção, como «Que bonito!»?", o: ["ponto final", "ponto de exclamação", "ponto de interrogação", "reticências"], r: 1, e: "As frases exclamativas terminam com o ponto de exclamação (!)." },
+        { q: "Qual sinal termina uma frase declarativa, como «O sol brilha.»?", o: ["ponto de exclamação", "ponto de interrogação", "ponto final", "dois pontos"], r: 2, e: "As frases declarativas terminam com ponto final (.)." },
+        { q: "Qual é a pontuação correta?", o: ["Onde estás.", "Onde estás?", "Onde estás!", "Onde estás,"], r: 1, e: "«Onde estás?» é uma pergunta, por isso termina com ?." },
+        { q: "Qual é a pontuação correta?", o: ["Que dia lindo?", "Que dia lindo!", "Que dia lindo.", "Que dia lindo,"], r: 1, e: "Mostra admiração → ponto de exclamação." }
+      ]
+    },
+    {
+      id: "pron", nome: "Pronomes pessoais", desc: "Eu, tu, ele, ela, nós, vós, eles, elas",
+      perguntas: [
+        { q: "A Eva gosta de bolos. ___ come um todos os dias.", o: ["Ela", "Eles", "Nós", "Vós"], r: 0, e: "A Eva é uma pessoa do feminino singular → ela (3.ª pessoa do singular)." },
+        { q: "O Pedro e eu fomos ao parque. ___ fomos ao parque.", o: ["Eles", "Elas", "Nós", "Vós"], r: 2, e: "«O Pedro e eu» = nós (1.ª pessoa do plural)." },
+        { q: "Os meus pais chegaram cedo. ___ chegaram cedo.", o: ["Ele", "Eles", "Elas", "Nós"], r: 1, e: "«os meus pais» → 3.ª pessoa do plural masculino → eles." },
+        { q: "A Joana e a Sara são amigas. ___ brincam juntas.", o: ["Eles", "Elas", "Ela", "Vós"], r: 1, e: "Duas raparigas (feminino plural) → elas." },
+        { q: "Ana, ___ estás bem?", o: ["tu", "eu", "ele", "vós"], r: 0, e: "Estamos a falar diretamente com a Ana → tu." }
+      ]
+    },
+    {
+      id: "verb", nome: "Verbos (presente)", desc: "Conjugação no presente do indicativo",
+      perguntas: [
+        { q: "Eu ___ (jogar) à bola todos os dias.", o: ["jogo", "jogas", "joga", "jogamos"], r: 0, e: "Eu → jogo (1.ª pessoa do singular)." },
+        { q: "Nós ___ (comer) na escola.", o: ["come", "comem", "comemos", "comes"], r: 2, e: "Nós → comemos." },
+        { q: "Elas ___ (ler) um livro.", o: ["lê", "lês", "leem", "lemos"], r: 2, e: "Elas → leem (3.ª pessoa do plural)." },
+        { q: "Tu ___ (ir) para casa?", o: ["vai", "vais", "vou", "vão"], r: 1, e: "Tu → vais." },
+        { q: "O cão ___ (dormir) no sofá.", o: ["dormem", "dormes", "dorme", "dormo"], r: 2, e: "O cão (ele) → dorme." }
+      ]
+    },
+    {
+      id: "con", nome: "Conectores", desc: "Palavras que ligam ideias: e, mas, ou, porque, portanto…",
+      perguntas: [
+        { q: "Comi a sopa, ___ fiquei com fome.", o: ["porque", "mas", "ou", "e"], r: 1, e: "«mas» indica oposição: comi, mas fiquei com fome." },
+        { q: "Levei o guarda-chuva ___ estava a chover.", o: ["mas", "ou", "porque", "então"], r: 2, e: "«porque» indica a causa." },
+        { q: "Gosto de maçãs ___ de peras.", o: ["mas", "ou", "porque", "e"], r: 3, e: "«e» junta duas ideias que se somam." },
+        { q: "Queres chá ___ café?", o: ["e", "ou", "mas", "porque"], r: 1, e: "«ou» oferece uma escolha." },
+        { q: "Primeiro lavei as mãos; ___, sentei-me à mesa.", o: ["portanto", "depois", "porque", "mas"], r: 1, e: "«depois» indica a sequência no tempo." },
+        { q: "Estudei muito; ___, tirei boa nota.", o: ["portanto", "porque", "mas", "ou"], r: 0, e: "«portanto» indica consequência: estudei muito, por isso tirei boa nota." }
+      ]
+    },
+    {
+      id: "leit", nome: "Leitura e interpretação", desc: "Responde às perguntas sobre o texto",
+      texto: "A Mariana tem um cão chamado Bolinha. Todas as manhãs, levam-no a passear no parque. O Bolinha é castanho e muito brincalhão. Gosta de correr atrás das bolas e de nadar no lago.",
+      perguntas: [
+        { q: "Como se chama o cão?", o: ["Bobi", "Bolinha", "Mariana", "Lago"], r: 1, e: "O cão chama-se Bolinha." },
+        { q: "De que cor é o Bolinha?", o: ["branco", "preto", "castanho", "cinzento"], r: 2, e: "O texto diz «O Bolinha é castanho»." },
+        { q: "Onde levam o cão a passear?", o: ["na praia", "no parque", "na escola", "no jardim da casa"], r: 1, e: "Levam-no a passear no parque." },
+        { q: "O que gosta de fazer o Bolinha?", o: ["dormir no sofá", "correr atrás das bolas e nadar", "ler livros", "cantar"], r: 1, e: "O texto diz que gosta de correr atrás das bolas e de nadar no lago." },
+        { q: "Quem é a dona do cão?", o: ["a Eva", "a Mariana", "o Bolinha", "a professora"], r: 1, e: "A Mariana tem um cão chamado Bolinha." }
+      ]
+    }
+  ];
+
+  // ---------- Estado ----------
+  let current = null, idx = 0, score = 0, answered = false;
+
+  function loadScores() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveScores(s) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch (e) { /* sem armazenamento: ignora */ }
+  }
+
+  function show(id) {
+    ["menu", "quiz", "result", "writing"].forEach(s => $(s).classList.toggle("hidden", s !== id));
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- Menu ----------
+  function renderMenu() {
+    const list = $("topicList");
+    list.innerHTML = "";
+    const scores = loadScores();
+    TOPICS.forEach(t => {
+      const b = document.createElement("button");
+      b.className = "topic-btn";
+      const best = scores[t.id] ? ` · melhor: ${scores[t.id].best}/${t.perguntas.length}` : "";
+      b.innerHTML = `<strong>${t.nome}</strong><small>${t.desc}${best}</small>`;
+      b.onclick = () => startQuiz(t);
+      list.appendChild(b);
+    });
+    const w = document.createElement("button");
+    w.className = "topic-btn";
+    w.innerHTML = `<strong>Produção escrita</strong><small>Pequena narrativa + lista de verificação</small>`;
+    w.onclick = () => show("writing");
+    list.appendChild(w);
+
+    const s = $("scores");
+    const entries = Object.entries(scores);
+    s.textContent = entries.length
+      ? entries.map(([id, v]) => {
+          const t = TOPICS.find(x => x.id === id);
+          return `${t ? t.nome : id}: ${v.best}/${t ? t.perguntas.length : "?"} (tentativas: ${v.tentativas})`;
+        }).join(" · ")
+      : "Ainda não há pontuações.";
+  }
+
+  // ---------- Quiz ----------
+  function startQuiz(t) {
+    current = t; idx = 0; score = 0;
+    $("quizTitle").textContent = t.nome;
+    show("quiz");
+    render();
+  }
+
+  function render() {
+    answered = false;
+    const p = current.perguntas[idx];
+    const total = current.perguntas.length;
+    $("bar").style.width = (idx / total * 100) + "%";
+    const tb = $("textBox");
+    if (current.texto) { tb.textContent = current.texto; tb.classList.remove("hidden"); }
+    else tb.classList.add("hidden");
+    $("question").textContent = `${idx + 1}. ${p.q}`;
+    const opts = $("options");
+    opts.innerHTML = "";
+    p.o.forEach((txt, i) => {
+      const b = document.createElement("button");
+      b.className = "opt";
+      b.textContent = txt;
+      b.onclick = () => answer(i);
+      opts.appendChild(b);
+    });
+    $("feedback").className = "feedback";
+    $("feedback").textContent = "";
+    $("nextBtn").disabled = true;
+    $("nextBtn").textContent = idx === total - 1 ? "Ver resultado" : "Seguinte";
+  }
+
+  function answer(i) {
+    if (answered) return;
+    answered = true;
+    const p = current.perguntas[idx];
+    const btns = $("options").children;
+    btns[p.r].classList.add("correct");
+    if (i === p.r) score++;
+    else btns[i].classList.add("wrong");
+    Array.from(btns).forEach(b => b.disabled = true);
+    const fb = $("feedback");
+    fb.textContent = (i === p.r ? "Correto! " : "Não é esta. ") + p.e;
+    fb.className = "feedback " + (i === p.r ? "ok" : "bad");
+    $("nextBtn").disabled = false;
+  }
+
+  $("nextBtn").onclick = () => {
+    idx++;
+    if (idx < current.perguntas.length) render();
+    else finish();
+  };
+
+  function finish() {
+    const total = current.perguntas.length;
+    $("bar").style.width = "100%";
+    const scores = loadScores();
+    const prev = scores[current.id] || { best: 0, tentativas: 0 };
+    scores[current.id] = { best: Math.max(prev.best, score), tentativas: prev.tentativas + 1 };
+    saveScores(scores);
+    $("resultTitle").textContent = current.nome;
+    $("resultScore").textContent = `${score} / ${total}`;
+    const pct = score / total;
+    $("resultMsg").textContent = pct === 1 ? "Excelente! Acertaste em tudo."
+      : pct >= 0.7 ? "Muito bem! Revê as respostas erradas e tenta outra vez."
+      : "Continua a praticar. Lê outra vez a matéria no manual e repete o teste.";
+    show("result");
+  }
+
+  $("retryBtn").onclick = () => startQuiz(current);
+  $("menuBtn").onclick = () => { renderMenu(); show("menu"); };
+  $("backToMenu").onclick = () => { renderMenu(); show("menu"); };
+  $("backToMenu2").onclick = () => { renderMenu(); show("menu"); };
+
+  $("resetScores").onclick = () => {
+    try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+    renderMenu();
+  };
+
+  // ---------- Escrita: lista de verificação ----------
+  const CHECKS = [
+    "Tem início, meio e fim.",
+    "Diz quem são as personagens e onde e quando acontece.",
+    "Usa pelo menos 3 adjetivos com a flexão certa (género e número).",
+    "Usa pronomes pessoais (ele, ela, eles, elas, nós…).",
+    "Usa pelo menos 2 conectores (e, mas, porque, depois, portanto…).",
+    "Usa verbos no presente bem conjugados.",
+    "Termina cada frase com a pontuação certa (. ! ?).",
+    "Começa as frases com maiúscula e confirma a ortografia."
+  ];
+  const cl = $("checklist");
+  CHECKS.forEach((txt, i) => {
+    const l = document.createElement("label");
+    const c = document.createElement("input");
+    c.type = "checkbox"; c.id = "chk" + i;
+    l.appendChild(c);
+    l.appendChild(document.createTextNode(txt));
+    cl.appendChild(l);
+  });
+
+  // ---------- Tema ----------
+  $("themeBtn").onclick = () => {
+    const root = document.documentElement;
+    const dark = root.getAttribute("data-theme") === "dark" ||
+      (!root.hasAttribute("data-theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    root.setAttribute("data-theme", dark ? "light" : "dark");
+  };
+
+  renderMenu();
+  show("menu");
+})();
+</script>
+</body>
+</html>
