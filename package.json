@@ -1,0 +1,33 @@
+{
+  "name": "telecomando",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "@expo/vector-icons": "^15.0.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "buffer": "^6.0.3",
+    "expo": "~58.0.26",
+    "expo-build-properties": "~58.0.12",
+    "expo-dev-client": "~58.0.21",
+    "expo-network": "~58.0.5",
+    "expo-status-bar": "~58.0.5",
+    "node-forge": "^1.4.4",
+    "react": "19.3.0",
+    "react-native": "0.88.1",
+    "react-native-get-random-values": "^2.1.0",
+    "react-native-safe-area-context": "~5.11.1",
+    "react-native-tcp-socket": "^6.4.3"
+  },
+  "devDependencies": {
+    "@types/node-forge": "^1.3.14",
+    "@types/react": "~19.3.0",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "private": true
+}
