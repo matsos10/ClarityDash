@@ -59,10 +59,16 @@ export type RemoteKey =
 
 export type ConnectionStatus = 'idle' | 'connecting' | 'waiting_tv' | 'connected' | 'error';
 
+export type AppId = 'netflix' | 'prime' | 'disney' | 'youtube' | 'spotify' | 'appletv';
+
 export interface TvRemote {
   connect(): Promise<void>;
   send(key: RemoteKey): Promise<void>;
   supports(key: RemoteKey): boolean;
+  /** Abre uma aplicação de streaming na TV. */
+  launchApp(app: AppId): Promise<void>;
+  /** Escreve texto no campo de texto ativo da TV. */
+  sendText(text: string): Promise<void>;
   disconnect(): void;
 }
 

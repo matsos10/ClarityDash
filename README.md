@@ -14,6 +14,9 @@ App móvel (React Native / Expo, Android e iOS) que controla TVs através da red
 - Pesquisa automática de TVs na rede local (ou adicionar pelo IP).
 - Ligar/desligar, fonte, setas + OK, voltar, início, menu, volume, canais, sem som, info, guia, teclado numérico, multimédia e botões coloridos.
 - Repetição automática ao manter premidos volume, canais e setas.
+- Atalhos para Netflix, Prime Video, Disney+, YouTube, Spotify e Apple TV.
+- Teclado para escrever na TV (pesquisas, palavras-passe…).
+- Mudar o nome das TVs (tocar no nome no comando, ou manter premido na lista).
 - Guarda as TVs, o token Samsung e o certificado de emparelhamento Android TV no telemóvel.
 
 ## Executar

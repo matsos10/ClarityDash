@@ -1,5 +1,6 @@
 import { OpenedSocket, openSocket, probePort, toBytes } from '../../net/socket';
-import { RemoteKey, TvDevice, TvRemote } from '../../types';
+import { ANDROID_TV_LINKS } from '../../apps';
+import { AppId, RemoteKey, TvDevice, TvRemote } from '../../types';
 import { NotPairedError } from '../errors';
 import { getIdentity } from './identity';
 import { PAIRING_PORT, PairingSession } from './pairing';
@@ -54,9 +55,13 @@ const F_ERROR = 3;
 const F_PING_REQUEST = 8;
 const F_PING_RESPONSE = 9;
 const F_KEY_INJECT = 10;
+const F_IME_KEY_INJECT = 20;
+const F_IME_BATCH_EDIT = 21;
+const F_IME_SHOW_REQUEST = 22;
+const F_APP_LINK_LAUNCH = 90;
 const DIRECTION_SHORT = 3;
-// Funcionalidades: PING | KEY | POWER | VOLUME | APP_LINK
-const FEATURES = 1 | 2 | 32 | 64 | 512;
+// Funcionalidades: PING | KEY | IME | POWER | VOLUME | APP_LINK
+const FEATURES = 1 | 2 | 4 | 32 | 64 | 512;
 
 
 /** Indica se o IP responde nas portas do Android TV Remote v2. */
@@ -93,6 +98,12 @@ export class AndroidTvRemote implements TvRemote {
   private conn?: OpenedSocket;
   private ready = false;
   private connecting?: Promise<void>;
+  /** Contadores do campo de texto ativo, enviados pela TV. */
+  private imeCounter = 0;
+  private fieldCounter = 0;
+  private hasImeCounter = false;
+  private hasFieldCounter = false;
+  private features = FEATURES;
 
   constructor(
     private device: TvDevice,
@@ -147,10 +158,12 @@ export class AndroidTvRemote implements TvRemote {
 
       const reader = new FrameReader((raw) => {
         const msg = decode(raw);
+        if (this.trackIme(msg)) return;
         if (msg.has(F_CONFIGURE)) {
           const cfg = getMsg(msg, F_CONFIGURE);
           const tvFeatures = (cfg && getNum(cfg, 1)) ?? FEATURES;
           features = FEATURES & tvFeatures;
+          this.features = features;
           this.write(
             fMsg(
               F_CONFIGURE,
@@ -201,6 +214,57 @@ export class AndroidTvRemote implements TvRemote {
       conn.socket.on('close', onEnd);
       conn.socket.on('error', onEnd);
     });
+  }
+
+  /** Guarda os contadores do campo de texto (necessários para escrever). */
+  private trackIme(msg: ReturnType<typeof decode>): boolean {
+    const inject = getMsg(msg, F_IME_KEY_INJECT);
+    if (inject) {
+      const app = getMsg(inject, 1);
+      const field = getMsg(inject, 2);
+      this.imeCounter = (app && getNum(app, 1)) ?? 0;
+      this.fieldCounter = (field && getNum(field, 1)) ?? 0;
+      this.hasImeCounter = this.imeCounter !== 0;
+      this.hasFieldCounter = this.fieldCounter !== 0;
+      return true;
+    }
+    const show = getMsg(msg, F_IME_SHOW_REQUEST);
+    if (show) {
+      const st = getMsg(show, 2);
+      if (st && getNum(st, 1) !== undefined) {
+        this.fieldCounter = getNum(st, 1)!;
+        this.hasFieldCounter = true;
+      }
+      return true;
+    }
+    const batch = getMsg(msg, F_IME_BATCH_EDIT);
+    if (batch) {
+      if (!this.hasImeCounter) this.imeCounter = getNum(batch, 1) ?? 0;
+      if (!this.hasFieldCounter) this.fieldCounter = getNum(batch, 2) ?? 0;
+      return true;
+    }
+    return false;
+  }
+
+  async launchApp(app: AppId) {
+    await this.connect();
+    if (!(this.features & 512)) throw new Error('Esta TV não permite abrir aplicações remotamente.');
+    this.write(fMsg(F_APP_LINK_LAUNCH, fString(1, ANDROID_TV_LINKS[app])));
+  }
+
+  async sendText(text: string) {
+    if (!text) return;
+    await this.connect();
+    if (!(this.features & 4)) throw new Error('Esta TV não aceita texto pelo comando.');
+    const len = text.length;
+    this.write(
+      fMsg(
+        F_IME_BATCH_EDIT,
+        fVarint(1, this.imeCounter),
+        fVarint(2, this.fieldCounter),
+        fMsg(3, fVarint(1, 1), fMsg(2, fVarint(1, len), fVarint(2, len), fString(3, text))),
+      ),
+    );
   }
 
   private write(inner: Uint8Array) {

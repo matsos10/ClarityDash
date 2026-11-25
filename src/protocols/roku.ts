@@ -1,4 +1,5 @@
-import { RemoteKey, TvDevice, TvRemote } from '../types';
+import { ROKU_CHANNELS } from '../apps';
+import { AppId, RemoteKey, TvDevice, TvRemote } from '../types';
 
 /** Roku External Control Protocol (TVs TCL Roku), porta 8060. */
 const KEYS: Partial<Record<RemoteKey, string>> = {
@@ -76,6 +77,17 @@ export class RokuRemote implements TvRemote {
     const res = await request(`http://${this.device.ip}:8060/keypress/${code}`, 'POST', 3000);
     if (res.status === 403) {
       throw new Error('A TV bloqueou o controlo. Ativa "Controlo por apps móveis" nas definições da TV.');
+    }
+  }
+
+  async launchApp(app: AppId) {
+    const res = await request(`http://${this.device.ip}:8060/launch/${ROKU_CHANNELS[app]}`, 'POST', 5000);
+    if (!res.ok) throw new Error('A aplicação não está instalada na TV.');
+  }
+
+  async sendText(text: string) {
+    for (const ch of text) {
+      await request(`http://${this.device.ip}:8060/keypress/Lit_${encodeURIComponent(ch)}`, 'POST', 3000);
     }
   }
 

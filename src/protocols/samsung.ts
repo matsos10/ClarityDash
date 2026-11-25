@@ -1,6 +1,7 @@
 import { MiniWebSocket, base64 } from '../net/miniWebSocket';
 import { utf8Encode } from '../net/socket';
-import { RemoteKey, TvDevice, TvRemote } from '../types';
+import { SAMSUNG_APP_IDS } from '../apps';
+import { AppId, RemoteKey, TvDevice, TvRemote } from '../types';
 
 const APP_NAME = 'Telecomando Universal';
 
@@ -181,6 +182,46 @@ export class SamsungRemote implements TvRemote {
         },
       }),
     );
+  }
+
+  async launchApp(app: AppId) {
+    const ids = SAMSUNG_APP_IDS[app];
+    // 1) API REST (a maioria das TVs Tizen); devolve 404 se a app não existir.
+    for (const id of ids) {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 4000);
+      try {
+        const res = await fetch(`http://${this.device.ip}:8001/api/v2/applications/${id}`, {
+          method: 'POST',
+          signal: ctrl.signal,
+        });
+        if (res.ok) return;
+      } catch {
+      } finally {
+        clearTimeout(t);
+      }
+    }
+    // 2) Pedido pelo canal WebSocket (TVs mais recentes).
+    await this.connect();
+    for (const id of ids) {
+      this.ws!.send(
+        JSON.stringify({
+          method: 'ms.channel.emit',
+          params: { event: 'ed.apps.launch', to: 'host', data: { appId: id, action_type: 'DEEP_LINK' } },
+        }),
+      );
+    }
+  }
+
+  async sendText(text: string) {
+    await this.connect();
+    this.ws!.send(
+      JSON.stringify({
+        method: 'ms.remote.control',
+        params: { Cmd: base64(utf8Encode(text)), DataOfCmd: 'base64', TypeOfRemote: 'SendInputString' },
+      }),
+    );
+    this.ws!.send(JSON.stringify({ method: 'ms.remote.control', params: { TypeOfRemote: 'SendInputEnd' } }));
   }
 
   disconnect() {

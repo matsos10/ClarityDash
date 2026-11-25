@@ -30,6 +30,10 @@ export default function App() {
     setDevices((prev) => prev.filter((p) => p.id !== id));
   }, []);
 
+  const renameDevice = useCallback((id: string, name: string) => {
+    setDevices((prev) => prev.map((p) => (p.id === id ? { ...p, name } : p)));
+  }, []);
+
   const updateCurrent = useCallback(
     (patch: Partial<TvDevice>) => {
       setDevices((prev) => prev.map((p) => (p.id === currentId ? { ...p, ...patch } : p)));
@@ -50,6 +54,7 @@ export default function App() {
           onOpen={(d) => setCurrentId(d.id)}
           onAdd={addDevice}
           onRemove={removeDevice}
+          onRename={renameDevice}
         />
       )}
     </SafeAreaProvider>

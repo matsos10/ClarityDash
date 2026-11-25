@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
-import { RemoteKey, TvDevice, TvRemote } from '../types';
+import { appLabel, SONY_TITLES } from '../apps';
+import { AppId, RemoteKey, TvDevice, TvRemote } from '../types';
 import { NotPairedError } from './errors';
 
 /**
@@ -323,6 +324,35 @@ export class SonyRemote implements TvRemote {
     if (!code) return;
     const res = await this.sendIrcc(code);
     if (res.status !== 200) throw new Error(`A TV rejeitou o comando (HTTP ${res.status}).`);
+  }
+
+  private apps?: { title: string; uri: string }[];
+
+  async launchApp(app: AppId) {
+    if (!this.ready) await this.connect();
+    if (!this.apps) {
+      const r = await this.withAuth(
+        () => rpc(this.device.ip, 'appControl', 'getApplicationList', [], this.auth()),
+        isAuthError,
+      );
+      this.apps = (r.json?.result?.[0] ?? []).map((a: any) => ({ title: String(a.title), uri: String(a.uri) }));
+    }
+    const found = this.apps!.find((a) => SONY_TITLES[app].test(a.title));
+    if (!found) throw new Error(`${appLabel(app)} não está instalada nesta TV.`);
+    const r = await this.withAuth(
+      () => rpc(this.device.ip, 'appControl', 'setActiveApp', [{ uri: found.uri }], this.auth()),
+      isAuthError,
+    );
+    if (r.json?.error) throw new Error(`A TV não abriu ${found.title} (erro ${r.json.error[0]}).`);
+  }
+
+  async sendText(text: string) {
+    if (!this.ready) await this.connect();
+    const r = await this.withAuth(
+      () => rpc(this.device.ip, 'appControl', 'setTextForm', [text], this.auth()),
+      isAuthError,
+    );
+    if (r.json?.error) throw new Error('Não há nenhum campo de texto ativo na TV. Seleciona primeiro um campo de pesquisa.');
   }
 
   disconnect() {}

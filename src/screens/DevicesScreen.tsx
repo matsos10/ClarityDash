@@ -14,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { TextPromptModal } from '../components/TextPromptModal';
 import { deviceId, identify, scanNetwork } from '../discovery';
 import { colors } from '../theme';
 import { Protocol, PROTOCOL_LABEL, TvDevice } from '../types';
@@ -23,6 +24,7 @@ interface Props {
   onOpen: (d: TvDevice) => void;
   onAdd: (d: TvDevice) => void;
   onRemove: (id: string) => void;
+  onRename: (id: string, name: string) => void;
 }
 
 const BRAND: Record<Protocol, { label: string; color: string }> = {
@@ -32,7 +34,7 @@ const BRAND: Record<Protocol, { label: string; color: string }> = {
   sony: { label: 'SONY', color: '#000000' },
 };
 
-export function DevicesScreen({ devices, onOpen, onAdd, onRemove }: Props) {
+export function DevicesScreen({ devices, onOpen, onAdd, onRemove, onRename }: Props) {
   const [scanning, setScanning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [found, setFound] = useState<TvDevice[]>([]);
@@ -43,6 +45,7 @@ export function DevicesScreen({ devices, onOpen, onAdd, onRemove }: Props) {
   const [ip, setIp] = useState('');
   const [protocol, setProtocol] = useState<Protocol>('samsung');
   const [adding, setAdding] = useState(false);
+  const [renaming, setRenaming] = useState<TvDevice | null>(null);
 
   const saved = new Set(devices.map((d) => d.id));
 
@@ -96,10 +99,19 @@ export function DevicesScreen({ devices, onOpen, onAdd, onRemove }: Props) {
     }
   };
 
-  const confirmRemove = (d: TvDevice) =>
-    Alert.alert('Remover TV', `Remover "${d.name}"?`, [
+  const showOptions = (d: TvDevice) =>
+    Alert.alert(d.name, undefined, [
+      { text: 'Mudar o nome', onPress: () => setRenaming(d) },
+      {
+        text: 'Remover',
+        style: 'destructive',
+        onPress: () =>
+          Alert.alert('Remover TV', `Remover "${d.name}"?`, [
+            { text: 'Cancelar', style: 'cancel' },
+            { text: 'Remover', style: 'destructive', onPress: () => onRemove(d.id) },
+          ]),
+      },
       { text: 'Cancelar', style: 'cancel' },
-      { text: 'Remover', style: 'destructive', onPress: () => onRemove(d.id) },
     ]);
 
   const newFound = found.filter((d) => !saved.has(d.id));
@@ -124,7 +136,7 @@ export function DevicesScreen({ devices, onOpen, onAdd, onRemove }: Props) {
           </View>
         }
         renderItem={({ item }) => (
-          <DeviceCard device={item} onPress={() => onOpen(item)} onLongPress={() => confirmRemove(item)} />
+          <DeviceCard device={item} onPress={() => onOpen(item)} onLongPress={() => showOptions(item)} />
         )}
         ListFooterComponent={
           <View style={{ gap: 12, marginTop: 8 }}>
@@ -154,6 +166,18 @@ export function DevicesScreen({ devices, onOpen, onAdd, onRemove }: Props) {
           <Text style={styles.actionText}>Por IP</Text>
         </Pressable>
       </View>
+
+      <TextPromptModal
+        visible={renaming !== null}
+        title="Nome da TV"
+        initialValue={renaming?.name ?? ''}
+        placeholder="Sala, Quarto…"
+        confirmLabel="Guardar"
+        onConfirm={(name) => {
+          if (renaming) onRename(renaming.id, name.trim());
+        }}
+        onClose={() => setRenaming(null)}
+      />
 
       <Modal visible={manualOpen} transparent animationType="fade" onRequestClose={() => setManualOpen(false)}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.backdrop}>

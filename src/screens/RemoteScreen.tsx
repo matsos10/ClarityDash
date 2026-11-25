@@ -13,10 +13,12 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { APPS } from '../apps';
 import { RemoteButton } from '../components/RemoteButton';
+import { TextPromptModal } from '../components/TextPromptModal';
 import { createRemote, needsPairing, NotPairedError, PairingFlow, startPairing } from '../protocols';
 import { colors } from '../theme';
-import { ConnectionStatus, PROTOCOL_LABEL, RemoteKey, TvDevice, TvRemote } from '../types';
+import { AppId, ConnectionStatus, PROTOCOL_LABEL, RemoteKey, TvDevice, TvRemote } from '../types';
 
 interface Props {
   device: TvDevice;
@@ -34,6 +36,8 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
   const [code, setCode] = useState('');
   const [pairError, setPairError] = useState<string | null>(null);
   const [pairBusy, setPairBusy] = useState(false);
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
 
   const remoteRef = useRef<TvRemote | null>(null);
   const deviceRef = useRef(device);
@@ -158,6 +162,30 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
 
   const has = useCallback((k: RemoteKey) => remoteRef.current?.supports(k) ?? true, []);
 
+  /** Executa uma ação no comando; os erros de emparelhamento reiniciam o emparelhamento. */
+  const run = useCallback(
+    async (action: (r: TvRemote) => Promise<void>, rethrow = false) => {
+      const remote = remoteRef.current;
+      if (!remote) throw new Error('A TV não está ligada.');
+      try {
+        await action(remote);
+        setStatus('connected');
+        setError(null);
+      } catch (e: any) {
+        if (e instanceof NotPairedError) {
+          updateDevice({ paired: false });
+          beginPairing();
+          return;
+        }
+        if (rethrow) throw e;
+        setError(e?.message ?? 'Falha ao enviar comando');
+      }
+    },
+    [beginPairing, updateDevice],
+  );
+
+  const openApp = (app: AppId) => run((r) => r.launchApp(app)).catch(() => {});
+
   return (
     <KeyContext.Provider value={{ press, has }}>
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
@@ -165,14 +193,21 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
         <Pressable onPress={onBack} hitSlop={12} accessibilityLabel="Voltar">
           {ic('chevron-back', 28)}
         </Pressable>
-        <View style={{ flex: 1, marginHorizontal: 12 }}>
-          <Text style={styles.title} numberOfLines={1}>
-            {device.name}
-          </Text>
+        <Pressable
+          style={{ flex: 1, marginHorizontal: 12 }}
+          onPress={() => setRenameOpen(true)}
+          accessibilityLabel="Mudar o nome da TV"
+        >
+          <View style={styles.titleRow}>
+            <Text style={styles.title} numberOfLines={1}>
+              {device.name}
+            </Text>
+            {ic('pencil', 14, colors.textDim)}
+          </View>
           <Text style={styles.subtitle} numberOfLines={1}>
             {PROTOCOL_LABEL[device.protocol]} · {device.ip}
           </Text>
-        </View>
+        </Pressable>
         <StatusBadge status={status} onRetry={connect} />
       </View>
 
@@ -188,6 +223,11 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
           <Btn k="POWER" icon={ic('power', 26, '#fff')} style={styles.power} a11y="Ligar/Desligar" />
           <Btn k="SOURCE" icon={<MaterialCommunityIcons name="import" size={24} color={colors.text} />} a11y="Fonte" />
           <Btn k="MUTE" icon={ic('volume-mute')} a11y="Sem som" />
+          <RemoteButton
+            onPress={() => setKeyboardOpen(true)}
+            icon={<MaterialCommunityIcons name="keyboard-outline" size={26} color={colors.text} />}
+            accessibilityLabel="Teclado"
+          />
           <Pressable
             onPress={() => setNumpad((v) => !v)}
             style={[styles.toggle, numpad && styles.toggleOn]}
@@ -196,6 +236,21 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
             <Text style={styles.toggleText}>123</Text>
           </Pressable>
         </View>
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.apps}>
+          {APPS.map((a) => (
+            <Pressable
+              key={a.id}
+              onPress={() => openApp(a.id)}
+              style={({ pressed }) => [styles.app, { backgroundColor: a.bg }, pressed && { opacity: 0.7 }]}
+              accessibilityLabel={`Abrir ${a.label}`}
+            >
+              <Text style={[styles.appText, { color: a.fg }]} numberOfLines={1}>
+                {a.label}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
 
         {numpad ? (
           <View style={styles.numpad}>
@@ -254,6 +309,27 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
           <Btn k="BLUE" style={[styles.flex, styles.color, { backgroundColor: colors.blue }]} a11y="Azul" />
         </View>
       </ScrollView>
+
+      <TextPromptModal
+        visible={renameOpen}
+        title="Nome da TV"
+        initialValue={device.name}
+        placeholder="Sala, Quarto…"
+        confirmLabel="Guardar"
+        onConfirm={(name) => updateDevice({ name: name.trim() })}
+        onClose={() => setRenameOpen(false)}
+      />
+
+      <TextPromptModal
+        visible={keyboardOpen}
+        title="Escrever na TV"
+        hint="Seleciona primeiro um campo de texto na TV (ex.: pesquisa) e depois escreve aqui."
+        placeholder="Texto a enviar"
+        confirmLabel="Enviar"
+        keepOpen
+        onConfirm={(text) => run((r) => r.sendText(text), true)}
+        onClose={() => setKeyboardOpen(false)}
+      />
 
       <Modal visible={pairing !== null} transparent animationType="fade" onRequestClose={cancelPairing}>
         <KeyboardAvoidingView
@@ -366,7 +442,11 @@ const DPAD = 240;
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10 },
-  title: { color: colors.text, fontSize: 18, fontWeight: '700' },
+  title: { color: colors.text, fontSize: 18, fontWeight: '700', flexShrink: 1 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  apps: { gap: 10, paddingVertical: 2 },
+  app: { height: 44, minWidth: 96, paddingHorizontal: 14, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  appText: { fontSize: 15, fontWeight: '800' },
   subtitle: { color: colors.textDim, fontSize: 12, marginTop: 2 },
   badge: {
     flexDirection: 'row',
