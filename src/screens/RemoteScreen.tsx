@@ -68,7 +68,7 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
     } catch (e: any) {
       setPairing(null);
       setStatus('error');
-      setError(e?.message ?? 'Falha ao iniciar o emparelhamento');
+      setError((e?.message ?? (typeof e === 'string' ? e : null)) ?? 'Falha ao iniciar o emparelhamento');
     }
   }, [updateDevice]);
 
@@ -99,7 +99,7 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
         return;
       }
       setStatus('error');
-      setError(e?.message ?? 'Erro de ligação');
+      setError((e?.message ?? (typeof e === 'string' ? e : null)) ?? 'Erro de ligação');
     }
   }, [beginPairing, updateDevice]);
   connectRef.current = connect;
@@ -123,12 +123,12 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
       setPairing(null);
       connect();
     } catch (e: any) {
-      setPairError(e?.message ?? 'Falha no emparelhamento');
+      setPairError((e?.message ?? (typeof e === 'string' ? e : null)) ?? 'Falha no emparelhamento');
       if (!/incorreto/i.test(String(e?.message))) {
         pairing.flow.close();
         setPairing(null);
         setStatus('error');
-        setError(e?.message ?? 'Falha no emparelhamento');
+        setError((e?.message ?? (typeof e === 'string' ? e : null)) ?? 'Falha no emparelhamento');
       }
     } finally {
       setPairBusy(false);
@@ -156,7 +156,7 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
         return;
       }
       setStatus('error');
-      setError(e?.message ?? 'Falha ao enviar comando');
+      setError((e?.message ?? (typeof e === 'string' ? e : null)) ?? 'Falha ao enviar comando');
     }
   }, [beginPairing, updateDevice]);
 
@@ -178,7 +178,7 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
           return;
         }
         if (rethrow) throw e;
-        setError(e?.message ?? 'Falha ao enviar comando');
+        setError((e?.message ?? (typeof e === 'string' ? e : null)) ?? 'Falha ao enviar comando');
       }
     },
     [beginPairing, updateDevice],

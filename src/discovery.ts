@@ -14,7 +14,7 @@ export async function identify(ip: string, timeoutMs = 1500): Promise<TvDevice |
   const [samsung, roku, sony] = await Promise.all([
     fetchSamsungInfo(ip, timeoutMs),
     fetchRokuInfo(ip, timeoutMs),
-    fetchSonyInfo(ip, timeoutMs),
+    fetchSonyInfo(ip, Math.max(timeoutMs, 2500)),
   ]);
   if (samsung) {
     return { id: deviceId(ip, 'samsung'), ip, protocol: 'samsung', name: samsung.name, secure: samsung.secure };

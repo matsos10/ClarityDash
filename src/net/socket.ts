@@ -35,6 +35,22 @@ export interface OpenOptions {
 
 export type SocketFactory = (opts: OpenOptions) => Promise<OpenedSocket>;
 
+/** O react-native-tcp-socket emite erros como texto; converte sempre para Error. */
+export function toError(e: unknown, fallback = 'Erro de ligação'): Error {
+  if (e instanceof Error) return e;
+  const msg = typeof e === 'string' ? e : (e as any)?.message;
+  return new Error(msg ? String(msg) : fallback);
+}
+
+function wrapNative(s: any): Sock {
+  return {
+    on: (event: string, cb: (...args: any[]) => void) =>
+      s.on(event, event === 'error' ? (e: unknown) => cb(toError(e)) : cb),
+    write: (d: Uint8Array | string) => s.write(d),
+    destroy: () => s.destroy(),
+  } as Sock;
+}
+
 const nativeFactory: SocketFactory = (opts) =>
   new Promise((resolve, reject) => {
     const timeoutMs = opts.timeoutMs ?? 5000;
@@ -55,7 +71,7 @@ const nativeFactory: SocketFactory = (opts) =>
       settled = true;
       clearTimeout(timer);
       resolve({
-        socket: sock,
+        socket: wrapNative(sock),
         getPeerCertificate: async () => {
           const c = await sock.getPeerCertificate();
           return { modulus: String(c.modulus), exponent: String(c.exponent) };
@@ -63,14 +79,14 @@ const nativeFactory: SocketFactory = (opts) =>
       });
     };
 
-    const onError = (err: Error) => {
+    const onError = (err: unknown) => {
       if (settled) return;
       settled = true;
       clearTimeout(timer);
       try {
         sock?.destroy();
       } catch {}
-      reject(err);
+      reject(toError(err, `Falha ao ligar a ${opts.host}:${opts.port}`));
     };
 
     const base = { host: opts.host, port: opts.port, connectTimeout: timeoutMs };

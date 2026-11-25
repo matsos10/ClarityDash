@@ -1,4 +1,4 @@
-import { OpenedSocket, openSocket, probePort, toBytes } from '../../net/socket';
+import { OpenedSocket, openSocket, probePort, toBytes, toError } from '../../net/socket';
 import { ANDROID_TV_LINKS } from '../../apps';
 import { AppId, RemoteKey, TvDevice, TvRemote } from '../../types';
 import { NotPairedError } from '../errors';
@@ -138,10 +138,10 @@ export class AndroidTvRemote implements TvRemote {
       });
     } catch (e) {
       // A TV termina o handshake TLS quando o certificado não está emparelhado.
-      if (!this.device.paired || /certificate|handshake|ssl|tls/i.test(String(e))) {
+      if (!this.device.paired || /certificate|handshake|ssl|tls/i.test(String((e as any)?.message ?? e))) {
         throw new NotPairedError();
       }
-      throw e;
+      throw toError(e);
     }
     this.conn = conn;
 
