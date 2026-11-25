@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClarityDash</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%232563eb'/%3E%3Ccircle cx='16' cy='16' r='5' fill='white'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div id="login" class="login hidden">
+  <form id="login-form" class="card login-card">
+    <h1><span class="logo"></span> ClarityDash</h1>
+    <p class="muted">Gestão da rede de casa</p>
+    <input type="password" id="login-pass" placeholder="Palavra-passe" autocomplete="current-password" required>
+    <button type="submit" class="primary">Entrar</button>
+    <p class="error" id="login-error"></p>
+  </form>
+</div>
+
+<div id="app" class="hidden">
+  <header class="topbar">
+    <div class="brand"><span class="logo"></span> ClarityDash</div>
+    <nav id="tabs">
+      <button data-tab="dashboard" class="active">Painel</button>
+      <button data-tab="devices">Aparelhos</button>
+      <button data-tab="events">Eventos</button>
+      <button data-tab="tools">Ferramentas</button>
+      <button data-tab="settings">Configurações</button>
+    </nav>
+    <div class="top-actions">
+      <span id="scan-status" class="muted small"></span>
+      <button id="scan-btn" class="primary">Varrer agora</button>
+      <button id="logout-btn" class="ghost hidden">Sair</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- PAINEL -->
+    <section id="tab-dashboard" class="tab">
+      <div id="ping-warning" class="banner hidden">
+        O comando <code>ping</code> não está disponível neste sistema; a deteção usa ligações TCP e a tabela ARP, o que pode falhar alguns aparelhos.
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-label">Aparelhos online</div><div class="stat-value" id="st-online">–</div><div class="stat-sub" id="st-total"></div></div>
+        <div class="stat"><div class="stat-label">Por confirmar</div><div class="stat-value" id="st-untrusted">–</div><div class="stat-sub">aparelhos desconhecidos</div></div>
+        <div class="stat"><div class="stat-label">Latência ao router</div><div class="stat-value" id="st-gw">–</div><div class="stat-sub" id="st-gw-sub"></div></div>
+        <div class="stat"><div class="stat-label">Latência à internet</div><div class="stat-value" id="st-net">–</div><div class="stat-sub" id="st-net-sub"></div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h2>Latência (24 h)</h2>
+            <div class="legend"><span class="dot gw"></span>Router <span class="dot inet"></span>Internet</div>
+          </div>
+          <div id="latency-chart" class="chart"></div>
+          <div id="latency-summary" class="muted small"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>A minha rede</h2></div>
+          <dl class="kv" id="net-info"></dl>
+          <button id="public-ip-btn" class="small-btn">Ver IP público</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h2>Por confirmar</h2><button id="trust-all-btn" class="small-btn">Confirmar todos</button></div>
+          <div id="untrusted-list" class="list"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Atividade recente</h2><button class="small-btn link" data-goto="events">Ver tudo</button></div>
+          <div id="recent-events" class="list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- APARELHOS -->
+    <section id="tab-devices" class="tab hidden">
+      <div class="toolbar">
+        <input type="search" id="dev-search" placeholder="Procurar nome, IP, MAC, fabricante…">
+        <select id="dev-filter">
+          <option value="all">Todos</option>
+          <option value="online">Online</option>
+          <option value="offline">Offline</option>
+          <option value="untrusted">Por confirmar</option>
+        </select>
+        <select id="dev-type"><option value="">Todos os tipos</option></select>
+        <a class="button small-btn" href="/api/export?format=csv">Exportar CSV</a>
+      </div>
+      <div class="card flush">
+        <table class="devices">
+          <thead><tr>
+            <th></th><th data-sort="label">Aparelho</th><th data-sort="ip">IP</th>
+            <th data-sort="mac" class="hide-sm">MAC</th><th data-sort="vendor" class="hide-md">Fabricante</th>
+            <th data-sort="last_seen" class="hide-sm">Visto</th><th data-sort="latency" class="hide-sm">Latência</th>
+          </tr></thead>
+          <tbody id="dev-rows"></tbody>
+        </table>
+        <p id="dev-empty" class="empty hidden">Nenhum aparelho corresponde ao filtro.</p>
+      </div>
+    </section>
+
+    <!-- EVENTOS -->
+    <section id="tab-events" class="tab hidden">
+      <div class="toolbar">
+        <select id="ev-kind">
+          <option value="">Todos os eventos</option>
+          <option value="new_device">Novos aparelhos</option>
+          <option value="online">Ficou online</option>
+          <option value="offline">Ficou offline</option>
+          <option value="ip_change">Mudança de IP</option>
+          <option value="wol">Wake-on-LAN</option>
+          <option value="info">Informação</option>
+        </select>
+        <span class="spacer"></span>
+        <button id="ev-clear" class="small-btn danger">Limpar histórico</button>
+      </div>
+      <div class="card"><div id="events-list" class="list"></div></div>
+    </section>
+
+    <!-- FERRAMENTAS -->
+    <section id="tab-tools" class="tab hidden">
+      <div class="grid-2">
+        <form class="card tool" data-tool="ping">
+          <h2>Ping</h2>
+          <p class="muted small">Testa se um aparelho ou site responde e mede a latência.</p>
+          <div class="row"><input name="host" placeholder="192.168.1.1 ou google.com" required><input name="count" type="number" min="1" max="20" value="4" class="narrow" title="Pacotes"><button class="primary">Testar</button></div>
+          <pre class="result hidden"></pre>
+        </form>
+        <form class="card tool" data-tool="dns">
+          <h2>DNS</h2>
+          <p class="muted small">Resolve um nome e mede o tempo de resposta do DNS.</p>
+          <div class="row"><input name="name" placeholder="exemplo.com" required><button class="primary">Resolver</button></div>
+          <pre class="result hidden"></pre>
+        </form>
+        <form class="card tool" data-tool="ports">
+          <h2>Portas abertas</h2>
+          <p class="muted small">Vazio = portas comuns. Aceita listas e intervalos: <code>22,80,8000-8100</code>.</p>
+          <div class="row"><input name="host" placeholder="192.168.1.20" required><input name="ports" placeholder="portas (opcional)"><button class="primary">Analisar</button></div>
+          <pre class="result hidden"></pre>
+        </form>
+        <form class="card tool" data-tool="wake">
+          <h2>Wake-on-LAN</h2>
+          <p class="muted small">Liga à distância um computador que suporte Wake-on-LAN.</p>
+          <div class="row"><input name="mac" placeholder="aa:bb:cc:dd:ee:ff" required><button class="primary">Acordar</button></div>
+          <pre class="result hidden"></pre>
+        </form>
+      </div>
+    </section>
+
+    <!-- CONFIGURAÇÕES -->
+    <section id="tab-settings" class="tab hidden">
+      <form id="settings-form" class="card settings">
+        <h2>Varrimento</h2>
+        <label>Sub-rede a varrer
+          <input name="subnet" id="set-subnet" placeholder="automático">
+          <span class="hint" id="set-subnet-hint"></span>
+        </label>
+        <label>Intervalo entre varrimentos (segundos)
+          <input name="scan_interval" type="number" min="30" max="86400">
+        </label>
+        <label>Considerar offline após (segundos sem resposta)
+          <input name="offline_after" type="number" min="60" max="86400">
+          <span class="hint">Telemóveis em repouso deixam de responder por momentos; um valor de 5–10 min evita falsos alertas.</span>
+        </label>
+        <label>Servidor para medir a latência à internet
+          <input name="latency_target" placeholder="1.1.1.1">
+        </label>
+
+        <h2>Notificações</h2>
+        <label>Webhook (ntfy, Discord, Slack, Home Assistant…)
+          <div class="row"><input name="webhook_url" placeholder="https://ntfy.sh/o-meu-topico"><button type="button" id="test-webhook" class="small-btn">Testar</button></div>
+        </label>
+        <label class="check"><input type="checkbox" name="notify_new_device"> Avisar quando aparece um aparelho novo</label>
+        <label class="check"><input type="checkbox" name="notify_offline"> Avisar quando um aparelho marcado com “alertar” fica offline / volta</label>
+
+        <div class="form-actions"><button class="primary">Guardar</button><span id="settings-msg" class="muted small"></span></div>
+
+        <h2>Base de fabricantes</h2>
+        <p class="muted small" id="vendors-info"></p>
+        <button type="button" id="vendors-update" class="small-btn">Atualizar lista de fabricantes</button>
+      </form>
+    </section>
+  </main>
+</div>
+
+<!-- Painel lateral do aparelho -->
+<div id="drawer-backdrop" class="backdrop hidden"></div>
+<aside id="drawer" class="drawer hidden" aria-label="Detalhes do aparelho">
+  <div class="drawer-head">
+    <div><div id="d-title" class="drawer-title"></div><div id="d-sub" class="muted small"></div></div>
+    <button id="d-close" class="ghost icon" aria-label="Fechar">✕</button>
+  </div>
+  <div class="drawer-body">
+    <dl class="kv" id="d-info"></dl>
+
+    <div class="actions">
+      <button id="d-ping" class="small-btn">Ping</button>
+      <button id="d-ports" class="small-btn">Analisar portas</button>
+      <button id="d-wake" class="small-btn">Wake-on-LAN</button>
+    </div>
+    <pre id="d-result" class="result hidden"></pre>
+    <div id="d-ports-list"></div>
+
+    <form id="d-form" class="settings">
+      <label>Nome<input name="name" maxlength="100" placeholder="ex.: Portátil da Ana"></label>
+      <label>Tipo<select name="type" id="d-type"></select></label>
+      <div class="row2">
+        <label>Dono<input name="owner" maxlength="100"></label>
+        <label>Local<input name="location" maxlength="100" placeholder="ex.: Sala"></label>
+      </div>
+      <label>Notas<textarea name="notes" rows="2" maxlength="500"></textarea></label>
+      <label class="check"><input type="checkbox" name="trusted"> Aparelho confiável (conhecido)</label>
+      <label class="check"><input type="checkbox" name="alert_offline"> Alertar quando fica offline / volta</label>
+      <div class="form-actions">
+        <button class="primary">Guardar</button>
+        <span class="spacer"></span>
+        <button type="button" id="d-delete" class="small-btn danger">Esquecer aparelho</button>
+      </div>
+    </form>
+
+    <h3>Histórico</h3>
+    <div id="d-events" class="list"></div>
+  </div>
+</aside>
+
+<div id="toast" class="toast hidden"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>
