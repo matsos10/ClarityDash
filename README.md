@@ -1,6 +1,28 @@
 # ClarityDash
 
-Gestão da rede de casa e dos aparelhos ligados a ela. Corre num computador da própria rede
+## App Android (APK)
+
+Descarrega [`releases/ClarityDash.apk`](releases/ClarityDash.apk), abre-o no telemóvel e autoriza a instalação
+de "fontes desconhecidas" quando o Android pedir. Requer Android 8.0 ou superior.
+
+Com o telemóvel no Wi-Fi de casa, a app:
+
+- descobre os aparelhos da rede (ping/TCP, mDNS/Bonjour, UPnP, NetBIOS e DNS) e mostra nome, fabricante, modelo e tipo;
+- permite dar nome, tipo, dono, local e notas a cada aparelho;
+- assinala aparelhos novos como "por confirmar" e avisa com notificação;
+- regista entradas, saídas e mudanças de IP, com alerta opcional para aparelhos importantes;
+- mede a latência ao router e à internet (gráfico de 24 h);
+- analisa a rede automaticamente em segundo plano (de 15 em 15 min ou menos frequente);
+- inclui ping, DNS, análise de portas, Wake-on-LAN, IP público e calculadora de sub-rede.
+
+As versões recentes do Android não deixam as apps ler o MAC dos outros aparelhos, por isso a app identifica-os
+pelo IP e pelos nomes que anunciam na rede.
+
+Código em [`android/`](android/) — compilar com `cd android && ./gradlew assembleRelease`.
+
+## Versão servidor (Python)
+
+Alternativa que corre num computador da própria rede
 (PC, Raspberry Pi, NAS…) e abre-se no browser — também no telemóvel.
 
 Só usa Python 3.9+ (biblioteca padrão): não há nada para instalar.
