@@ -1,5 +1,6 @@
 import { OpenedSocket, openSocket, probePort, toBytes } from '../../net/socket';
 import { RemoteKey, TvDevice, TvRemote } from '../../types';
+import { NotPairedError } from '../errors';
 import { getIdentity } from './identity';
 import { PAIRING_PORT, PairingSession } from './pairing';
 import { decode, fMsg, fString, fVarint, frame, FrameReader, getMsg, getNum } from './protobuf';
@@ -57,11 +58,6 @@ const DIRECTION_SHORT = 3;
 // Funcionalidades: PING | KEY | POWER | VOLUME | APP_LINK
 const FEATURES = 1 | 2 | 32 | 64 | 512;
 
-export class NotPairedError extends Error {
-  constructor() {
-    super('Esta TV ainda não está emparelhada com a app.');
-  }
-}
 
 /** Indica se o IP responde nas portas do Android TV Remote v2. */
 export async function isAndroidTv(ip: string, timeoutMs = 1200) {

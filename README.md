@@ -1,4 +1,4 @@
-# Telecomando Universal (Samsung · TCL)
+# Telecomando Universal (Samsung · TCL · Sony)
 
 App móvel (React Native / Expo, Android e iOS) que controla TVs através da rede Wi-Fi.
 
@@ -7,6 +7,7 @@ App móvel (React Native / Expo, Android e iOS) que controla TVs através da red
 | Samsung Tizen (2016+) | WebSocket nas portas 8001 / 8002 (wss) | Aceitar o pedido que aparece na TV |
 | TCL Android TV / Google TV | Android TV Remote v2 (TLS, portas 6466/6467) | Introduzir na app o código de 6 caracteres mostrado na TV |
 | TCL Roku TV | Roku ECP (HTTP, porta 8060) | Ativar *Controlo por apps móveis* nas definições da TV |
+| Sony Bravia (2013+) | API REST Sony + IRCC (HTTP, porta 80) | Introduzir na app o PIN de 4 dígitos mostrado na TV |
 
 ## Funcionalidades
 

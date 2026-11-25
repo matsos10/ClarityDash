@@ -2,17 +2,25 @@ import * as Network from 'expo-network';
 import { fetchAndroidTvName, isAndroidTv } from './protocols/androidtv/remote';
 import { fetchRokuInfo } from './protocols/roku';
 import { fetchSamsungInfo } from './protocols/samsung';
+import { fetchSonyInfo } from './protocols/sony';
 import { Protocol, TvDevice } from './types';
 
 export function deviceId(ip: string, protocol: Protocol) {
   return `${protocol}@${ip}`;
 }
 
-/** Identifica o tipo de TV num IP (Samsung, Roku ou Android TV). */
+/** Identifica o tipo de TV num IP (Samsung, Sony, Roku ou Android TV). */
 export async function identify(ip: string, timeoutMs = 1500): Promise<TvDevice | null> {
-  const [samsung, roku] = await Promise.all([fetchSamsungInfo(ip, timeoutMs), fetchRokuInfo(ip, timeoutMs)]);
+  const [samsung, roku, sony] = await Promise.all([
+    fetchSamsungInfo(ip, timeoutMs),
+    fetchRokuInfo(ip, timeoutMs),
+    fetchSonyInfo(ip, timeoutMs),
+  ]);
   if (samsung) {
     return { id: deviceId(ip, 'samsung'), ip, protocol: 'samsung', name: samsung.name, secure: samsung.secure };
+  }
+  if (sony) {
+    return { id: deviceId(ip, 'sony'), ip, protocol: 'sony', name: sony.name };
   }
   if (roku) {
     return { id: deviceId(ip, 'roku'), ip, protocol: 'roku', name: roku.name };

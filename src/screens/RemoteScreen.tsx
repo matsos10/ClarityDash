@@ -14,9 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RemoteButton } from '../components/RemoteButton';
-import { createRemote } from '../protocols';
-import { NotPairedError, startPairing } from '../protocols/androidtv/remote';
-import { PairingSession } from '../protocols/androidtv/pairing';
+import { createRemote, needsPairing, NotPairedError, PairingFlow, startPairing } from '../protocols';
 import { colors } from '../theme';
 import { ConnectionStatus, PROTOCOL_LABEL, RemoteKey, TvDevice, TvRemote } from '../types';
 
@@ -26,7 +24,7 @@ interface Props {
   onDeviceUpdate: (patch: Partial<TvDevice>) => void;
 }
 
-type PairingState = { step: 'starting' } | { step: 'code'; session: PairingSession } | null;
+type PairingState = { step: 'starting' } | { step: 'code'; flow: PairingFlow } | null;
 
 export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
   const [status, setStatus] = useState<ConnectionStatus>('idle');
@@ -55,20 +53,27 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
     setCode('');
     setStatus('waiting_tv');
     try {
-      const session = await startPairing(deviceRef.current.ip);
-      setPairing({ step: 'code', session });
+      const { flow, patch } = await startPairing(deviceRef.current);
+      if (flow) {
+        setPairing({ step: 'code', flow });
+      } else {
+        updateDevice({ ...patch, paired: true });
+        setPairing(null);
+        connectRef.current();
+      }
     } catch (e: any) {
       setPairing(null);
       setStatus('error');
       setError(e?.message ?? 'Falha ao iniciar o emparelhamento');
     }
-  }, []);
+  }, [updateDevice]);
 
+  const connectRef = useRef<() => void>(() => {});
   const connect = useCallback(async () => {
     remoteRef.current?.disconnect();
     setError(null);
     const dev = deviceRef.current;
-    if (dev.protocol === 'androidtv' && !dev.paired) {
+    if (needsPairing(dev)) {
       beginPairing();
       return;
     }
@@ -93,6 +98,7 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
       setError(e?.message ?? 'Erro de ligação');
     }
   }, [beginPairing, updateDevice]);
+  connectRef.current = connect;
 
   useEffect(() => {
     connect();
@@ -108,14 +114,14 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
     setPairBusy(true);
     setPairError(null);
     try {
-      await pairing.session.finish(code);
-      updateDevice({ paired: true });
+      const patch = await pairing.flow.finish(code);
+      updateDevice({ ...patch, paired: true });
       setPairing(null);
       connect();
     } catch (e: any) {
       setPairError(e?.message ?? 'Falha no emparelhamento');
       if (!/incorreto/i.test(String(e?.message))) {
-        pairing.session.close();
+        pairing.flow.close();
         setPairing(null);
         setStatus('error');
         setError(e?.message ?? 'Falha no emparelhamento');
@@ -126,7 +132,7 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
   };
 
   const cancelPairing = () => {
-    if (pairing?.step === 'code') pairing.session.close();
+    if (pairing?.step === 'code') pairing.flow.close();
     setPairing(null);
     setStatus('error');
     setError('Emparelhamento cancelado.');
@@ -255,32 +261,44 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
           style={styles.modalBackdrop}
         >
           <View style={styles.modal}>
-            <Text style={styles.modalTitle}>Emparelhar com a TV</Text>
+            <Text style={styles.modalTitle}>
+              {pairing?.step === 'code' ? pairing.flow.title : 'Emparelhar com a TV'}
+            </Text>
             {pairing?.step === 'starting' ? (
               <View style={{ alignItems: 'center', paddingVertical: 16 }}>
                 <ActivityIndicator color={colors.accent} />
                 <Text style={styles.modalText}>
-                  A preparar o emparelhamento… (na primeira vez a app gera um certificado, pode demorar alguns segundos)
+                  {device.protocol === 'sony'
+                    ? 'A pedir o PIN à TV…'
+                    : 'A preparar o emparelhamento… (na primeira vez a app gera um certificado, pode demorar alguns segundos)'}
                 </Text>
               </View>
-            ) : (
+            ) : pairing?.step === 'code' ? (
               <>
-                <Text style={styles.modalText}>Introduz o código de 6 caracteres que aparece no ecrã da TV.</Text>
+                <Text style={styles.modalText}>{pairing.flow.hint}</Text>
                 <TextInput
                   value={code}
-                  onChangeText={(t) => setCode(t.replace(/[^0-9a-fA-F]/g, '').toUpperCase().slice(0, 6))}
+                  onChangeText={(t) =>
+                    setCode(
+                      (pairing.flow.numeric ? t.replace(/\D/g, '') : t.replace(/[^0-9a-fA-F]/g, '').toUpperCase()).slice(
+                        0,
+                        pairing.flow.codeLength,
+                      ),
+                    )
+                  }
+                  keyboardType={pairing.flow.numeric ? 'number-pad' : 'default'}
                   autoCapitalize="characters"
                   autoCorrect={false}
                   autoFocus
-                  maxLength={6}
-                  placeholder="A1B2C3"
+                  maxLength={pairing.flow.codeLength}
+                  placeholder={pairing.flow.placeholder}
                   placeholderTextColor={colors.textDim}
                   style={styles.codeInput}
                   onSubmitEditing={submitCode}
                 />
                 {pairError ? <Text style={styles.pairError}>{pairError}</Text> : null}
               </>
-            )}
+            ) : null}
             <View style={styles.modalActions}>
               <Pressable onPress={cancelPairing} style={styles.modalBtn}>
                 <Text style={styles.modalBtnText}>Cancelar</Text>
@@ -288,8 +306,8 @@ export function RemoteScreen({ device, onBack, onDeviceUpdate }: Props) {
               {pairing?.step === 'code' ? (
                 <Pressable
                   onPress={submitCode}
-                  disabled={code.length !== 6 || pairBusy}
-                  style={[styles.modalBtn, styles.modalBtnPrimary, (code.length !== 6 || pairBusy) && { opacity: 0.5 }]}
+                  disabled={code.length !== (pairing?.step === 'code' ? pairing.flow.codeLength : 6) || pairBusy}
+                  style={[styles.modalBtn, styles.modalBtnPrimary, (code.length !== (pairing?.step === 'code' ? pairing.flow.codeLength : 6) || pairBusy) && { opacity: 0.5 }]}
                 >
                   {pairBusy ? <ActivityIndicator color="#fff" /> : <Text style={styles.modalBtnText}>Emparelhar</Text>}
                 </Pressable>

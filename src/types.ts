@@ -1,4 +1,4 @@
-export type Protocol = 'samsung' | 'androidtv' | 'roku';
+export type Protocol = 'samsung' | 'androidtv' | 'roku' | 'sony';
 
 export interface TvDevice {
   id: string;
@@ -9,8 +9,14 @@ export interface TvDevice {
   token?: string;
   /** Samsung: a TV exige ligação segura (wss na porta 8002). */
   secure?: boolean;
-  /** Android TV / Google TV: já emparelhado com o certificado desta app. */
+  /** Android TV / Google TV e Sony: emparelhamento concluído. */
   paired?: boolean;
+  /** Sony: identificador desta app registado na TV. */
+  clientId?: string;
+  /** Sony: PIN usado no registo (permite renovar a sessão). */
+  pin?: string;
+  /** Sony: cookie de autenticação devolvido pela TV. */
+  authCookie?: string;
 }
 
 export type RemoteKey =
@@ -64,4 +70,5 @@ export const PROTOCOL_LABEL: Record<Protocol, string> = {
   samsung: 'Samsung (Tizen)',
   androidtv: 'TCL (Android TV / Google TV)',
   roku: 'TCL (Roku TV)',
+  sony: 'Sony (Bravia)',
 };

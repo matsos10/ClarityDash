@@ -29,6 +29,7 @@ const BRAND: Record<Protocol, { label: string; color: string }> = {
   samsung: { label: 'SAMSUNG', color: '#1428A0' },
   androidtv: { label: 'TCL', color: '#E4002B' },
   roku: { label: 'TCL', color: '#6C3C97' },
+  sony: { label: 'SONY', color: '#000000' },
 };
 
 export function DevicesScreen({ devices, onOpen, onAdd, onRemove }: Props) {
@@ -84,7 +85,7 @@ export function DevicesScreen({ devices, onOpen, onAdd, onRemove }: Props) {
               id: deviceId(clean, protocol),
               ip: clean,
               protocol,
-              name: protocol === 'samsung' ? 'Samsung TV' : 'TCL TV',
+              name: protocol === 'samsung' ? 'Samsung TV' : protocol === 'sony' ? 'Sony TV' : 'TCL TV',
               secure: protocol === 'samsung' ? true : undefined,
             };
       onAdd(dev);
@@ -107,7 +108,7 @@ export function DevicesScreen({ devices, onOpen, onAdd, onRemove }: Props) {
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <Text style={styles.title}>Telecomando</Text>
-        <Text style={styles.subtitle}>Samsung · TCL</Text>
+        <Text style={styles.subtitle}>Samsung · TCL · Sony</Text>
       </View>
 
       <FlatList
