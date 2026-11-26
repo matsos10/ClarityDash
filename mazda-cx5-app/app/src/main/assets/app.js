@@ -756,7 +756,7 @@ PAGES.settings = () => {
    <button class="btn sec block" style="margin-bottom:8px" onclick="resetPlan()">↺ Repor plano de manutenção original</button>
    <button class="btn danger block" onclick="wipe()">🗑️ Apagar todos os dados</button>
    <div class="small muted" style="margin-top:8px">Armazenamento usado: ${num(JSON.stringify(S).length / 1024)} KB</div></div>
-  <div class="card small muted">CX-5 Manutenção v1.0 · dados guardados apenas no telemóvel. Intervalos de manutenção indicativos – siga sempre o livro de manutenção do seu veículo.</div>`;
+  <div class="card small muted">CX-5 Manutenção v1.1 · dados guardados apenas no telemóvel. Intervalos de manutenção indicativos – siga sempre o livro de manutenção do seu veículo.</div>`;
 };
 function testNotif() { if (!NATIVE.notificationsAllowed()) { NATIVE.requestNotifications(); return; } NATIVE.notify('🔧 Teste CX-5', 'As notificações estão a funcionar!'); }
 function importBackup(inp) {
