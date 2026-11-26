@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>CX-5 Manutenção</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="top">
+  <button id="backBtn" class="icon-btn hidden" onclick="handleBack()">‹</button>
+  <div class="top-title"><div id="pageTitle">CX-5</div><div id="pageSub" class="sub"></div></div>
+  <button class="icon-btn" onclick="quickKm()" title="Atualizar km">📟</button>
+</header>
+<main id="main"></main>
+<nav id="nav">
+  <button data-p="home" onclick="go('home')"><span>🏠</span>Início</button>
+  <button data-p="plan" onclick="go('plan')"><span>🔧</span>Manutenção</button>
+  <button data-p="history" onclick="go('history')"><span>📋</span>Histórico</button>
+  <button data-p="fuel" onclick="go('fuel')"><span>⛽</span>Combustível</button>
+  <button data-p="more" onclick="go('more')"><span>☰</span>Mais</button>
+</nav>
+<div id="modal" class="hidden"><div class="sheet" id="sheet"></div></div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
