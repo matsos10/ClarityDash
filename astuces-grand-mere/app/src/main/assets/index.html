@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Astuces de Grand-Mère</title>
+<style>
+  :root { --brun:#7A4A2B; --creme:#FBF5EC; --beige:#F4E3C8; --vert:#6B8E4E; --txt:#3A2A1E; --gris:#8A7A6C; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; font-family: Georgia, "Times New Roman", serif; background:var(--creme); color:var(--txt); }
+  header { position:sticky; top:0; z-index:5; background:var(--brun); color:#fff; padding:14px 16px 12px; box-shadow:0 2px 6px rgba(0,0,0,.15); }
+  header .top { display:flex; align-items:center; gap:10px; }
+  header h1 { font-size:20px; margin:0; flex:1; font-weight:normal; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .btn-ic { background:none; border:0; color:#fff; font-size:22px; padding:4px 6px; }
+  #search { width:100%; margin-top:10px; padding:10px 14px; border-radius:22px; border:0; font-size:16px; font-family:inherit; }
+  main { padding:16px; padding-bottom:40px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .cat { background:#fff; border-radius:14px; padding:18px 10px; text-align:center; box-shadow:0 1px 4px rgba(122,74,43,.15); border:1px solid var(--beige); }
+  .cat .ico { font-size:34px; }
+  .cat .nom { margin-top:6px; font-size:15px; }
+  .cat .nb { font-size:12px; color:var(--gris); margin-top:2px; }
+  .cat.fav { background:var(--beige); }
+  .item { background:#fff; border-radius:12px; padding:14px; margin-bottom:10px; display:flex; align-items:center; gap:12px; box-shadow:0 1px 3px rgba(122,74,43,.12); }
+  .item .ico { font-size:26px; }
+  .item .t { flex:1; font-size:16px; }
+  .item .s { font-size:12px; color:var(--gris); }
+  .star { font-size:22px; color:#C9A227; background:none; border:0; padding:4px; }
+  h2 { font-weight:normal; color:var(--brun); margin:0 0 12px; }
+  .card { background:#fff; border-radius:14px; padding:18px; box-shadow:0 1px 4px rgba(122,74,43,.15); }
+  .card h3 { color:var(--vert); font-size:16px; margin:18px 0 8px; text-transform:uppercase; letter-spacing:.5px; }
+  .card ul, .card ol { margin:0; padding-left:22px; line-height:1.55; }
+  .card li { margin-bottom:6px; }
+  .note { margin-top:18px; background:#FFF4D6; border-left:4px solid #C9A227; padding:10px 12px; border-radius:6px; font-size:14px; line-height:1.45; }
+  .tag { display:inline-block; background:var(--beige); color:var(--brun); padding:3px 10px; border-radius:12px; font-size:13px; }
+  .vide { text-align:center; color:var(--gris); padding:40px 10px; }
+  .avert { margin-top:20px; font-size:12px; color:var(--gris); text-align:center; line-height:1.4; }
+  .hasard { display:block; width:100%; margin-top:14px; padding:14px; background:var(--vert); color:#fff; border:0; border-radius:12px; font-size:16px; font-family:inherit; }
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <button class="btn-ic" id="back" style="display:none" onclick="goBack()">←</button>
+    <h1 id="titre">Astuces de Grand-Mère</h1>
+  </div>
+  <input id="search" type="search" placeholder="🔍 Rechercher une astuce, un ingrédient…">
+</header>
+<main id="app"></main>
+
+<script src="data.js"></script>
+<script>
+  var app = document.getElementById('app');
+  var search = document.getElementById('search');
+  var pile = [];       // historique de navigation
+  var vue = { type: 'accueil' };
+
+  RECETTES.forEach(function (r, i) { r.id = i; });
+
+  function catDe(id) { for (var i = 0; i < CATS.length; i++) if (CATS[i].id === id) return CATS[i]; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function norm(s) { return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+
+  function getFavs() { try { return JSON.parse(localStorage.getItem('favs') || '[]'); } catch (e) { return []; } }
+  function setFavs(f) { try { localStorage.setItem('favs', JSON.stringify(f)); } catch (e) {} }
+  function estFav(id) { return getFavs().indexOf(id) >= 0; }
+  function toggleFav(id, ev) {
+    if (ev) ev.stopPropagation();
+    var f = getFavs(), k = f.indexOf(id);
+    if (k >= 0) f.splice(k, 1); else f.push(id);
+    setFavs(f); rendre();
+  }
+
+  function aller(v) { pile.push(vue); vue = v; window.scrollTo(0, 0); rendre(); }
+  window.goBack = function () {
+    if (search.value) { search.value = ''; rendre(); return true; }
+    if (!pile.length) return false;
+    vue = pile.pop(); rendre(); return true;
+  };
+
+  function ligne(r) {
+    var c = catDe(r.c);
+    return '<div class="item" onclick="aller({type:\'recette\',id:' + r.id + '})">' +
+      '<span class="ico">' + c.ico + '</span>' +
+      '<div class="t">' + esc(r.t) + '<div class="s">' + esc(c.nom) + '</div></div>' +
+      '<button class="star" onclick="toggleFav(' + r.id + ',event)">' + (estFav(r.id) ? '★' : '☆') + '</button></div>';
+  }
+
+  function liste(rs, vide) {
+    return rs.length ? rs.map(ligne).join('') : '<div class="vide">' + vide + '</div>';
+  }
+
+  function rendre() {
+    var q = norm(search.value.trim());
+    var back = document.getElementById('back'), titre = document.getElementById('titre');
+    back.style.display = (pile.length || q) ? '' : 'none';
+
+    if (q) {
+      titre.textContent = 'Recherche';
+      var mots = q.split(/\s+/);
+      var rs = RECETTES.filter(function (r) {
+        var txt = norm(r.t + ' ' + r.i.join(' ') + ' ' + r.e.join(' ') + ' ' + catDe(r.c).nom);
+        return mots.every(function (m) { return txt.indexOf(m) >= 0; });
+      });
+      app.innerHTML = '<h2>' + rs.length + ' résultat' + (rs.length > 1 ? 's' : '') + '</h2>' + liste(rs, 'Aucune astuce trouvée.');
+      return;
+    }
+
+    if (vue.type === 'accueil') {
+      titre.textContent = 'Astuces de Grand-Mère';
+      var h = '<div class="grid">';
+      CATS.forEach(function (c) {
+        var nb = RECETTES.filter(function (r) { return r.c === c.id; }).length;
+        h += '<div class="cat" onclick="aller({type:\'cat\',id:\'' + c.id + '\'})"><div class="ico">' + c.ico + '</div><div class="nom">' + c.nom + '</div><div class="nb">' + nb + ' astuces</div></div>';
+      });
+      h += '<div class="cat fav" onclick="aller({type:\'favs\'})"><div class="ico">⭐</div><div class="nom">Mes favoris</div><div class="nb">' + getFavs().length + '</div></div>';
+      h += '</div><button class="hasard" onclick="aller({type:\'recette\',id:Math.floor(Math.random()*RECETTES.length)})">🎲 Une astuce au hasard</button>';
+      h += '<p class="avert">Les remèdes santé sont des astuces traditionnelles : ils ne remplacent pas l\'avis d\'un médecin ou d\'un pharmacien. En cas de doute, de symptômes persistants ou graves, consultez.</p>';
+      app.innerHTML = h;
+    } else if (vue.type === 'cat') {
+      var c = catDe(vue.id);
+      titre.textContent = c.ico + ' ' + c.nom;
+      app.innerHTML = liste(RECETTES.filter(function (r) { return r.c === c.id; }), '');
+    } else if (vue.type === 'favs') {
+      titre.textContent = '⭐ Mes favoris';
+      var f = getFavs();
+      app.innerHTML = liste(RECETTES.filter(function (r) { return f.indexOf(r.id) >= 0; }), 'Aucun favori pour l\'instant.<br>Touchez ☆ sur une astuce pour l\'ajouter.');
+    } else if (vue.type === 'recette') {
+      var r = RECETTES[vue.id], cc = catDe(r.c);
+      titre.textContent = cc.nom;
+      var x = '<div class="card"><span class="tag">' + cc.ico + ' ' + esc(cc.nom) + '</span>' +
+        '<div style="display:flex;align-items:flex-start;gap:8px;margin-top:10px"><h2 style="flex:1;margin:0">' + esc(r.t) + '</h2>' +
+        '<button class="star" onclick="toggleFav(' + r.id + ')">' + (estFav(r.id) ? '★' : '☆') + '</button></div>' +
+        '<h3>Il vous faut</h3><ul>' + r.i.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' +
+        '<h3>Comment faire</h3><ol>' + r.e.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ol>' +
+        (r.n ? '<div class="note">💡 ' + esc(r.n) + '</div>' : '') + '</div>';
+      if (r.c === 'sante') x += '<p class="avert">Remède traditionnel, ne remplace pas un avis médical.</p>';
+      app.innerHTML = x;
+    }
+  }
+
+  search.addEventListener('input', rendre);
+  rendre();
+</script>
+</body>
+</html>
